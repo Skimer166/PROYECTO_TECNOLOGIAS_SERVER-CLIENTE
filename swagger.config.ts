@@ -6,7 +6,7 @@ const options: SwaggerOptions = {
     swaggerDefinition: {
         openapi: '3.1.0',
         info: {
-            title: '',
+            title: 'APi Proyecto',
             descripcion: '',
             version: '0.0.1'
         },
