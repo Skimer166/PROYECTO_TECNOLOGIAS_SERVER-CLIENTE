@@ -1,7 +1,6 @@
-interface IUser {
-    id?: number; //va a hacer opcional
+export interface IUser {
+    id?: number; //va a ser opcional
     name: string;
-    correo: string;
+    email: string;
     password?: string; 
 }
-export default IUser; 

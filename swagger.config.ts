@@ -6,12 +6,12 @@ const options: SwaggerOptions = {
     swaggerDefinition: {
         openapi: '3.1.0',
         info: {
-            title: 'APi Proyecto',
-            descripcion: '',
+            title: 'API AI Market',
+            descripcion: 'esta es la API de nuestra app web "AI MARKET". ',
             version: '0.0.1'
         },
         servers: [
-            {url: 'https://localhost:' + process.env.PORT}
+            {url: 'http://localhost:' + process.env.PORT}
         ]
     },
     apis: [

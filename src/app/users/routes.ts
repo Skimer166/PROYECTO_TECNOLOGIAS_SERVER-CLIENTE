@@ -1,0 +1,80 @@
+import { Router } from "express";
+import { getUsers, postUsers } from "./controller";
+import { authMiddleware } from "../middlewares/auth";
+const router = Router();
+
+/**
+ * @swagger 
+ * /users:
+ *  get:
+ *      tags: [USERS]
+ *      description: Listar usuarios
+ *      parameters:
+ *         -  in: query
+ *            name: token
+ *            description: auth user token
+ *            schema:
+ *              type: string
+ *      responses:
+ *          200:
+ *              description: success
+ *          401:
+ *              description: missing token
+ */
+router.get('', authMiddleware, getUsers) //cuando haya un get a esta ruta se manda a llamar el metodo getUsers
+
+
+/**
+ * @swagger
+ * /users:
+ *   post:
+ *     tags: [USERS]
+ *     description: Crear un nuevo usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Juan Pérez
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: juanperez@mail.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: 123456
+ *     responses:
+ *       201:
+ *         description: Usuario creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: 64fa0c3e8b5f7a1234567890
+ *                 name:
+ *                   type: string
+ *                   example: Juan Pérez
+ *                 email:
+ *                   type: string
+ *                   example: juanperez@mail.com
+ *       400:
+ *         description: Datos inválidos o incompletos
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post('', postUsers)
+
+export default router;
+
