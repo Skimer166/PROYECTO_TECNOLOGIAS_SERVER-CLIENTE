@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    // File Layout
+    // "rootDir": "./src",
+    "outDir": "./dist",
+    "module": "nodenext",
+    "esModuleInterop": true,
+    "target": "esnext",
+    "strict": true,
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true   //por si tenemos archivos json
+  }
+}
