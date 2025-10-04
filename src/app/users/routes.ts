@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUsers, postUsers } from "./controller";
+import { getUsers, getUserById, postUsers, updateUser, deleteUser } from "./controller";
 import { authMiddleware } from "../middlewares/auth";
 const router = Router();
 
@@ -22,6 +22,26 @@ const router = Router();
  *              description: missing token
  */
 router.get('', authMiddleware, getUsers) //cuando haya un get a esta ruta se manda a llamar el metodo getUsers
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     tags: [USERS]
+ *     description: Obtener un usuario por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: success
+ *       404:
+ *         description: not found
+ */
+router.get('/:id', authMiddleware, getUserById)
 
 
 /**
@@ -76,5 +96,53 @@ router.get('', authMiddleware, getUsers) //cuando haya un get a esta ruta se man
  */
 router.post('', postUsers)
 
-export default router;
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     tags: [USERS]
+ *     description: Actualizar un usuario por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado
+ */
+router.put('/:id', authMiddleware, updateUser)
 
+/**
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *     tags: [USERS]
+ *     description: Eliminar un usuario por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Eliminado
+ *       404:
+ *         description: not found
+ */
+router.delete('/:id', authMiddleware, deleteUser)
+
+export default router;
