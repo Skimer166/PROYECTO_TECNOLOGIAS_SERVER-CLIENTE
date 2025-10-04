@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 
 export function getUsers(req: Request, res: Response) {
-    console.log('User:', req.user);
-    const user = req.user as { id: number; name: string };
+    console.log('Usuario autenticado correctamente');
+    const user = { id: 123, name: "Juan Perez" };
     res.send(`Bienvenido ${user.name}`);
 }
 

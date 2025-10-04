@@ -42,7 +42,7 @@ router.get('', authMiddleware, getUsers) //cuando haya un get a esta ruta se man
  *         description: not found
  */
 router.get('/:id', authMiddleware, getUserById)
-
+//http://localhost:3001/users/:id?token=Bearer1234
 
 /**
  * @swagger
