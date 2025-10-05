@@ -18,13 +18,13 @@ export function postUsers(req: Request, res: Response) {
 
 export function getUserById(req: Request, res: Response) { //obtiene un usuario por su id
   const { id } = req.params;
-  return res.json({ id, name: 'Usuario Dummy', email: 'dummy@correo.com' });
+  return res.json({ id, name: 'Juan Perez', email: 'juanperez@gmail.com' });
 }
 
 export function updateUser(req: Request, res: Response) { //actualiza un usuario por su id
   const { id } = req.params;
   const { name, email } = req.body || {}; 
-  return res.json({ id, name: name ?? 'Usuario Dummy', email: email ?? 'dummy@correo.com' });
+  return res.json({ id, name: name ?? 'Juan Perez', email: email ?? 'juanperez@gmail.com' });
 }
 
 export function deleteUser(req: Request, res: Response) {
