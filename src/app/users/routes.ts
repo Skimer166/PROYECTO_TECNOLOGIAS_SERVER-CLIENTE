@@ -108,6 +108,11 @@ router.post('', postUsers)
  *         required: true
  *         schema:
  *           type: string
+ *       -  in: query
+ *          name: token
+ *          description: auth user token
+ *          schema:
+ *            type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -122,6 +127,8 @@ router.post('', postUsers)
  *     responses:
  *       200:
  *         description: Usuario actualizado
+ *       401:
+ *         description: missing token
  */
 router.put('/:id', authMiddleware, updateUser)
 
@@ -137,11 +144,18 @@ router.put('/:id', authMiddleware, updateUser)
  *         required: true
  *         schema:
  *           type: string
+ *       -  in: query
+ *          name: token
+ *          description: auth user token
+ *          schema:
+ *            type: string
  *     responses:
  *       204:
  *         description: Eliminado
  *       404:
  *         description: not found
+ *       401:
+ *         description: missing token
  */
 router.delete('/:id', authMiddleware, deleteUser)
 
