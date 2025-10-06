@@ -35,14 +35,23 @@ router.get('', authMiddleware, getUsers) //cuando haya un get a esta ruta se man
  *         required: true
  *         schema:
  *           type: string
+ *         description: ID del usuario
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: Bearer1234
+ *         description: Token de acceso (query param que valida el middleware)
  *     responses:
  *       200:
  *         description: success
+ *       401:
+ *         description: unauthorized
  *       404:
  *         description: not found
  */
 router.get('/:id', authMiddleware, getUserById)
-//http://localhost:3001/users/:id?token=Bearer1234
 
 /**
  * @swagger

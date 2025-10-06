@@ -37,3 +37,4 @@ router.get('', getAllAgents);
 router.get('/favorites', authMiddleware, getFavoriteAgents);
 
 export default router;
+

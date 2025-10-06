@@ -13,12 +13,15 @@ export function postUsers(req: Request, res: Response) {
         return res.status(400).json({ message: "Rellena todos los campos" });
     }
 
-    res.send(`Usuario creado: ${name}`);
 }
 
+//http://localhost:3001/users/123?token=Bearer1234
 export function getUserById(req: Request, res: Response) { //obtiene un usuario por su id
-  const { id } = req.params;
-  return res.json({ id, name: 'Juan Perez', email: 'juanperez@gmail.com' });
+    const { id } = req.params;
+    const name = "Juan Perez"
+    res.send(`Consultando usuario: ${name}`);
+    res.json({ id, name: 'Juan Perez', email: 'juanperez@gmail.com' });
+  return 
 }
 
 export function updateUser(req: Request, res: Response) { //actualiza un usuario por su id
