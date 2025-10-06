@@ -8,3 +8,12 @@ export function getAllAgents(req: Request, res: Response){
 
     res.json({ agents });
 }
+
+export function getFavoriteAgents(req: Request, res: Response){
+    // Ejemplo simple: lista de agentes marcados como favoritos (mock)
+    const favorites = [
+        { id: 2, name: "Agente especualista Cocinando", description: "Te ayudara en la cocina." }
+    ];
+
+    res.json({ agents: favorites });
+}
