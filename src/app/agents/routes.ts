@@ -10,11 +10,19 @@ const router = Router();
  *   get:
  *     tags: [AGENTS]
  *     description: Listar agentes disponibles
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         description: auth user token
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: success
+ *       401:
+ *         description: missing token
  */
-router.get('', getAllAgents);
+router.get('', authMiddleware, getAllAgents);
 
 /**
  * @swagger
@@ -37,4 +45,3 @@ router.get('', getAllAgents);
 router.get('/favorites', authMiddleware, getFavoriteAgents);
 
 export default router;
-
