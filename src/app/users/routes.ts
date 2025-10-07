@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUsers, getUserById, postUsers, updateUser, deleteUser } from "./controller";
+import { getUsers, getUserById, postUsers, updateUser, deleteUser, getFavoriteAgents } from "./controller";
 import { authMiddleware } from "../middlewares/auth";
 const router = Router();
 
@@ -167,5 +167,46 @@ router.put('/:id', authMiddleware, updateUser)
  *         description: missing token
  */
 router.delete('/:id', authMiddleware, deleteUser)
+
+/**
+ * @swagger
+ * /users/favorites:
+ *   get:
+ *     tags: [USERS]
+ *     description: Obtener la lista de agentes favoritos del usuario autenticado
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: Bearer1234
+ *         description: Token de acceso (query param que valida el middleware)
+ *     responses:
+ *       200:
+ *         description: Lista de agentes favoritos obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: 001
+ *                   name:
+ *                     type: string
+ *                     example: Agente Smith
+ *                   specialty:
+ *                     type: string
+ *                     example: Ventas
+ *       401:
+ *         description: Token inválido o no proporcionado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/favorites', authMiddleware, getFavoriteAgents);
+
 
 export default router;

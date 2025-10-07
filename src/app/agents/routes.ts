@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllAgents, getFavoriteAgents } from "./controller";
+import { getAllAgents, searchAgent } from "./controller";
 import { authMiddleware } from "../middlewares/auth";
 
 const router = Router();
@@ -26,22 +26,37 @@ router.get('', authMiddleware, getAllAgents);
 
 /**
  * @swagger
- * /agents/favorites:
+ * /agents/search:
  *   get:
  *     tags: [AGENTS]
- *     description: Listar agentes marcados con like (favoritos)
+ *     description: Buscar agentes por nombre o descripción.
  *     parameters:
  *       - in: query
- *         name: token
- *         description: auth user token
+ *         name: search
  *         schema:
  *           type: string
+ *         required: false
+ *         description: Texto a buscar (por ejemplo, "python").
  *     responses:
  *       200:
- *         description: success
- *       401:
- *         description: missing token
+ *         description: Lista de agentes coincidentes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     example: Agente especialista en Python
+ *                   description:
+ *                     type: string
+ *                     example: Asistente de código.
  */
-router.get('/favorites', authMiddleware, getFavoriteAgents);
+router.get('/search', searchAgent);
 
 export default router;

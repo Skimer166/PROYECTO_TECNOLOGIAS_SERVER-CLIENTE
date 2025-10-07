@@ -33,3 +33,12 @@ export function updateUser(req: Request, res: Response) { //actualiza un usuario
 export function deleteUser(req: Request, res: Response) {
   return res.status(204).send();
 }
+
+export function getFavoriteAgents(req: Request, res: Response){
+    // Ejemplo simple: lista de agentes marcados como favoritos
+    const favorites = [
+        { id: 2, name: "Agente especialista Cocinando", description: "Te ayudara en la cocina." }
+    ];
+
+    res.json({ agents: favorites });
+}
