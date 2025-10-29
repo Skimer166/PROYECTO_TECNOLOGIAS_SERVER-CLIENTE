@@ -1,1 +1,81 @@
-<p>register works!</p>
+
+<div class="contenedor-registro">
+    <div class="tarjeta-registro">
+        <h1>Crea tu cuenta de Market AI</h1>
+        <br>
+        <br>
+        <form [formGroup]="form" (submit)="doOnSubmit()">
+            <mat-form-field>
+                <mat-label for="name">Nombre del Usuario</mat-label>
+                <input matInput type="text" name="name" formControlName="Nombre">
+                @if (form.get('Nombre')?.hasError('required')) {
+                    <mat-error >Este campo es Requerido</mat-error>
+                }    
+                @if (form.get('Nombre')?.hasError('minlength')) {
+                    <mat-error >Tu nombre debe tener como minimo 2 caracteres</mat-error>
+                }    
+            </mat-form-field>
+
+            <br>
+
+            <mat-form-field>
+                <mat-label for="email" >Correo Electrónico</mat-label>
+                <input matInput type="email" name="Correo" formControlName="Correo">
+                @if (form.get('Correo')?.hasError('required')) {
+                    <mat-error >Este campo es Requerido</mat-error>
+                }
+                @if (form.get('Correo')?.hasError('email')) {
+                    <mat-error >Ingresa un formato de correo valido</mat-error>
+                }
+            </mat-form-field>
+
+
+            <mat-form-field>
+                <mat-label form="contraseña">Contraseña</mat-label>
+                <input matInput type="text" name="Contraseña" formControlName="Contraseña">
+                @if (form.get('Contraseña')?.hasError('required')) {
+                    <mat-error >Este campo es Requerido</mat-error>
+                }  
+                @if (form.get('Contraseña')?.hasError('minlength')) {
+                    <mat-error >Tu contraseña debe tener al menos 8 caracteres</mat-error>
+                }     
+            </mat-form-field>
+
+            <br>
+
+            <mat-form-field>
+                <mat-label form="edad">Confirmar Contraseña</mat-label>
+                <input matInput type="text" name="Confirmar_Contraseña" formControlName="Confirmar_contraseña">
+                @if (form.get('Confirmar_contraseña')?.hasError('required')) {
+                    <mat-error >Este campo es Requerido</mat-error>
+                }  
+                @if (form.get('Confirmar_contraseña')?.hasError('minlength')) {
+                    <mat-error >Tu contraseña debe tener al menos 8 caracteres</mat-error>
+                } 
+                @if (form.get('Confirmar_contraseña')?.hasError('mismatch')) {
+                    <mat-error >Las contraseñas deben coincidir.</mat-error>
+                }  
+            </mat-form-field>
+
+            <br>
+
+            <div class="alinearEnCard">
+                <p>Ya tengo una cuenta... <a href="login" style="color: whitesmoke">Iniciar Sesión</a></p>
+            </div>
+
+            <div class="alinearEnCard">
+                <mat-checkbox class="example-margin" formControlName="Terms">
+                    <p><u>Acepto los terminos y condiciones</u></p>
+                </mat-checkbox>
+            </div>
+
+            <div class="botones">
+                <button matButton="elevated">Cancelar</button>
+                <button [disabled]="form.invalid" matButton="elevated">Enviar</button>
+            </div>
+
+            
+
+        </form>
+    </div>
+</div>
