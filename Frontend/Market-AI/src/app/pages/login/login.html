@@ -1,0 +1,42 @@
+<div class="contenedor-registro">
+  <div class="tarjeta-registro">
+    <h1>Inicia sesion en Market AI</h1>
+    <br>
+    <form [formGroup]="form" (submit)="doOnSubmit()">
+      <mat-form-field>
+        <mat-label for="email">Correo electronico</mat-label>
+        <input matInput type="email" name="Correo" formControlName="Correo">
+        @if (form.get('Correo')?.hasError('required')) {
+          <mat-error>Este campo es Requerido</mat-error>
+        }
+        @if (form.get('Correo')?.hasError('email')) {
+          <mat-error>Ingresa un formato de correo valido</mat-error>
+        }
+      </mat-form-field>
+
+      <br>
+
+      <mat-form-field>
+        <mat-label for="password">Contrasena</mat-label>
+        <input matInput type="text" name="Contrasena" formControlName="Contrasena">
+        @if (form.get('Contrasena')?.hasError('required')) {
+          <mat-error>Este campo es Requerido</mat-error>
+        }
+        @if (form.get('Contrasena')?.hasError('minlength')) {
+          <mat-error>Tu contrasena debe tener al menos 8 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <br>
+
+      <div class="alinearEnCard">
+        <p>No tienes cuenta? <a href="register" style="color: whitesmoke">Registrate</a></p>
+      </div>
+
+      <div class="botones">
+        <button matButton="elevated">Cancelar</button>
+        <button [disabled]="form.invalid || loading" matButton="elevated">Enviar</button>
+      </div>
+    </form>
+  </div>
+</div>

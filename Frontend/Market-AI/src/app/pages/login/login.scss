@@ -1,0 +1,53 @@
+form {
+  max-width: 800px;
+  margin: auto;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+h1 {
+  font-family: sans-serif;
+  text-align: center;
+  color: whitesmoke;
+}
+
+p {
+  color: whitesmoke;
+}
+
+.tarjeta-registro {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  padding: 2rem;
+  width: 400px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.contenedor-registro {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.alinearEnCard {
+  display: grid;
+  justify-content: center;
+}
+
+.botones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
