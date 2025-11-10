@@ -1,12 +1,71 @@
 
+
 <app-header></app-header>
 
-    <div>
-        <h1>Market AI</h1>
+    <!-- Section 1: Hero -->
+    <section class="hero">
+    <div class="hero__content">
+        <h1>En este Marketplace podrás encontrar todos los agentes de IA que necesitas en tu día a día.</h1>
+        <p> <span>Domina</span> las diferentes tareas en tu rutina con nosotros.</p>
+        <div class="hero__actions">
+        <a mat-flat-button color="whitesmoke" routerLink="/login"><mat-icon>login</mat-icon>&nbsp;Entrar</a>
+        <a mat-flat-button color="whitesmoke" href="#features"><mat-icon>visibility</mat-icon>&nbsp;Ver funciones</a>
+        </div>
     </div>
+    </section>
 
-    <p>Plataforma donde podás rentar agentes de IA</p>
+    <!-- Section 2: Features (3 cards) -->
+    <section id="features" class="features container">
+    <h2>Lo esencial</h2>
+    <div class="grid">
+        <mat-card class="feature">
+        <mat-icon class="feature__icon">hub</mat-icon>
+        <h3>Integración Multibase</h3>
+        <p>Unifica KPIs desde Cassandra, MongoDB y Dgraph en un solo panel.</p>
+        </mat-card>
 
-    <h2>Nuestros servicios</h2>
+        <mat-card class="feature">
+        <mat-icon class="feature__icon">insights</mat-icon>
+        <h3>Insights en tiempo real</h3>
+        <p>Dashboards y consultas rápidas con índices pensados para analítica.</p>
+        </mat-card>
+
+        <mat-card class="feature">
+        <mat-icon class="feature__icon">tune</mat-icon>
+        <h3>Paneles personalizables</h3>
+        <p>Filtra por campañas, fechas y audiencias. Guarda vistas favoritas.</p>
+        </mat-card>
+    </div>
+    </section>
+
+    <!-- Section 3: How It Works (3 pasos) -->
+    <section class="how container">
+    <h2>¿Cómo funciona?</h2>
+    <div class="steps">
+        <div class="step">
+        <div class="num">1</div>
+        <h4>Conecta tus fuentes</h4>
+        <p>Configura conexiones a tus bases y permisos de lectura.</p>
+        </div>
+        <div class="step">
+        <div class="num">2</div>
+        <h4>Modela tus métricas</h4>
+        <p>Define KPIs de campaña, engagement y afinidad entre usuarios.</p>
+        </div>
+        <div class="step">
+        <div class="num">3</div>
+        <h4>Explora y decide</h4>
+        <p>Visualiza tendencias, segmenta audiencias y comparte reportes.</p>
+        </div>
+    </div>
+    </section>
+
+    <!-- Section 4: CTA final -->
+    <section class="cta container">
+    <h2>Listo para ver tus datos con otra perspectiva</h2>
+    <p>Entra al panel y empieza a medir lo que importa.</p>
+    <a mat-flat-button color="primary" routerLink="/home"><mat-icon>dashboard</mat-icon>&nbsp;Ir al dashboard</a>
+    </section>
+
 
 <app-footer></app-footer>

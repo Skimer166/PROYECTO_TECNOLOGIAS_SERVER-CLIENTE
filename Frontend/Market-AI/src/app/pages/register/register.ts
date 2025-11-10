@@ -5,10 +5,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
+import { User as userService } from '../../shared/services/user';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
-  imports: [FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatCheckboxModule],
+  imports: [FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatCheckboxModule, HttpClientModule],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
@@ -16,7 +18,7 @@ export class Register {
 
   form: FormGroup;
 
-  constructor(private activatedRoute: ActivatedRoute, private fb: FormBuilder) {
+  constructor(private activatedRoute: ActivatedRoute, private fb: FormBuilder, private userService: userService) {
     this.form = fb.group({
       Nombre: ['', [Validators.required, Validators.minLength(2)]],
       Correo: ['', [Validators.required, Validators.email]],
@@ -47,8 +49,19 @@ export class Register {
 
   doOnSubmit() {
     if (this.form.valid) {
-      alert('Se ha registrado con exito, revisa la consola');
-      console.log('Datos del formulario:', this.form.value);
+      const { Nombre, Correo, Contraseña } = this.form.value;
+      const payload = { name: Nombre, email: Correo, password: Contraseña };
+      this.userService.registerUser(payload).subscribe({
+        next: (res) => {
+          alert('Usuario registrado correctamente');
+          console.log('Respuesta del servidor:', res);
+        },
+        error: (err) => {
+          console.error('Error en registro:', err);
+          const msg = typeof err?.error === 'string' ? err.error : (err?.error?.message || 'Error desconocido');
+          alert(`Ocurrió un error al registrar el usuario. Código: ${err.status || 'N/A'} - ${msg}`);
+        }
+      });
     } else {
       this.form.markAllAsTouched();
       alert('El formulario contiene errores, revisa los campos');

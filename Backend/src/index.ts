@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -12,9 +13,16 @@ import routes from './app/routes';
 
 const app = express();
 
+// Middlewares necesarios para recibir JSON y permitir CORS desde Angular
+app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:4200',
+  credentials: true,
+}));
+
 app.use(routes); //aqui usamos el archivo que contiene todas las rutas
 
-app.get('', (req, res) => {
+app.get('/', (req, res) => {
     res.send('La api funciona (navegador)')
 })
 
@@ -30,8 +38,4 @@ dbConnect().then(() => {
   });
 }).catch(() => {
   console.log('Error al conectarse a la base de datos')
-})
-
-const server = app.listen(PORT, () => {
-  console.log(`app is running in port ${PORT}`) //app.listen me retorna un tipo de dato llamado server
 })

@@ -103,7 +103,7 @@ router.get('/:id', authMiddleware, getUserById)
  *       500:
  *         description: Error interno del servidor
  */
-router.post('', postUsers)
+router.post('/register', postUsers)
 
 /**
  * @swagger
