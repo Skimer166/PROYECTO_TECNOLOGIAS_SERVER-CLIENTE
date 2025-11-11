@@ -19,15 +19,18 @@
   "homepage": "https://github.com/Skimer166/PROYECTO_TECNOLOGIAS_SERVER-CLIENTE#readme",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "handlebars": "^4.7.8",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",
     "mongoose": "^8.19.3",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/mongoose": "^5.11.96",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
