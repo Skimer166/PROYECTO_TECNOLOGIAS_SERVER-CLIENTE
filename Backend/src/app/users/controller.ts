@@ -1,13 +1,20 @@
 import { Request, Response } from "express";
+import { isValidObjectId } from "mongoose";
 import { UserModel } from "./model";
 import bcrypt from "bcryptjs";
 
-export function getUsers(req: Request, res: Response) {
-  console.log('Usuario autenticado correctamente');
-  const user = { id: 123, name: "Juan Perez" };
-  return res.json({ message: `Bienvenido ${user.name}`, user });
+//GET/users-CRUD: Read (listar usuarios)
+export async function getUsers(req: Request, res: Response) {
+  try {
+    const users = await UserModel.find({}, { name: 1, email: 1 }).lean();
+    return res.json({ users: users.map(u => ({ id: String(u._id), name: u.name, email: u.email })) });
+  } catch (err) {
+    console.error("Error listando usuarios:", err);
+    return res.status(500).json({ message: "Error del servidor" });
+  }
 }
 
+//POST/users-CRUD: Create (crear usuario)
 export async function postUsers(req: Request, res: Response) {
   try {
     const { name, email, password } = req.body;
@@ -23,7 +30,7 @@ export async function postUsers(req: Request, res: Response) {
 
     return res.status(201).json({
       message: "Usuario creado correctamente",
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: String(user._id), name: user.name, email: user.email },
     });
   } catch (err: any) {
     console.error("Error creando usuario:", err);
@@ -31,23 +38,72 @@ export async function postUsers(req: Request, res: Response) {
   }
 }
 
-// GET /users/:id
-export function getUserById(req: Request, res: Response) {
-  const { id } = req.params;
-  const user = { id, name: 'Juan Perez', email: 'juanperez@gmail.com' };
-  return res.json(user);
+//GET/users/:id-CRUD: Read (obtener usuario por id)
+export async function getUserById(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) return res.status(400).json({ message: "ID inválido" });
+
+    const user = await UserModel.findById(id, { name: 1, email: 1 }).lean();
+    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    return res.json({ id: String(user._id), name: user.name, email: user.email });
+  } catch (err) {
+    console.error("Error obteniendo usuario:", err);
+    return res.status(500).json({ message: "Error del servidor" });
+  }
 }
 
-export function updateUser(req: Request, res: Response) {
-  const { id } = req.params;
-  const { name, email } = req.body || {};
-  return res.json({ id, name: name ?? 'Juan Perez', email: email ?? 'juanperez@gmail.com' });
+//PUT/users/:id-CRUD: Update (actualizar usuario)
+export async function updateUser(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) return res.status(400).json({ message: "ID inválido" });
+
+    const { name, email, password } = req.body || {};
+    if (!name && !email && !password) {
+      return res.status(400).json({ message: "Nada para actualizar" });
+    }
+
+    if (email) {
+      const exists = await UserModel.findOne({ email, _id: { $ne: id } }).lean();
+      if (exists) return res.status(409).json({ message: "Email ya registrado" });
+    }
+
+    const update: any = {};
+    if (typeof name === 'string') update.name = name;
+    if (typeof email === 'string') update.email = email;
+    if (typeof password === 'string' && password.length > 0) {
+      update.passwordHash = await bcrypt.hash(password, 10);
+    }
+
+    const updated = await UserModel.findByIdAndUpdate(id, update, { new: true, projection: { name: 1, email: 1 } }).lean();
+    if (!updated) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    return res.json({ id: String(updated._id), name: updated.name, email: updated.email });
+  } catch (err) {
+    console.error("Error actualizando usuario:", err);
+    return res.status(500).json({ message: "Error del servidor" });
+  }
 }
 
-export function deleteUser(req: Request, res: Response) {
-  return res.status(204).send();
+//DELETE/users/:id-CRUD: Delete (eliminar usuario)
+export async function deleteUser(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) return res.status(400).json({ message: "ID inválido" });
+
+    const result = await UserModel.findByIdAndDelete(id).lean();
+    if (!result) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    return res.status(204).send();
+  } catch (err) {
+    console.error("Error eliminando usuario:", err);
+    return res.status(500).json({ message: "Error del servidor" });
+  }
 }
 
+//GET /users/favorites falta el crud aca ruben el del modulo de agents
 export function getFavoriteAgents(req: Request, res: Response){
   const favorites = [
     { id: 2, name: "Agente especialista Cocinando", description: "Te ayudara en la cocina." }
