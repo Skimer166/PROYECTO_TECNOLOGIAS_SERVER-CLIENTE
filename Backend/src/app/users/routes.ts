@@ -15,6 +15,7 @@ const router = Router();
  *            description: auth user token
  *            schema:
  *              type: string
+ *              example: Bearer1234
  *      responses:
  *          200:
  *              description: success
@@ -103,6 +104,8 @@ router.get('/:id', authMiddleware, getUserById)
  *       500:
  *         description: Error interno del servidor
  */
+// Crear usuario en /users (alias de /users/register)
+router.post('', postUsers)
 router.post('/register', postUsers)
 
 /**

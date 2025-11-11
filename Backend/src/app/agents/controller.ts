@@ -10,7 +10,7 @@ export function getAllAgents(req: Request, res: Response){
 }
 
 export function searchAgent(req: Request, res: Response){
-    const { search } = req.params;
+    const { search } = req.query as { search?: string };
     res.json([
         { id: 1, name: 'Agente especialista en Python', description: 'Asistente de código.' },
         { id: 2, name: 'Agente especialista en Grafos Con Python', description: 'Te ayudare con los grafos en Python.' }

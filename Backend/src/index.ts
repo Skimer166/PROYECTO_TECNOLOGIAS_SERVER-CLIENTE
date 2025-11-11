@@ -29,6 +29,11 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3000;
 //obtenemos el documento
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
+//json del swagger
+app.get('/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerDocs);
+});
 //creamos la ruta (en forma de middleware)
 app.use('/swagger', serve, setup(swaggerDocs));
 

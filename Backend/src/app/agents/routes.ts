@@ -16,6 +16,7 @@ const router = Router();
  *         description: auth user token
  *         schema:
  *           type: string
+ *           example: Bearer1234
  *     responses:
  *       200:
  *         description: success

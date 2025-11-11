@@ -1,5 +1,6 @@
 import { Router } from "express";
-import {login, signup} from "./controller";
+import { login } from "./controller";
+import { postUsers } from "../users/controller";
 
 const router = Router();
 
@@ -23,6 +24,8 @@ const router = Router();
  *     responses:
  *       200:
  *         description: Token generado
+ *       401:
+ *         description: Credenciales inválidas
  */
 router.post('/login', login);    //se pone solamente login porque creamos la funcion en otro archivo
 
@@ -50,6 +53,6 @@ router.post('/login', login);    //se pone solamente login porque creamos la fun
  *       201:
  *         description: Usuario registrado
  */
-router.post('/signup', signup);
+router.post('/signup', postUsers);
 
 export default router;
