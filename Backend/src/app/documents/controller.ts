@@ -13,14 +13,14 @@ export async function listMyFiles(req: Request, res: Response) {
   return disabled(res);
 }
 //GET /files/:id/download
-export async function downloadFile(req: Request, res: Response) {
-  return disabled(res);
-}
+//export async function downloadFile(req: Request, res: Response) {
+  //return disabled(res);
+//}
 //DELETE /files/:id
 export async function deleteFile(req: Request, res: Response) {
   return disabled(res);
 }
 //PUT /files/:id/share
-export async function shareFile(req: Request, res: Response) {
-  return disabled(res);
-}
+//export async function shareFile(req: Request, res: Response) {
+  //return disabled(res);
+//}
