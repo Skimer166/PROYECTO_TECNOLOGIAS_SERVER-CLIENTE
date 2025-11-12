@@ -110,3 +110,28 @@ export function getFavoriteAgents(req: Request, res: Response){
   ];
   return res.json({ agents: favorites });
 }
+
+// PUT /users/:id/role - Admin: actualizar rol de usuario
+export async function updateUserRole(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) return res.status(400).json({ message: "ID inválido" });
+
+    const { role } = req.body || {};
+    if (!role || !['user', 'admin'].includes(role)) {
+      return res.status(400).json({ message: "Rol inválido. Usa 'user' o 'admin'" });
+    }
+
+    const updated = await UserModel.findByIdAndUpdate(
+      id,
+      { role },
+      { new: true, projection: { name: 1, email: 1, role: 1 } }
+    ).lean();
+    if (!updated) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    return res.json({ id: String(updated._id), name: updated.name, email: updated.email, role: updated.role });
+  } catch (err) {
+    console.error("Error actualizando rol:", err);
+    return res.status(500).json({ message: "Error del servidor" });
+  }
+}

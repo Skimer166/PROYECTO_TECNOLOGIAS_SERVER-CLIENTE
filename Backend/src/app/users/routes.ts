@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { getUsers, getUserById, postUsers, updateUser, deleteUser, getFavoriteAgents } from "./controller";
-import { authMiddleware } from "../middlewares/auth";
+import { getUsers, getUserById, postUsers, updateUser, deleteUser, getFavoriteAgents, updateUserRole } from "./controller";
+import { authMiddleware, verifyAdmin } from "../middlewares/auth";
 const router = Router();
 
 /**
@@ -210,6 +210,50 @@ router.delete('/:id', authMiddleware, deleteUser)
  *         description: Error interno del servidor
  */
 router.get('/favorites', authMiddleware, getFavoriteAgents);
+
+/**
+ * @swagger
+ * /users/{id}/role:
+ *   put:
+ *     tags: [USERS]
+ *     description: Actualizar el rol de un usuario (admin requerido)
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: header
+ *         name: Authorization
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [user, admin]
+ *                 example: admin
+ *     responses:
+ *       200:
+ *         description: Rol actualizado
+ *       400:
+ *         description: ID o rol inválido
+ *       401:
+ *         description: missing token
+ *       403:
+ *         description: admin required
+ *       404:
+ *         description: not found
+ */
+// PUT /users/:id/role - Admin: actualizar rol
+router.put('/:id/role', authMiddleware, verifyAdmin, updateUserRole)
 
 
 export default router;

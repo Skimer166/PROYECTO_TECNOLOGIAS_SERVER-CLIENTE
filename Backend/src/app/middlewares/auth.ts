@@ -64,7 +64,7 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
     return res.status(401).json({ message: 'Invalid token' });
   }
 };
-
+//misleware admin
 export const verifyAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
   if (!req.user) return res.status(401).json({ message: 'Required token' });
   if ((req.user as any).role !== 'admin') {
