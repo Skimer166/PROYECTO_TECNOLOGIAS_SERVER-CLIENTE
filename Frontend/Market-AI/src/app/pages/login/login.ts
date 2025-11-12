@@ -5,6 +5,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { Location } from '@angular/common';
+
 
 @Component({
   selector: 'app-login',
@@ -17,11 +19,15 @@ export class Login {
   form: FormGroup;
   loading = false;
 
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
+  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router, private location: Location) {
     this.form = this.fb.group({
       Correo: ['', [Validators.required, Validators.email]],
       Contrasena: ['', [Validators.required, Validators.minLength(8)]]
     });
+  }
+
+  onCancel(): void {
+    this.location.back();
   }
 
   doOnSubmit() {

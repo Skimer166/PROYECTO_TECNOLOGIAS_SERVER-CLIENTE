@@ -32,7 +32,7 @@
 
             <mat-form-field>
                 <mat-label form="contraseña">Contraseña</mat-label>
-                <input matInput type="text" name="Contraseña" formControlName="Contraseña">
+                <input matInput type="password" name="Contraseña" formControlName="Contraseña">
                 @if (form.get('Contraseña')?.hasError('required')) {
                     <mat-error >Este campo es Requerido</mat-error>
                 }  
@@ -45,7 +45,7 @@
 
             <mat-form-field>
                 <mat-label form="edad">Confirmar Contraseña</mat-label>
-                <input matInput type="text" name="Confirmar_Contraseña" formControlName="Confirmar_contraseña">
+                <input matInput type="password" name="Confirmar_Contraseña" formControlName="Confirmar_contraseña">
                 @if (form.get('Confirmar_contraseña')?.hasError('required')) {
                     <mat-error >Este campo es Requerido</mat-error>
                 }  
@@ -70,7 +70,7 @@
             </div>
 
             <div class="botones">
-                <button matButton="elevated">Cancelar</button>
+                <button class="cancelButton" matButton="elevated">Cancelar</button>
                 <button [disabled]="form.invalid" matButton="elevated">Enviar</button>
             </div>
 

@@ -18,7 +18,7 @@
 
       <mat-form-field>
         <mat-label for="password">Contrasena</mat-label>
-        <input matInput type="text" name="Contrasena" formControlName="Contrasena">
+        <input matInput type="password" name="Contrasena" formControlName="Contrasena">
         @if (form.get('Contrasena')?.hasError('required')) {
           <mat-error>Este campo es Requerido</mat-error>
         }
@@ -34,7 +34,7 @@
       </div>
 
       <div class="botones">
-        <button matButton="elevated">Cancelar</button>
+        <button matButton="elevated" type="button" (click)="onCancel()">Cancelar</button>
         <button [disabled]="form.invalid || loading" matButton="elevated">Enviar</button>
       </div>
     </form>

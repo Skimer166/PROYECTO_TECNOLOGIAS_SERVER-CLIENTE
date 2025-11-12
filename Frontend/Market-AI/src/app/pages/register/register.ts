@@ -7,6 +7,8 @@ import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
 import { User as userService } from '../../shared/services/user';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Location } from '@angular/common';
+
 
 @Component({
   selector: 'app-register',
@@ -18,7 +20,7 @@ export class Register {
 
   form: FormGroup;
 
-  constructor(private activatedRoute: ActivatedRoute, private fb: FormBuilder, private userService: userService) {
+  constructor(private activatedRoute: ActivatedRoute, private fb: FormBuilder, private userService: userService, private location: Location) {
     this.form = fb.group({
       Nombre: ['', [Validators.required, Validators.minLength(2)]],
       Correo: ['', [Validators.required, Validators.email]],
@@ -47,6 +49,9 @@ export class Register {
     };
   }
 
+  onCancel(): void {
+    this.location.back();
+  }
   doOnSubmit() {
     if (this.form.valid) {
       const { Nombre, Correo, Contraseña } = this.form.value;
