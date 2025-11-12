@@ -1,29 +1,181 @@
-import { Router } from "express";
-import { getAllAgents, searchAgent, getCategories } from "./controller";
-import { authMiddleware } from "../middlewares/auth";
+import { Router } from 'express';
+import {
+  getAllAgents,
+  searchAgent,
+  // getCategories,
+  createAgent,
+  getAgentById,
+  updateAgent,
+  deleteAgent
+} from './controller';
+import { authMiddleware } from '../middlewares/auth';
 
 const router = Router();
 
 /**
  * @swagger
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+ /**
+  * @swagger
+  * /agents:
+  *   get:
+  *     tags: [AGENTS]
+  *     description: Listar agentes disponibles
+  *     security:
+  *       - BearerAuth: []
+  *     parameters:
+  *       - in: query
+  *         name: category
+  *         schema:
+  *           type: string
+  *         required: false
+  *         description: Filtrar por categoría
+  *       - in: query
+  *         name: available
+  *         schema:
+  *           type: boolean
+  *         required: false
+  *         description: true para solo disponibles
+  *     responses:
+  *       200:
+  *         description: success
+  *       401:
+  *         description: missing token
+  */
+router.get('', authMiddleware, getAllAgents);
+
+/**
+ * @swagger
  * /agents:
+ *   post:
+ *     tags: [AGENTS]
+ *     description: Crear un nuevo agente (solo admin)
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *                 enum: [marketing, salud, educacion, asistente, otros]
+ *               language:
+ *                 type: string
+ *               modelVersion:
+ *                 type: string
+ *               imageUrl:
+ *                 type: string
+ *               pricePerHour:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Agente creado
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Solo administradores
+ */
+router.post('', authMiddleware, createAgent);
+
+/**
+ * @swagger
+ * /agents/{id}:
  *   get:
  *     tags: [AGENTS]
- *     description: Listar agentes disponibles
+ *     description: Obtener detalle de un agente
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
- *       - in: query
- *         name: token
- *         description: auth user token
+ *       - in: path
+ *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *           example: Bearer1234
  *     responses:
  *       200:
  *         description: success
  *       401:
- *         description: missing token
+ *         description: No autorizado
+ *       404:
+ *         description: Agente no encontrado
  */
-router.get('', authMiddleware, getAllAgents);
+router.get('/:id', authMiddleware, getAgentById);
+
+/**
+ * @swagger
+ * /agents/{id}:
+ *   put:
+ *     tags: [AGENTS]
+ *     description: Actualizar un agente
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Agente actualizado
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Sin permiso
+ *       404:
+ *         description: Agente no encontrado
+ */
+router.put('/:id', authMiddleware, updateAgent);
+
+/**
+ * @swagger
+ * /agents/{id}:
+ *   delete:
+ *     tags: [AGENTS]
+ *     description: Eliminar un agente
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Agente eliminado
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Sin permiso
+ *       404:
+ *         description: Agente no encontrado
+ */
+router.delete('/:id', authMiddleware, deleteAgent);
 
 /**
  * @swagger
@@ -41,22 +193,6 @@ router.get('', authMiddleware, getAllAgents);
  *     responses:
  *       200:
  *         description: Lista de agentes coincidentes
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   name:
- *                     type: string
- *                     example: Agente especialista en Python
- *                   description:
- *                     type: string
- *                     example: Asistente de código.
  */
 router.get('/search', searchAgent);
 
@@ -66,43 +202,10 @@ router.get('/search', searchAgent);
  *   get:
  *     tags: [AGENTS]
  *     description: categorias de agentes
- *     parameters:
- *       - in: query
- *         name: categories
- *         schema:
- *           type: string
- *         required: false
- *         description: Categoria a buscar (por ejemplo, "cocina").
  *     responses:
  *       200:
  *         description: success
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 categories:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: integer
- *                         example: 1
- *                       key:
- *                         type: string
- *                         example: programacion
- *                       name:
- *                         type: string
- *                         example: Programacion
- *                       description:
- *                         type: string
- *                         example: Agentes para codigo y scripts.
- *                       example:
- *                         type: string
- *                         example: Agente especialista en Python
  */
-router.get('/categories', getCategories)
-
+// router.get('/categories', getCategories);
 
 export default router;
