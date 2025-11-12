@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
 import { UserModel } from "./model";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 //GET/users-CRUD: Read (listar usuarios)
 export async function getUsers(req: Request, res: Response) {
@@ -110,6 +111,41 @@ export function getFavoriteAgents(req: Request, res: Response){
   ];
   return res.json({ agents: favorites });
 }
+//login
+export const loginUser = async (req:Request, res:Response) => {
+  try {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const password = String(req.body.password || '');
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Faltan email o password' });
+    }
+
+    //importante: seleccionar el password si en el schema está con select:false
+    const user = await UserModel.findOne({ email }).select('+password');
+    if (!user) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    //comparar texto plano vs hash guardado
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '2h' }
+    );
+
+    // Opcional: no devolver password nunca
+    return res.json({ token });
+  } catch (e) {
+    console.error('loginUser error:', e);
+    return res.status(500).json({ message: 'Error interno' });
+  }
+};
 
 // PUT /users/:id/role - Admin: actualizar rol de usuario
 export async function updateUserRole(req: Request, res: Response) {
@@ -135,3 +171,4 @@ export async function updateUserRole(req: Request, res: Response) {
     return res.status(500).json({ message: "Error del servidor" });
   }
 }
+

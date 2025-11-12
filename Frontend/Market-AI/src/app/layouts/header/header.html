@@ -1,15 +1,30 @@
-<mat-toolbar>
-
+<mat-toolbar color="primary" class="header-toolbar">
+  <button mat-icon-button [routerLink]="['/']" aria-label="Ir al inicio">
     <mat-icon>home</mat-icon>
+  </button>
 
-    <span>Market AI</span>
+  <span class="brand">Market AI</span>
 
-    
-    @if (isLogueado) {
-        <button>Cerrar Sesión</button>
-    }
+  @if (isLandingPage) {
+    <span class="spacer"></span>
+    <a mat-button [routerLink]="['/landing-page']" fragment="inicio">Inicio</a>
+    <a mat-button [routerLink]="['/landing-page']" fragment="precios">Precios</a>
+    <a mat-button [routerLink]="['/landing-page']" fragment="servicios">Servicios</a>
+  }
 
-    <!-- directivas de estructura -->
-    <!-- <button *appAuth>Cerrar Sesion Directiva</button>    -->
+  <span class="spacer"></span>
 
+  @if (isLoggedIn) {
+    <div class="user-info">
+      @if (userPhoto) {
+        <img [src]="userPhoto" alt="Foto de usuario" class="user-photo" />
+      }
+      @if (userName) {
+        <span class="user-name">{{ userName }}</span>
+      }
+      <button mat-stroked-button color="accent" (click)="logout()">Cerrar sesión</button>
+    </div>
+  } @else {
+    <button mat-flat-button color="accent" [routerLink]="['/login']">Iniciar sesión</button>
+  }
 </mat-toolbar>
