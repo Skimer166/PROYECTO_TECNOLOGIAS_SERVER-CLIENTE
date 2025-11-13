@@ -1,5 +1,245 @@
 <app-header></app-header>
+<div class="home-container-card">
+<div class="home-page">
+  <!-- Hero / bienvenida -->
+  <section class="hero">
+    <div class="hero__content">
+      <h1>Bienvenido a Market-AI</h1>
+      <p>
+        Renta agentes de IA especializados para ayudarte con programación, marketing,
+        educación, salud y mucho más.
+      </p>
 
-<p>home-page works!</p>
+      <div class="hero__actions">
+        <button mat-raised-button color="primary" routerLink="/agentes">
+          <mat-icon>bolt</mat-icon>
+          Explorar agentes
+        </button>
 
+        <button mat-stroked-button color="primary" routerLink="/mi-cuenta">
+          <mat-icon>person</mat-icon>
+          Ver mi cuenta
+        </button>
+      </div>
+
+      <div class="hero__badges">
+        <span>Respuestas inteligentes</span>
+        <span>Sesiones seguras</span>
+        <span>Pago por uso</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Paneles solo admin -->
+  <section class="admin-panel" *ngIf="isAdmin">
+    <h2>Panel de administración</h2>
+    <p>Como administrador puedes gestionar agentes y usuarios de la plataforma.</p>
+
+    <div class="admin-panel__buttons">
+      <button
+        mat-raised-button
+        color="accent"
+        routerLink="/admin/agents"
+        (click)="goToAgentPanel()"
+      >
+        <mat-icon>smart_toy</mat-icon>
+        Panel de agentes
+      </button>
+
+      <button
+        mat-stroked-button
+        color="accent"
+        routerLink="/admin/users"
+        (click)="goToUserPanel()"
+      >
+        <mat-icon>group</mat-icon>
+        Panel de usuarios
+      </button>
+    </div>
+  </section>
+
+  <!-- Buscador + filtros -->
+  <section class="search-section">
+    <div class="search-section__header">
+      <h2>Explora nuestros agentes</h2>
+      <p>Filtra por nombre, descripción o categoría.</p>
+    </div>
+
+    <div class="search-section__controls">
+      <mat-form-field appearance="outline" class="search-section__search-input">
+        <mat-label>Buscar agente</mat-label>
+        <input
+          matInput
+          placeholder="Ej. python, marketing, recetas..."
+          [value]="searchTerm"
+          (input)="onSearchTermChange($any($event.target).value)"
+        />
+        <button
+          *ngIf="searchTerm"
+          mat-icon-button
+          matSuffix
+          aria-label="Limpiar"
+          (click)="onSearchTermChange('')"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <div class="search-section__chips">
+        <mat-chip-listbox aria-label="Filtros de categoría">
+          <mat-chip-option
+            [selected]="selectedCategory === 'all'"
+            (click)="onCategoryClick('all')"
+          >
+            Todos
+          </mat-chip-option>
+
+          <mat-chip-option
+            *ngFor="let cat of categories"
+            [selected]="selectedCategory === cat.key"
+            (click)="onCategoryClick(cat.key)"
+          >
+            {{ cat.label }}
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+    </div>
+  </section>
+
+  <!-- Carrusel de agentes -->
+  <section class="carousel-section">
+    <div *ngIf="isLoading" class="state-message">
+      <mat-icon>hourglass_empty</mat-icon>
+      <span>Cargando agentes...</span>
+    </div>
+
+    <div *ngIf="error" class="state-message state-message--error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <ng-container *ngIf="!isLoading && !error">
+      <div *ngIf="!hasAgents" class="state-message">
+        <mat-icon>search_off</mat-icon>
+        <span>No encontramos agentes con esos filtros.</span>
+      </div>
+
+      <div *ngIf="hasAgents" class="carousel">
+        <button
+          mat-icon-button
+          class="carousel__nav carousel__nav--left"
+          [disabled]="!canGoPrev"
+          (click)="prev()"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <mat-card class="carousel__card" *ngIf="currentAgent as agent">
+          <div class="carousel__image" *ngIf="agent.imageUrl; else defaultAvatar">
+            <img [src]="agent.imageUrl" [alt]="agent.name" />
+          </div>
+          <ng-template #defaultAvatar>
+            <div class="carousel__avatar-placeholder">
+              <mat-icon>smart_toy</mat-icon>
+            </div>
+          </ng-template>
+
+          <mat-card-header>
+            <mat-card-title>{{ agent.name }}</mat-card-title>
+            <mat-card-subtitle>
+              <p class="carousel__description">
+                {{ agent.category | titlecase }} • {{ agent.modelVersion }}
+              </p>
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <p class="carousel__description">
+              {{ agent.description }}
+            </p>
+
+            <div class="carousel__meta">
+              <span class="price">${{ agent.pricePerHour }} MXN / hora</span>
+              <span class="availability" [class.offline]="!agent.availability">
+                <span class="dot"></span>
+                {{ agent.availability ? 'Disponible' : 'No disponible' }}
+              </span>
+            </div>
+
+            <div class="carousel__rating" *ngIf="agent.ratings">
+              <mat-icon>star</mat-icon>
+              <span>{{ agent.ratings.average || 0 | number:'1.1-1' }}</span>
+              <span class="rating__count">
+                ({{ agent.ratings.totalReviews || 0 }} reseñas)
+              </span>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions align="end">
+            <button
+              mat-flat-button
+              color="primary"
+              [disabled]="!agent.availability"
+              (click)="rentAgent(agent)"
+            >
+              <mat-icon>shopping_cart</mat-icon>
+              Rentar agente
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+        <button
+          mat-icon-button
+          class="carousel__nav carousel__nav--right"
+          [disabled]="!canGoNext"
+          (click)="next()"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+<!--       Vista rápida de más agentes en grid
+      <div class="agents-grid" *ngIf="filteredAgents.length > 1">
+        <h3>Otros agentes que podrían interesarte</h3>
+        <div class="agents-grid__list">
+          <mat-card
+            class="agents-grid__card"
+            *ngFor="let a of filteredAgents; let i = index"
+            (click)="currentIndex = i"
+          >
+            <div class="agents-grid__avatar">
+              <mat-icon>smart_toy</mat-icon>
+            </div>
+            <mat-card-title>{{ a.name }}</mat-card-title>
+            <mat-card-subtitle>{{ a.category | titlecase }}</mat-card-subtitle>
+            <p class="agents-grid__price">\${{ a.pricePerHour }} / hora</p>
+          </mat-card>
+        </div>
+      </div> -->
+    </ng-container>
+  </section>
+
+  <!-- Cómo funciona -->
+  <section class="how-it-works">
+    <h2>¿Cómo funciona?</h2>
+    <div class="how-it-works__steps">
+      <div class="step">
+        <span class="step__number">1</span>
+        <h3>Explora</h3>
+        <p>Filtra y descubre agentes que encajen con tus necesidades.</p>
+      </div>
+      <div class="step">
+        <span class="step__number">2</span>
+        <h3>Renta</h3>
+        <p>Activa un agente por la cantidad de tiempo que necesites.</p>
+      </div>
+      <div class="step">
+        <span class="step__number">3</span>
+        <h3>Colabora</h3>
+        <p>Chatea, resuelve dudas y acelera tu trabajo con soporte de IA.</p>
+      </div>
+    </div>
+  </section>
+</div>
+</div>
 <app-footer></app-footer>
