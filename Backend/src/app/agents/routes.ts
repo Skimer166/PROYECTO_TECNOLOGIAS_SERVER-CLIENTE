@@ -8,7 +8,7 @@ import {
   updateAgent,
   deleteAgent
 } from './controller';
-import { authMiddleware } from '../middlewares/auth';
+import { verifyToken, verifyAdmin } from '../middlewares/auth';
 
 const router = Router();
 
@@ -32,12 +32,6 @@ const router = Router();
   *       - BearerAuth: []
   *     parameters:
   *       - in: query
-  *         name: category
-  *         schema:
-  *           type: string
-  *         required: false
-  *         description: Filtrar por categoría
-  *       - in: query
   *         name: available
   *         schema:
   *           type: boolean
@@ -49,7 +43,7 @@ const router = Router();
   *       401:
   *         description: missing token
   */
-router.get('', authMiddleware, getAllAgents);
+router.get('', verifyToken, getAllAgents);
 
 /**
  * @swagger
@@ -91,7 +85,7 @@ router.get('', authMiddleware, getAllAgents);
  *       403:
  *         description: Solo administradores
  */
-router.post('', authMiddleware, createAgent);
+router.post('', verifyToken, verifyAdmin, createAgent);
 
 /**
  * @swagger
@@ -115,7 +109,7 @@ router.post('', authMiddleware, createAgent);
  *       404:
  *         description: Agente no encontrado
  */
-router.get('/:id', authMiddleware, getAgentById);
+router.get('/:id', verifyToken, getAgentById);
 
 /**
  * @swagger
@@ -149,7 +143,7 @@ router.get('/:id', authMiddleware, getAgentById);
  *       404:
  *         description: Agente no encontrado
  */
-router.put('/:id', authMiddleware, updateAgent);
+router.put('/:id', verifyToken, verifyAdmin, updateAgent);
 
 /**
  * @swagger
@@ -175,7 +169,7 @@ router.put('/:id', authMiddleware, updateAgent);
  *       404:
  *         description: Agente no encontrado
  */
-router.delete('/:id', authMiddleware, deleteAgent);
+router.delete('/:id', verifyToken, verifyAdmin, deleteAgent);
 
 /**
  * @swagger
@@ -196,16 +190,16 @@ router.delete('/:id', authMiddleware, deleteAgent);
  */
 router.get('/search', searchAgent);
 
-/**
- * @swagger
- * /agents/categories:
- *   get:
- *     tags: [AGENTS]
- *     description: categorias de agentes
- *     responses:
- *       200:
- *         description: success
- */
+// /**
+//  * @swagger
+//  * /agents/categories:
+//  *   get:
+//  *     tags: [AGENTS]
+//  *     description: categorias de agentes
+//  *     responses:
+//  *       200:
+//  *         description: success
+//  */
 // router.get('/categories', getCategories);
 
 export default router;

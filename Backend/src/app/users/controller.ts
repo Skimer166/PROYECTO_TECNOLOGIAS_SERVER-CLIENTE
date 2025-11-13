@@ -112,7 +112,8 @@ export function getFavoriteAgents(req: Request, res: Response){
   return res.json({ agents: favorites });
 }
 //login
-export const loginUser = async (req:Request, res:Response) => {
+const JWT_SECRET = process.env.JWT_SECRET || process.env.SECRET_KEY!;
+export const loginUser = async (req: Request, res: Response) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
@@ -121,25 +122,27 @@ export const loginUser = async (req:Request, res:Response) => {
       return res.status(400).json({ message: 'Faltan email o password' });
     }
 
-    //importante: seleccionar el password si en el schema está con select:false
-    const user = await UserModel.findOne({ email }).select('+password');
+    const user = await UserModel.findOne({ email }).exec();
     if (!user) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
-    //comparar texto plano vs hash guardado
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
     const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET || 'secret',
+      {
+        sub: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        role: user.role,    
+      },
+      JWT_SECRET,
       { expiresIn: '2h' }
     );
 
-    // Opcional: no devolver password nunca
     return res.json({ token });
   } catch (e) {
     console.error('loginUser error:', e);

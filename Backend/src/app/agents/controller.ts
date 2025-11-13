@@ -6,7 +6,7 @@ function getAuthUser(req: Request): { id?: string; role?: string } {
   const user = (req as any).user;
   if (!user) return {};
   return {
-    id: user.id || user._id || user.userId,
+    id: user.id,
     role: user.role
   };
 }

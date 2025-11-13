@@ -55,16 +55,27 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
 
   const token = authHeader.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'Required token' });
-
+  
   try {
-    const decoded = jwt.verify(token, JWT_SECRET as string);
-    req.user = decoded;
+    const decoded = jwt.verify(token, JWT_SECRET as string) as any;
+
+    req.user = {
+      id: decoded.sub,
+      email: decoded.email,
+      name: decoded.name,
+      role: decoded.role,
+    };
+
     next();
-  } catch {
+  } catch (err: any) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expirado, inicia sesión de nuevo' });
+    }
     return res.status(401).json({ message: 'Invalid token' });
   }
 };
-//misleware admin
+
+//middleware admin
 export const verifyAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
   if (!req.user) return res.status(401).json({ message: 'Required token' });
   if ((req.user as any).role !== 'admin') {
