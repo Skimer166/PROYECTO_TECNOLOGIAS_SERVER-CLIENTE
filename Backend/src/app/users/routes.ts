@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getUsers, getUserById, postUsers, updateUser, deleteUser, getFavoriteAgents, updateUserRole } from "./controller";
-import { authMiddleware, verifyAdmin } from "../middlewares/auth";
+import { authMiddleware, verifyAdmin, verifyToken } from "../middlewares/auth";
 const router = Router();
 
 /**
@@ -217,18 +217,14 @@ router.get('/favorites', authMiddleware, getFavoriteAgents);
  *   put:
  *     tags: [USERS]
  *     description: Actualizar el rol de un usuario (admin requerido)
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *       - in: header
- *         name: Authorization
- *         required: true
- *         schema:
- *           type: string
- *           example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *     requestBody:
  *       required: true
  *       content:
@@ -253,7 +249,7 @@ router.get('/favorites', authMiddleware, getFavoriteAgents);
  *         description: not found
  */
 // PUT /users/:id/role - Admin: actualizar rol
-router.put('/:id/role', authMiddleware, verifyAdmin, updateUserRole)
+router.put('/:id/role', verifyToken, verifyAdmin, updateUserRole)
 
 
 export default router;
