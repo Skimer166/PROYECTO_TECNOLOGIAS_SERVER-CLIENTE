@@ -1,7 +1,7 @@
 import { Login } from './login';
 import { FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { AuthService } from '../../shared/services/auth';
 import { from } from 'rxjs';
 
 describe('Login', () => {

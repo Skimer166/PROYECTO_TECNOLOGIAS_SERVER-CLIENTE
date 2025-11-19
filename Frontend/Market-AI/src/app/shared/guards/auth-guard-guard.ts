@@ -16,15 +16,20 @@ function hasToken(): boolean {
 }
 
 function isWhitelisted(url: string): boolean {
-  return PUBLIC_WHITELIST.some(prefix => url.startsWith(prefix));
+  // por si viene con query params
+  const cleanUrl = url.split('?')[0];
+  return PUBLIC_WHITELIST.includes(cleanUrl);
 }
-
 
 export const authActivateGuard: CanActivateFn = (route, state): boolean | UrlTree => {
   const router = inject(Router);
 
-  if (hasToken()) return true; //si esta logueado pasa
-  if (isWhitelisted(state.url)) return true; //si esta en la whitelist pasa
+  if (hasToken()) 
+    return true; //si esta logueado pasa  
+
+  if (isWhitelisted(state.url)) 
+    return true; //si esta en la whitelist pasa
+  
   return router.parseUrl('/login'); //si no esta log y no es white lo redirige
 };
 

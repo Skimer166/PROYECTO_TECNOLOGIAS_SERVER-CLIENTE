@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login } from "./controller";
+import { googleAuthController, googleCallbackController, login} from "./controller";
 import { postUsers } from "../users/controller";
 
 const router = Router();
@@ -55,4 +55,9 @@ router.post('/login', login);    //se pone solamente login porque creamos la fun
  */
 router.post('/signup', postUsers);
 
-export default router;
+
+//rutas para el login y signup con google
+router.get('/google', googleAuthController);
+router.get('/google/callback', googleCallbackController);
+
+export default router; 

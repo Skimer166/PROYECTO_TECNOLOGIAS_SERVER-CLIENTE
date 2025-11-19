@@ -33,6 +33,21 @@
         <p>No tienes cuenta? <a href="register" style="color: whitesmoke">Registrate</a></p>
       </div>
 
+      <div class="alinearEnCard separador-social">
+        <span>O inicia sesión con</span>
+      </div>
+
+      <div class="alinearEnCard">
+        <button
+          type="button"
+          class="google-btn"
+          mat-button
+          (click)="loginWithGoogle()">
+          <!-- meter un ícono de Google -->
+          Iniciar sesión con Google
+        </button>
+      </div>
+
       <div class="botones">
         <button matButton="elevated" type="button" (click)="onCancel()">Cancelar</button>
         <button [disabled]="form.invalid || loading" matButton="elevated">Enviar</button>

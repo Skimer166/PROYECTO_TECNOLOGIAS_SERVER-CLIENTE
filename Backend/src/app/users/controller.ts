@@ -112,43 +112,53 @@ export function getFavoriteAgents(req: Request, res: Response){
   return res.json({ agents: favorites });
 }
 //login
-const JWT_SECRET = process.env.JWT_SECRET || process.env.SECRET_KEY!;
-export const loginUser = async (req: Request, res: Response) => {
+const JWT_KEY = process.env.JWT_KEY!;
+export async function loginUser(req: Request, res: Response) {
   try {
-    const email = String(req.body.email || '').trim().toLowerCase();
-    const password = String(req.body.password || '');
+    const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Faltan email o password' });
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
     }
 
-    const user = await UserModel.findOne({ email }).exec();
-    if (!user) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+    if (!user.passwordHash) {
+      return res.status(400).json({
+        message: 'Esta cuenta fue creada con Google. Inicia sesión usando "Iniciar sesión con Google".',
+      });
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
+
     if (!ok) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+      return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
     }
 
     const token = jwt.sign(
       {
-        sub: user._id.toString(),
+        id: user._id,
         email: user.email,
-        name: user.name,
-        role: user.role,    
+        role: user.role || 'user',
       },
-      JWT_SECRET,
-      { expiresIn: '2h' }
+      process.env.JWT_SECRET || 'dev-secret',
+      { expiresIn: '1h' }
     );
 
-    return res.json({ token });
-  } catch (e) {
-    console.error('loginUser error:', e);
-    return res.status(500).json({ message: 'Error interno' });
+    return res.json({
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.error('Error en loginUser:', err);
+    return res.status(500).json({ message: 'Error interno del servidor' });
   }
-};
+}
 
 // PUT /users/:id/role - Admin: actualizar rol de usuario
 export async function updateUserRole(req: Request, res: Response) {

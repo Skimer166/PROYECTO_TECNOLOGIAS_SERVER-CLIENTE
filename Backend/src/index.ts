@@ -10,8 +10,12 @@ import swaggerOptions from '../swagger.config';
 import { dbConnect } from './database';
 
 import routes from './app/routes';
+import passport from './app/auth/google';
 
 const app = express();
+
+//para google auth
+app.use(passport.initialize());
 
 // Middlewares necesarios para recibir JSON y permitir CORS desde Angular
 app.use(express.json());

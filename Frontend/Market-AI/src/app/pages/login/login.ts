@@ -4,7 +4,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { AuthService } from '../../shared/services/auth';
 import { Location } from '@angular/common';
 
 
@@ -55,5 +55,10 @@ export class Login {
         this.loading = false;
       }
     });
+  }
+
+  loginWithGoogle() {
+    const url = this.auth.getGoogleLoginUrl();
+    window.location.href = url;
   }
 }

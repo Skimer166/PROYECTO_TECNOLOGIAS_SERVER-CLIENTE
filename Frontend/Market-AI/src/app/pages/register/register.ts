@@ -8,6 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { User as userService } from '../../shared/services/user';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Location } from '@angular/common';
+import { AuthService } from '../../shared/services/auth';
 
 
 @Component({
@@ -20,7 +21,7 @@ export class Register {
 
   form: FormGroup;
 
-  constructor(private activatedRoute: ActivatedRoute, private fb: FormBuilder, private userService: userService, private location: Location) {
+  constructor(private activatedRoute: ActivatedRoute, private fb: FormBuilder, private userService: userService, private location: Location, private auth: AuthService) {
     this.form = fb.group({
       Nombre: ['', [Validators.required, Validators.minLength(2)]],
       Correo: ['', [Validators.required, Validators.email]],
@@ -71,6 +72,11 @@ export class Register {
       this.form.markAllAsTouched();
       alert('El formulario contiene errores, revisa los campos');
     }
+  }
+
+  registerWithGoogle() {
+    const url = this.auth.getGoogleLoginUrl();
+    window.location.href = url;
   }
 
 }

@@ -30,13 +30,5 @@ export class User {
     return this.httpClient.post(`${this.apiUrl}/register`, data);
   }
 
-  // getAllUsers(): Observable <IUser[]> {
-  //   return this.httpClient.get<IUser[]>(`${environment.apiUrl}${this.endpoint}`)
-  // }
-
-  // getUserById(id: string): Observable<IUser> {
-  //   return this.httpClient.get<IUser>(`${environment.apiUrl}${this.endpoint}/1`)
-  // }
-
-
+  
 }
