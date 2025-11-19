@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { isValidObjectId } from 'mongoose';
-import { createImageUpload, bucketName, deleteObject } from '../storage/s3';
+import { createImageUpload, bucketName, deleteObject, getObject } from '../storage/s3';
 import { FileModel } from './model';
 
 export const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
@@ -75,6 +75,50 @@ export async function listMyFiles(req: Request, res: Response) {
   } catch (err) {
     console.error('Error al listar archivos:', err);
     return res.status(500).json({ message: 'Error al listar archivos' });
+  }
+}
+
+// GET /files/:id/download
+export async function downloadFile(req: Request, res: Response) {
+  try {
+    const userId = getAuthUserId(req);
+    if (!userId) {
+      return res.status(401).json({ message: 'No autorizado' });
+    }
+
+    const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
+
+    const file = await FileModel.findById(id).lean();
+    if (!file) {
+      return res.status(404).json({ message: 'Archivo no encontrado' });
+    }
+
+    if (String(file.ownerId) !== userId) {
+      return res.status(403).json({ message: 'No puedes acceder a este archivo' });
+    }
+
+    try {
+      const obj = await getObject(file.key);
+      const bodyStream = obj.Body as any;
+
+      res.setHeader('Content-Type', obj.ContentType || file.contentType || 'application/octet-stream');
+      if (obj.ContentLength != null) {
+        res.setHeader('Content-Length', obj.ContentLength.toString());
+      }
+      const filename = file.originalName || file.key;
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+
+      bodyStream.pipe(res);
+    } catch (err) {
+      console.error('Error obteniendo archivo de S3:', err);
+      return res.status(500).json({ message: 'Error al descargar archivo' });
+    }
+  } catch (err) {
+    console.error('Error en downloadFile:', err);
+    return res.status(500).json({ message: 'Error al descargar archivo' });
   }
 }
 
