@@ -24,6 +24,17 @@ app.use(cors({
   credentials: true,
 }));
 
+//para que el nombre de los usuarios que vienen de google no tenga problemas con caracteres especiales
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
+
+
 app.use(routes); //aqui usamos el archivo que contiene todas las rutas
 
 app.get('/', (req, res) => {

@@ -20,11 +20,15 @@
         <img [src]="userPhoto" alt="Foto de usuario" class="user-photo" />
       }
       @if (userName) {
-        <span class="user-name">{{ userName }}</span>
+        <span class="user-name">Hola, {{ userName }}</span>
       }
-      <button mat-stroked-button color="accent" (click)="logout()">Cerrar sesión</button>
+      <button mat-stroked-button color="accent" (click)="logout()">
+        Cerrar sesión
+      </button>
     </div>
   } @else {
-    <button mat-flat-button color="accent" [routerLink]="['/login']">Iniciar sesión</button>
+    <button mat-flat-button color="accent" [routerLink]="['/login']">
+      Iniciar sesión
+    </button>
   }
 </mat-toolbar>

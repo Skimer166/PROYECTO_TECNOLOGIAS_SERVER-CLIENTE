@@ -1,10 +1,8 @@
-// auth/controller.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import passport from './google';
 import { loginUser } from '../users/controller';
-// 👇 ajusta la ruta según tu proyecto
-import {UserModel} from '../users/model'; 
+import { UserModel } from '../users/model';
 
 const JWT_KEY = process.env.JWT_KEY!;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
@@ -15,9 +13,10 @@ export async function login(req: Request, res: Response) {
 
 export function signup(req: Request, res: Response) {
   console.log('Signup body', req.body);
-  return res.status(501).json({ message: 'No implementado. Usa /users/register' });
+  return res
+    .status(501)
+    .json({ message: 'No implementado. Usa /users/register' });
 }
-
 
 //redirige a google para que inicie sesion
 export const googleAuthController = passport.authenticate('google', {
@@ -41,10 +40,12 @@ export const googleCallbackController = (
       }
 
       try {
-        const { email, name, googleId } = googleUser;
+        const { email, name, googleId, avatar } = googleUser;
 
         if (!email) {
-          return res.redirect(`${FRONTEND_URL}/login?error=no_email_from_google`);
+          return res.redirect(
+            `${FRONTEND_URL}/login?error=no_email_from_google`
+          );
         }
 
         //buscar usuario por email
@@ -57,15 +58,48 @@ export const googleCallbackController = (
             email,
             googleId,
             provider: 'google',
+            avatar,
           });
+        } else {
+          // si existe, actualizamos datos relacionados con google si hace falta
+          let updated = false;
+
+          const emailAlias = email.split('@')[0];
+
+          // si no tenía nombre o su nombre es igual al alias del correo, actualizamos al nombre de Google
+          if (!user.name || user.name === emailAlias) {
+            user.name = name || user.name || emailAlias;
+            updated = true;
+          }
+
+          if (!user.googleId) {
+            user.googleId = googleId;
+            updated = true;
+          }
+
+          if (user.provider !== 'google') {
+            user.provider = 'google';
+            updated = true;
+          }
+
+          if (avatar && user.avatar !== avatar) {
+            user.avatar = avatar;
+            updated = true;
+          }
+
+          if (updated) {
+            await user.save();
+          }
         }
 
-        // generar JWT 
+        // generar JWT con name y avatar
         const token = jwt.sign(
           {
             id: user._id,
             email: user.email,
             role: user.role || 'user',
+            avatar: user.avatar,
+            name: user.name,
           },
           JWT_KEY,
           { expiresIn: '2h' }

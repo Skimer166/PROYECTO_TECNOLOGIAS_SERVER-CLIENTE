@@ -17,6 +17,11 @@ if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
   );
 }
 
+function normalizeUtf8(str: string) {
+  return Buffer.from(str, 'utf8').toString();
+}
+
+
 passport.use(
   new GoogleStrategy(
     {
@@ -24,41 +29,50 @@ passport.use(
       clientSecret: GOOGLE_CLIENT_SECRET,
       callbackURL: GOOGLE_CALLBACK_URL,
     },
-    async (
-      accessToken: string,
-      refreshToken: string,
-      profile: Profile,
-      done: VerifyCallback
-    ) => {
+
+    async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails?.[0]?.value;
         const name = profile.displayName || '';
+        const avatar = profile.photos?.[0]?.value; 
 
         if (!email) {
           return done(new Error('No se recibió email desde Google'), undefined);
         }
 
         let user = await UserModel.findOne({ email });
+        const cleanName = name ? normalizeUtf8(name) : 'Usuario Google';
 
         if (!user) {
           user = await UserModel.create({
-            name: name || email.split('@')[0],
+            name: cleanName,
             email,
             googleId: profile.id,
             provider: 'google',
-            // passwordHash NO es requerido cuando hay googleId
+            avatar, 
           });
         } else {
+            //actualizamos datos si cambia algo en el perfil del usuario
+          let updated = false;
+          
+
+          if (!user.avatar && avatar) {
+            user.avatar = avatar;
+            updated = true;
+          }
           if (!user.googleId) {
             user.googleId = profile.id;
+            updated = true;
           }
-          if (!user.provider || user.provider === 'local') {
+          if (user.provider !== 'google') {
             user.provider = 'google';
+            updated = true;
           }
-          await user.save();
+
+          if (updated) await user.save();
         }
 
-        return done(null, user as any);
+        return done(null, user);
       } catch (err) {
         return done(err as any, undefined);
       }

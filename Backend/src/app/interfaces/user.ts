@@ -1,6 +1,9 @@
-export interface IUser {
-    id?: number, //va a ser opcional
-    name: string,
-    email: string,
-    password?: string
+export interface IUser extends Document {
+  name: string;
+  email: string;
+  passwordHash?: string;
+  role: 'user' | 'admin';
+  googleId?: string;
+  provider: 'local' | 'google';
+  avatar?: string;
 }

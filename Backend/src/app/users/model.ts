@@ -1,13 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
-
-export interface IUser extends Document {
-  name: string;
-  email: string;
-  passwordHash?: string;
-  role: 'user' | 'admin';
-  googleId?: string;
-  provider: 'local' | 'google';
-}
+import { IUser } from '../interfaces/user';
 
 const userSchema = new Schema<IUser>(
   {
@@ -20,11 +12,10 @@ const userSchema = new Schema<IUser>(
       index: true,
     },
 
-    //requerido solo si NO hay googleId 
     passwordHash: {
       type: String,
       required: function (this: any) {
-        return !this.googleId; 
+        return !this.googleId;
       },
     },
 
@@ -42,6 +33,8 @@ const userSchema = new Schema<IUser>(
       enum: ['local', 'google'],
       default: 'local',
     },
+
+    avatar: { type: String }, 
   },
   {
     timestamps: true,

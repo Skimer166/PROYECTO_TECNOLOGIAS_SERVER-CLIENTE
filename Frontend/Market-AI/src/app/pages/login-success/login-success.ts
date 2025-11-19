@@ -1,8 +1,7 @@
-// src/app/auth/login-success.ts (o login-success.component.ts, como lo tengas)
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../shared/services/auth'; // AJUSTA LA RUTA
+import { AuthService } from '../../shared/services/auth'; 
 
 @Component({
   selector: 'app-login-success',
@@ -20,7 +19,6 @@ export class LoginSuccess implements OnInit {
   private authService = inject(AuthService);
 
   ngOnInit(): void {
-    // 👇 EVITAR EJECUCIÓN EN SSR (Node)
     if (typeof window === 'undefined') {
       return;
     }

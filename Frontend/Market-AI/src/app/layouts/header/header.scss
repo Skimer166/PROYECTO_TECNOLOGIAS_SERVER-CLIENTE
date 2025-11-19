@@ -2,6 +2,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .brand {
@@ -19,12 +22,13 @@
 }
 
 .user-photo {
-  width: 32px;
-  height: 32px;
+  width: 40px;   
+  height: 40px;  
   border-radius: 50%;
   object-fit: cover;
 }
 
 .user-name {
   font-weight: 500;
+  font-size: 0.95rem;
 }
