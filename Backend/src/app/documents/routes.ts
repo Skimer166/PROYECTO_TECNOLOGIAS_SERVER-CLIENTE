@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middlewares/auth';
+import { authMiddleware, verifyToken } from '../middlewares/auth';
 import { upload, uploadFile, listMyFiles, deleteFile } from './controller';
 
 
@@ -11,13 +11,15 @@ const router = Router();
  *   get:
  *     tags: [FILES]
  *     description: Lista archivos del usuario autenticado
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: success
  *       401:
  *         description: unauthorized
  */
-router.get('', authMiddleware, listMyFiles);
+router.get('', verifyToken, listMyFiles);
 
 /**
  * @swagger
@@ -25,6 +27,8 @@ router.get('', authMiddleware, listMyFiles);
  *   post:
  *     tags: [FILES]
  *     description: Subir imagen a S3 (máx 5MB, jpeg/png/webp)
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -50,7 +54,7 @@ router.get('', authMiddleware, listMyFiles);
  *       500:
  *         description: Error del servidor
  */
-router.post('/upload', authMiddleware, upload.single('file'), uploadFile);
+router.post('/upload', verifyToken, upload.single('file'), uploadFile);
 
 
 
@@ -60,6 +64,8 @@ router.post('/upload', authMiddleware, upload.single('file'), uploadFile);
  *   delete:
  *     tags: [FILES]
  *     description: Eliminar archivo del usuario (dueño)
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -76,7 +82,7 @@ router.post('/upload', authMiddleware, upload.single('file'), uploadFile);
  *       404:
  *         description: not found
  */
-router.delete('/:id', authMiddleware, deleteFile);
+router.delete('/:id', verifyToken, deleteFile);
 
 
 

@@ -9,20 +9,15 @@ const router = Router();
  *  get:
  *      tags: [USERS]
  *      description: Listar usuarios
- *      parameters:
- *         -  in: query
- *            name: token
- *            description: auth user token
- *            schema:
- *              type: string
- *              example: Bearer1234
+ *      security:
+ *        - BearerAuth: []
  *      responses:
  *          200:
  *              description: success
  *          401:
  *              description: missing token
  */
-router.get('', authMiddleware, getUsers) //cuando haya un get a esta ruta se manda a llamar el metodo getUsers
+router.get('', verifyToken, getUsers) //cuando haya un get a esta ruta se manda a llamar el metodo getUsers
 
 /**
  * @swagger
@@ -30,6 +25,8 @@ router.get('', authMiddleware, getUsers) //cuando haya un get a esta ruta se man
  *   get:
  *     tags: [USERS]
  *     description: Obtener un usuario por ID
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -37,13 +34,6 @@ router.get('', authMiddleware, getUsers) //cuando haya un get a esta ruta se man
  *         schema:
  *           type: string
  *         description: ID del usuario
- *       - in: query
- *         name: token
- *         required: true
- *         schema:
- *           type: string
- *           example: Bearer1234
- *         description: Token de acceso (query param que valida el middleware)
  *     responses:
  *       200:
  *         description: success
@@ -52,7 +42,7 @@ router.get('', authMiddleware, getUsers) //cuando haya un get a esta ruta se man
  *       404:
  *         description: not found
  */
-router.get('/:id', authMiddleware, getUserById)
+router.get('/:id', verifyToken, getUserById)
 
 /**
  * @swagger
@@ -114,17 +104,14 @@ router.post('/register', postUsers)
  *   put:
  *     tags: [USERS]
  *     description: Actualizar un usuario por ID
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *       -  in: query
- *          name: token
- *          description: auth user token
- *          schema:
- *            type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -142,7 +129,7 @@ router.post('/register', postUsers)
  *       401:
  *         description: missing token
  */
-router.put('/:id', authMiddleware, updateUser)
+router.put('/:id', verifyToken, updateUser)
 
 /**
  * @swagger
@@ -150,17 +137,14 @@ router.put('/:id', authMiddleware, updateUser)
  *   delete:
  *     tags: [USERS]
  *     description: Eliminar un usuario por ID
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *       -  in: query
- *          name: token
- *          description: auth user token
- *          schema:
- *            type: string
  *     responses:
  *       204:
  *         description: Eliminado
@@ -169,7 +153,7 @@ router.put('/:id', authMiddleware, updateUser)
  *       401:
  *         description: missing token
  */
-router.delete('/:id', authMiddleware, deleteUser)
+router.delete('/:id', verifyToken, deleteUser)
 
 /**
  * @swagger
@@ -177,14 +161,8 @@ router.delete('/:id', authMiddleware, deleteUser)
  *   get:
  *     tags: [USERS]
  *     description: Obtener la lista de agentes favoritos del usuario autenticado
- *     parameters:
- *       - in: query
- *         name: token
- *         required: true
- *         schema:
- *           type: string
- *           example: Bearer1234
- *         description: Token de acceso (query param que valida el middleware)
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de agentes favoritos obtenida exitosamente
@@ -209,7 +187,7 @@ router.delete('/:id', authMiddleware, deleteUser)
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/favorites', authMiddleware, getFavoriteAgents);
+router.get('/favorites', verifyToken, getFavoriteAgents);
 
 /**
  * @swagger
