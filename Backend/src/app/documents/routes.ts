@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware, verifyToken } from '../middlewares/auth';
+import { verifyToken } from '../middlewares/auth';
 import { upload, uploadFile, listMyFiles, deleteFile } from './controller';
 
 
