@@ -64,7 +64,6 @@ export class Header implements OnInit {
     const fullName: string =
       payload.name ||
       (payload.email ? String(payload.email).split('@')[0] : '');
-
     const firstName = fullName.split(' ')[0];
 
     this.userName = firstName || null;
