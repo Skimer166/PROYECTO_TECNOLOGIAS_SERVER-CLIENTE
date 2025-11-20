@@ -112,7 +112,7 @@ export function getFavoriteAgents(req: Request, res: Response){
   return res.json({ agents: favorites });
 }
 //login
-const JWT_KEY = process.env.JWT_KEY!;
+const JWT_SECRET = process.env.SECRET_KEY ?? process.env.JWT_KEY ?? process.env.JWT_SECRET ?? 'dev-secret';
 export async function loginUser(req: Request, res: Response) {
   try {
     const { email, password } = req.body;
@@ -137,11 +137,12 @@ export async function loginUser(req: Request, res: Response) {
 
     const token = jwt.sign(
       {
-        id: user._id,
+        sub: String(user._id),
         email: user.email,
+        name: user.name,
         role: user.role || 'user',
       },
-      process.env.JWT_SECRET || 'dev-secret',
+      JWT_SECRET,
       { expiresIn: '1h' }
     );
 

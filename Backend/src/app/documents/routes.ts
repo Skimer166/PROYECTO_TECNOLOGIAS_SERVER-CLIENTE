@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { authMiddleware, verifyToken } from '../middlewares/auth';
-import { upload, uploadFile, listMyFiles, deleteFile } from './controller';
+import { verifyToken } from '../middlewares/auth';
+import { upload, uploadFile, listMyFiles, deleteFile, downloadFile } from './controller';
 
 
 const router = Router();
@@ -20,6 +20,34 @@ const router = Router();
  *         description: unauthorized
  */
 router.get('', verifyToken, listMyFiles);
+
+/**
+ * @swagger
+ * /files/{id}/download:
+ *   get:
+ *     tags: [FILES]
+ *     description: Descargar o visualizar un archivo del usuario autenticado
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Archivo devuelto en el body
+ *       400:
+ *         description: ID inválido
+ *       401:
+ *         description: unauthorized
+ *       403:
+ *         description: forbidden
+ *       404:
+ *         description: not found
+ */
+router.get('/:id/download', verifyToken, downloadFile);
 
 /**
  * @swagger
