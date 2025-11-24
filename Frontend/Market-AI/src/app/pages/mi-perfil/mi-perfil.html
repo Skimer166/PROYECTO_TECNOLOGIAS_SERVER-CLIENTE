@@ -1,0 +1,69 @@
+<app-header></app-header>
+
+<div class="profile-container">
+  <div class="profile-card">
+    
+    <h2>Mi Perfil</h2>
+    
+    <div class="avatar-section">
+      <div class="avatar-wrapper" (click)="triggerFileInput()">
+        @if (currentAvatar) {
+          <img [src]="currentAvatar" alt="Foto de perfil">
+        } @else {
+          <div class="avatar-placeholder">
+            <mat-icon>person</mat-icon>
+          </div>
+        }
+        <div class="avatar-overlay">
+          <mat-icon>edit</mat-icon>
+        </div>
+      </div>
+      <p class="hint">Clic en la foto para cambiarla</p>
+      
+      <input type="file" id="avatarInput" hidden (change)="onFileSelected($event)" accept="image/*">
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="saveProfile()">
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre completo</mat-label>
+        <input matInput formControlName="name" placeholder="Tu nombre">
+        <mat-icon matSuffix>badge</mat-icon>
+        @if (form.get('name')?.hasError('required')) {
+          <mat-error>El nombre es requerido</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Correo electrónico</mat-label>
+        <input matInput formControlName="email" readonly>
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-hint>El correo no se puede editar</mat-hint>
+      </mat-form-field>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <span class="value">0</span>
+          <span class="label">Agentes Rentados</span>
+        </div>
+        <div class="stat-item">
+          <span class="value">Activo</span>
+          <span class="label">Estado de Cuenta</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading || form.pristine">
+          @if (loading) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            Guardar Cambios
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<app-footer></app-footer>

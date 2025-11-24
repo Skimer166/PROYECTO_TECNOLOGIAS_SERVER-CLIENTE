@@ -6,6 +6,7 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { authActivateGuard, guestOnlyGuard } from './shared/guards/auth-guard-guard';
 import { LoginSuccess } from './pages/login-success/login-success';
+import { MyProfile } from './pages/mi-perfil/mi-perfil';
 
 export const routes: Routes = [
     {path: 'landing-page', component: LandingPage},
@@ -14,4 +15,6 @@ export const routes: Routes = [
     {path: 'login', component: Login, canActivate:[guestOnlyGuard]},
     {path: 'register', component: Register, canActivate:[guestOnlyGuard]},
     {path: 'login/success', component: LoginSuccess},
+    {path: 'mi-perfil', component: MyProfile, canActivate:[authActivateGuard]},
+    {path: '**', redirectTo: 'landing-page' }
 ];

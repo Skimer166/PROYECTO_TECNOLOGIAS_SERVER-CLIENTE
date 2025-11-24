@@ -1,3 +1,6 @@
+/* =========================================
+   ESTILOS GENERALES Y LAYOUT
+   ========================================= */
 .home-page {
   max-width: 1120px;
   margin: 0 auto;
@@ -5,8 +8,22 @@
   color: #f5f5f7;
 }
 
-/* HERO */
+// CARD QUE CONTIENE A TODO LO DE LA PÁGINA HOME
+.home-container-card {
+  background: rgba(255, 255, 255, 0.05); // Ajustado para ser sutil
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: 2.2rem 2rem;
+  margin: 2rem auto 3rem;
+  border-radius: 1.7rem;
+  max-width: 1180px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.45);
+}
 
+/* =========================================
+   SECCIÓN HERO (BIENVENIDA)
+   ========================================= */
 .hero {
   padding: 0 0 2rem;
 }
@@ -52,8 +69,9 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* ADMIN PANEL */
-
+/* =========================================
+   PANEL DE ADMINISTRACIÓN
+   ========================================= */
 .admin-panel {
   margin: 1.8rem 0;
   padding: 1.1rem 1.25rem;
@@ -80,8 +98,9 @@
   margin-top: 0.9rem;
 }
 
-/* SEARCH */
-
+/* =========================================
+   SECCIÓN DE BÚSQUEDA
+   ========================================= */
 .search-section {
   margin: 2rem 0 1rem;
 }
@@ -109,15 +128,14 @@
   margin-top: 0.9rem;
 }
 
-/* Estados generales */
-
+/* Estados de carga y error */
 .state-message {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   justify-content: center;
   padding: 1rem;
-  color: #000000;
+  color: #ffffff; // Corregido para que se vea en fondo oscuro
 }
 
 .state-message mat-icon {
@@ -128,211 +146,319 @@
   color: #ffb3c1;
 }
 
-/* CAROUSEL */
-
+/* =========================================
+   NUEVO CARRUSEL DE AGENTES (GRID SYSTEM)
+   ========================================= */
 .carousel-section {
-  margin: 1.4rem 0 2.4rem;
+  margin: 2rem 0 3rem;
+  position: relative;
+  min-height: 400px; // Altura mínima para evitar saltos
 }
 
-.carousel {
+.carousel-container {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  position: relative;
+  gap: 1rem;
 }
 
-.carousel__card {
-  max-width: 620px;
+/* Grid layout: 3 columnas iguales */
+.carousel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
   width: 100%;
+  max-width: 100%;
 }
 
-.carousel__image {
-  width: 100%;
-  max-height: 220px;
+/* Botones de navegación (flechas) */
+.carousel-nav {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  z-index: 10;
+  flex-shrink: 0; // Evita que se aplasten
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  mat-icon {
+    font-size: 2rem;
+    height: 2rem;
+    width: 2rem;
+    line-height: 2rem;
+  }
+  
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+/* TARJETA INDIVIDUAL DE AGENTE */
+.agent-card {
+  background: rgba(18, 16, 45, 0.6) !important; // Fondo semi-transparente
+  backdrop-filter: blur(10px);
+  color: #f5f5f7 !important;
+  border-radius: 1rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
-  border-radius: 1rem 1rem 0 0;
-}
-
-.carousel__image img {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  object-fit: cover;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+
+  &:hover {
+    transform: translateY(-6px);
+    border-color: #6366f1; // Color primario
+    box-shadow: 0 12px 20px rgba(99, 102, 241, 0.25);
+  }
 }
 
-.carousel__avatar-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.agent-card__image {
   height: 180px;
-  background: rgba(10, 10, 40, 0.9);
+  background: #0f0c29;
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  // Efecto zoom suave en la imagen al hacer hover en la card
+  .agent-card:hover & img {
+    transform: scale(1.05);
+  }
+
+  .placeholder-img {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    
+    mat-icon {
+      font-size: 4rem;
+      width: 4rem;
+      height: 4rem;
+      color: rgba(255,255,255,0.3);
+    }
+  }
 }
 
-.carousel__avatar-placeholder mat-icon {
-  font-size: 3rem;
-  opacity: 0.7;
+mat-card-header {
+  margin-top: 1rem;
+  padding: 0 16px;
 }
 
-.carousel__description {
-  margin-top: 0.5rem;
-  margin-bottom: 0.75rem;
-  color: #f0ebff;
+mat-card-title {
+  font-size: 1.15rem !important;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.2rem !important;
 }
 
-.carousel__meta {
+mat-card-subtitle {
+  color: #a5b4fc !important; // Tono lila
+  font-size: 0.85rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+mat-card-content {
+  flex-grow: 1;
+  padding: 0 16px 16px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
+  flex-direction: column;
+  
+  .desc {
+    font-size: 0.92rem;
+    color: #cbd5e1;
+    margin: 0.8rem 0 1.2rem;
+    line-height: 1.5;
+    
+    // Truncar texto a 3 líneas
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    
+    .price {
+      color: #fbbf24; // Amarillo ámbar
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      color: #e2e8f0;
+      font-weight: 500;
+      
+      mat-icon { 
+        font-size: 1.1rem; 
+        color: #fbbf24; 
+        height: 1.1rem;
+        width: 1.1rem;
+      }
+    }
+  }
 }
 
-.carousel__meta .price {
+mat-card-actions {
+  padding: 8px 16px 16px;
+}
+
+.full-width {
+  width: 100%;
+  border-radius: 8px;
   font-weight: 600;
-  color: #ffef9f;
+  letter-spacing: 0.5px;
 }
 
-.carousel__meta .availability {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.carousel__meta .availability .dot {
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 999px;
-  background: #4caf50;
-}
-
-.carousel__meta .availability.offline .dot {
-  background: #ff6b81;
-}
-
-.carousel__rating {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.9rem;
-  color: #ffe7a0;
-}
-
-.carousel__rating mat-icon {
-  font-size: 1rem;
-  color: #ffca28;
-}
-
-.carousel__rating .rating__count {
-  color: #e0d8ff;
-}
-
-.carousel__nav {
-  align-self: center;
-}
-
-
-/* HOW IT WORKS */
-
+/* =========================================
+   CÓMO FUNCIONA (SECCIÓN INFERIOR)
+   ========================================= */
 .how-it-works {
-  margin-top: 2.5rem;
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 .how-it-works h2 {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   color: #ffffff;
+  text-align: center;
 }
 
 .how-it-works__steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
 }
 
 .step {
-  padding: 1rem;
+  padding: 1.5rem;
   border-radius: 1rem;
-  background: rgba(8, 6, 30, 0.8);
+  background: rgba(8, 6, 30, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+  transition: background 0.3s;
+  
+  &:hover {
+    background: rgba(8, 6, 30, 0.6);
+  }
 }
 
 .step__number {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.7rem;
-  height: 1.7rem;
-  border-radius: 999px;
-  background: #ff6bd5;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #ec4899);
   color: #fff;
-  font-size: 0.95rem;
-  margin-bottom: 0.5rem;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4);
 }
 
-/* Angular Material tweaks dentro de este componente */
-:host ::ng-deep .mat-mdc-card {
-  background: rgba(8, 6, 30, 0.9);
-  color: #f5f5f7;
-  border-radius: 1rem;
-  border: 1px solid rgba(0, 0, 0, 0.09);
-}
-
-:host ::ng-deep .mat-mdc-form-field-appearance-outline .mat-mdc-text-field-wrapper {
-  background: rgba(7, 5, 35, 0.85);
-  border-radius: 0.75rem;
-}
-
-:host ::ng-deep .mat-mdc-form-field-label,
-:host ::ng-deep .mat-mdc-input-element {
-  color: #f0ebff;
-}
-
-:host ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-  display: none;
-}
-
-:host ::ng-deep .mat-mdc-chip-option {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #f5f0ff;
-}
-
-:host ::ng-deep .mat-mdc-chip-option.mdc-evolution-chip--selected {
-  background: #ffffff;
-  color: #5b2cff;
-}
-
-/* RESPONSIVE */
-
-@media (max-width: 768px) {
-  .home-page {
-    padding-top: 2rem;
+/* =========================================
+   OVERRIDES DE ANGULAR MATERIAL (PROFUNDO)
+   ========================================= */
+:host ::ng-deep {
+  .mat-mdc-form-field-appearance-outline .mat-mdc-text-field-wrapper {
+    background: rgba(7, 5, 35, 0.6);
+    border-radius: 0.75rem;
   }
+
+  .mat-mdc-form-field-label,
+  .mat-mdc-input-element {
+    color: #f0ebff !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none; // Ahorra espacio vertical si no hay errores
+  }
+
+  .mat-mdc-chip-option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #f5f0ff;
+  }
+
+  .mat-mdc-chip-option.mdc-evolution-chip--selected {
+    background: #ffffff;
+    color: #5b2cff; 
+    font-weight: 600;
+  }
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+   ========================================= */
+@media (max-width: 960px) {
+  // En tablets, mostramos 2 columnas
+  .carousel-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .home-container-card {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+}
+
+@media (max-width: 650px) {
+  // En móviles, 1 sola columna
+  .carousel-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.6);
+    height: 2.5rem;
+    width: 2.5rem;
+    
+    mat-icon {
+      font-size: 1.5rem;
+      height: 1.5rem;
+      width: 1.5rem;
+      line-height: 1.5rem;
+    }
+  }
+  
+  .prev { left: -15px; }
+  .next { right: -15px; }
 
   .hero__content h1 {
     font-size: 2rem;
   }
-
-  .carousel {
-    flex-direction: row;
+  
+  .hero__actions {
+    flex-direction: column;
+    button { width: 100%; }
   }
-
-  .carousel__card {
-    max-width: 100%;
-  }
-
-  .admin-panel {
-    padding: 0.9rem 1rem;
-  }
-}
-
-// CARD QUE CONTIENE A TODO LO DE LA PÁGINA HOME
-.home-container-card {
-  background: rgba(255, 255, 255, 0.45);  
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  padding: 2.2rem 2rem;
-  margin: 2rem auto 3rem;
-  border-radius: 1.7rem;
-  max-width: 1180px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.45);
 }

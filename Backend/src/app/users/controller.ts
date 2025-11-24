@@ -61,10 +61,11 @@ export async function updateUser(req: Request, res: Response) {
     const { id } = req.params;
     if (!isValidObjectId(id)) return res.status(400).json({ message: "ID inválido" });
 
-    const { name, email, password } = req.body || {};
+    const { name, email, password, avatar } = req.body || {};
     if (!name && !email && !password) {
       return res.status(400).json({ message: "Nada para actualizar" });
     }
+    
 
     if (email) {
       const exists = await UserModel.findOne({ email, _id: { $ne: id } }).lean();
@@ -77,6 +78,7 @@ export async function updateUser(req: Request, res: Response) {
     if (typeof password === 'string' && password.length > 0) {
       update.passwordHash = await bcrypt.hash(password, 10);
     }
+    if (req.body.avatar) update.avatar = req.body.avatar;
 
     const updated = await UserModel.findByIdAndUpdate(id, update, { new: true, projection: { name: 1, email: 1 } }).lean();
     if (!updated) return res.status(404).json({ message: "Usuario no encontrado" });

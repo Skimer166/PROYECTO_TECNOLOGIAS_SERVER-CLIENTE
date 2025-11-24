@@ -1,0 +1,170 @@
+.profile-container {
+  min-height: 85vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.profile-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  color: #f5f5f7;
+  text-align: center;
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    color: #fff;
+  }
+}
+
+/* AVATAR */
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  .hint {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin-top: 0.5rem;
+  }
+}
+
+.avatar-wrapper {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  border: 3px solid rgba(99, 102, 241, 0.5); // Color primary border
+  background: #1e1b4b;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    mat-icon {
+      font-size: 4rem;
+      width: 4rem;
+      height: 4rem;
+      color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  // Overlay edit icon
+  .avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+
+    mat-icon {
+      color: #fff;
+      font-size: 2rem;
+    }
+  }
+
+  &:hover .avatar-overlay {
+    opacity: 1;
+  }
+}
+
+/* FORM */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* STATS EXTRAS */
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    .value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #fbbf24; // Amarillo
+    }
+    
+    .label {
+      font-size: 0.8rem;
+      color: #d1d5db;
+    }
+  }
+}
+
+.actions {
+  margin-top: 1rem;
+  
+  button {
+    width: 100%;
+    padding: 1.5rem 0; // Botón más alto
+    font-size: 1rem;
+    border-radius: 99px;
+  }
+}
+
+/* Angular Material Overrides (Igual que en Login/Home) */
+:host ::ng-deep {
+  .mat-mdc-form-field-appearance-outline .mat-mdc-text-field-wrapper {
+    background: rgba(0, 0, 0, 0.2); 
+  }
+  
+  .mat-mdc-input-element {
+    color: #fff !important;
+    
+    &:disabled {
+      color: rgba(255,255,255,0.5) !important;
+    }
+  }
+  
+  .mat-mdc-form-field-label {
+    color: #cbd5e1 !important;
+  }
+  
+  .mat-icon {
+    color: #a5b4fc;
+  }
+}

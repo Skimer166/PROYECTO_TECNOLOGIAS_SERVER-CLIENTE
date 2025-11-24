@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, PLATFORM_ID, ChangeDetectorRef } from '@angular/core'; // 1. Importar ChangeDetectorRef
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
@@ -9,7 +9,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
-import { PLATFORM_ID } from '@angular/core';
 
 import { Header } from '../../layouts/header/header';
 import { Footer } from '../../layouts/footer/footer';
@@ -18,7 +17,7 @@ interface Agent {
   _id: string;
   name: string;
   description: string;
-  category: 'marketing' | 'salud' | 'educacion' | 'asistente' | 'otros' | string;
+  category: string;
   language: string;
   modelVersion: string;
   imageUrl?: string;
@@ -49,15 +48,18 @@ interface Agent {
   templateUrl: './home-page.html',
   styleUrls: ['./home-page.scss']
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
   agents: Agent[] = [];
   filteredAgents: Agent[] = [];
   isLoading = false;
   error: string | null = null;
 
   searchTerm = '';
-  selectedCategory: string= 'all';
+  selectedCategory: string = 'all';
+  
   currentIndex = 0;
+  private autoSlideInterval: any;
+  itemsPerView = 3; 
 
   isAdmin = false;
 
@@ -71,6 +73,7 @@ export class HomePage implements OnInit {
 
   constructor(
     private http: HttpClient,
+    private cdr: ChangeDetectorRef, // 2. Inyectamos el detector de cambios
     @Inject(PLATFORM_ID) private platformId: object
   ) {}
 
@@ -83,8 +86,11 @@ export class HomePage implements OnInit {
     this.loadAgents();
   }
 
-  // ==== AUTH STATE / ADMIN CHECK ====
+  ngOnDestroy(): void {
+    this.stopAutoSlide();
+  }
 
+  // ==== AUTH & ADMIN CHECK ====
   private safeGet(key: string): string | null {
     if (!this.isBrowser) return null;
     try {
@@ -99,30 +105,21 @@ export class HomePage implements OnInit {
       this.isAdmin = false;
       return;
     }
-
-    // 1) Intentamos por user_role guardado por el login
     const storedRole = this.safeGet('user_role');
     if (storedRole === 'admin') {
       this.isAdmin = true;
       return;
     }
-
-    // 2) Intentamos decodificando el JWT (si existe)
     const rawToken = this.safeGet('token');
     if (!rawToken) {
       this.isAdmin = false;
       return;
     }
-
     let token = rawToken.trim();
-    if (token.startsWith('Bearer ')) {
-      token = token.substring('Bearer '.length);
-    }
-
+    if (token.startsWith('Bearer ')) token = token.substring(7);
+    
     try {
-      const payloadBase64 = token.split('.')[1];
-      const payloadJson = atob(payloadBase64);
-      const payload = JSON.parse(payloadJson);
+      const payload = JSON.parse(atob(token.split('.')[1]));
       this.isAdmin = payload.role === 'admin';
     } catch {
       this.isAdmin = false;
@@ -131,49 +128,43 @@ export class HomePage implements OnInit {
 
   private getAuthHeaders(): HttpHeaders {
     if (!this.isBrowser) return new HttpHeaders();
-
     let token = this.safeGet('token');
     if (!token) return new HttpHeaders();
-
-    if (!token.startsWith('Bearer ')) {
-      token = `Bearer ${token}`;
-    }
-
-    return new HttpHeaders({
-      Authorization: token
-    });
+    if (!token.startsWith('Bearer ')) token = `Bearer ${token}`;
+    return new HttpHeaders({ Authorization: token });
   }
 
-  //carga los agentes
-
+  // ==== DATA LOADING ====
   private loadAgents(): void {
-  this.isLoading = true;
-  this.error = null;
+    this.isLoading = true;
+    this.error = null;
 
-  this.http
-    .get<any>('http://localhost:3001/agents?available=true', {    //con el ?available=true solo traemos los agentes activos
+    // Asegúrate de que el puerto (3000 o 3001) sea el correcto aquí
+    this.http.get<any>('http://localhost:3001/agents?available=true', {
       headers: this.getAuthHeaders()
-    })
-    .subscribe({
+    }).subscribe({
       next: (res) => {
-        console.log('Respuesta /agents:', res);
         const agents = Array.isArray(res) ? res : res.agents;
-
         this.agents = agents || [];
         this.applyFilters();
+        
         this.isLoading = false;
+        this.startAutoSlide(); 
+
+        // 3. ¡IMPORTANTE! Forzamos la actualización de la vista manualmente
+        // porque estamos en modo Zoneless y esto es una respuesta asíncrona.
+        this.cdr.detectChanges(); 
       },
       error: (err) => {
         console.error('Error cargando agentes', err);
-        if (err.status === 401) {
-          this.error = 'Necesitas iniciar sesión para ver los agentes.';
-        } else {
-          this.error = 'No se pudieron cargar los agentes. Intenta más tarde.';
-        }
+        this.error = 'No se pudieron cargar los agentes.';
         this.isLoading = false;
+        
+        // También forzamos actualización si hay error
+        this.cdr.detectChanges(); 
       }
     });
-}
+  }
 
   onSearchTermChange(value: string): void {
     this.searchTerm = value;
@@ -187,69 +178,72 @@ export class HomePage implements OnInit {
 
   private applyFilters(): void {
     const term = this.searchTerm.trim().toLowerCase();
-
     this.filteredAgents = this.agents.filter((agent) => {
-      const matchesSearch =
-        !term ||
+      const matchesSearch = !term ||
         agent.name.toLowerCase().includes(term) ||
         agent.description.toLowerCase().includes(term) ||
         agent.modelVersion.toLowerCase().includes(term);
-
-      const matchesCategory =
-        this.selectedCategory === 'all' || agent.category === this.selectedCategory;
-
+      const matchesCategory = this.selectedCategory === 'all' || agent.category === this.selectedCategory;
       return matchesSearch && matchesCategory;
     });
-
-    if (this.currentIndex >= this.filteredAgents.length) {
-      this.currentIndex = 0;
-    }
+    
+    this.currentIndex = 0;
   }
 
-
   // ==== CAROUSEL LOGIC ====
+
+  get visibleAgents(): Agent[] {
+    if (!this.filteredAgents.length) return [];
+    
+    if (this.filteredAgents.length <= this.itemsPerView) {
+      return this.filteredAgents;
+    }
+
+    const result: Agent[] = [];
+    for (let i = 0; i < this.itemsPerView; i++) {
+      const index = (this.currentIndex + i) % this.filteredAgents.length;
+      result.push(this.filteredAgents[index]);
+    }
+    return result;
+  }
 
   get hasAgents(): boolean {
     return this.filteredAgents.length > 0;
   }
 
-  get currentAgent(): Agent | null {
-    if (!this.hasAgents) return null;
-    return this.filteredAgents[this.currentIndex];
-  }
-
-  get canGoPrev(): boolean {
-    return this.currentIndex > 0;
-  }
-
-  get canGoNext(): boolean {
-    return this.currentIndex < this.filteredAgents.length - 1;
+  next(): void {
+    if (!this.hasAgents) return;
+    this.currentIndex = (this.currentIndex + 1) % this.filteredAgents.length;
   }
 
   prev(): void {
-    if (this.canGoPrev) {
-      this.currentIndex--;
+    if (!this.hasAgents) return;
+    this.currentIndex = (this.currentIndex - 1 + this.filteredAgents.length) % this.filteredAgents.length;
+  }
+
+  // Auto-slide
+  startAutoSlide(): void {
+    this.stopAutoSlide();
+    if (this.isBrowser && this.filteredAgents.length > this.itemsPerView) {
+      this.autoSlideInterval = setInterval(() => {
+        this.next();
+        // 4. También actualizamos la vista cuando el carrusel se mueve solo
+        this.cdr.detectChanges(); 
+      }, 5000); 
     }
   }
 
-  next(): void {
-    if (this.canGoNext) {
-      this.currentIndex++;
+  stopAutoSlide(): void {
+    if (this.autoSlideInterval) {
+      clearInterval(this.autoSlideInterval);
+      this.autoSlideInterval = null;
     }
   }
-
-  // ==== ACTIONS ====
 
   rentAgent(agent: Agent): void {
-    // aqui luego podemos llamar a /agents/:id/rent
     console.log('Rentar agente:', agent._id);
   }
 
-  goToAgentPanel(): void {
-    //poner la ruta de la vista de agentes (solo admins)
-  }
-
-  goToUserPanel(): void {
-    //poner la ruta de la vista de usuarios (solo admins)
-  }
+  goToAgentPanel(): void {}
+  goToUserPanel(): void {}
 }
