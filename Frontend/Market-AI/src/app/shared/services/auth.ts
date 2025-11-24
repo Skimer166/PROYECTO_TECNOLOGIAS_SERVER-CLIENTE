@@ -61,6 +61,18 @@ export class AuthService {
 
 
   logout() {
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        sessionStorage.removeItem('token');
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('user_role');
+        localStorage.removeItem('user_role');
+      } catch (e) {
+        console.error('Error limpiando storage', e);
+      }
+    }
+
+    // 2. Actualizar estado de la app
     this.isLoggedInSubject.next(false);
     this.creditsSubject.next(0); 
   }
