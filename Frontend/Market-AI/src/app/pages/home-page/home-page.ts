@@ -9,9 +9,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { Header } from '../../layouts/header/header';
 import { Footer } from '../../layouts/footer/footer';
+import { RentDialogComponent } from '../rent-dialog/rent-dialog';
+import { AuthService } from '../../shared/services/auth';
 
 interface Agent {
   _id: string;
@@ -43,7 +46,8 @@ interface Agent {
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatChipsModule
+    MatChipsModule,
+    MatDialogModule
   ],
   templateUrl: './home-page.html',
   styleUrls: ['./home-page.scss']
@@ -74,6 +78,8 @@ export class HomePage implements OnInit, OnDestroy {
   constructor(
     private http: HttpClient,
     private cdr: ChangeDetectorRef, // detector de cambios
+    private dialog: MatDialog,
+    private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: object
   ) {}
 
@@ -238,24 +244,40 @@ export class HomePage implements OnInit, OnDestroy {
 
   rentAgent(agent: Agent): void {
     if (!this.isBrowser) return;
-
-    // Verificar si está logueado antes
     if (!localStorage.getItem('token')) {
-      alert('Debes iniciar sesión para rentar un agente.');
+      alert('Debes iniciar sesión para rentar.');
       return;
     }
 
-    if(!confirm(`¿Deseas rentar al agente ${agent.name} por $${agent.pricePerHour}/hr?`)) return;
+    const dialogRef = this.dialog.open(RentDialogComponent, {
+      width: '400px',
+      data: { agent }
+    });
 
-    this.http.post(`http://localhost:3001/agents/${agent._id}/rent`, {}, {
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.processRent(agent, result.amount, result.unit);
+      }
+    });
+  }
+
+  private processRent(agent: Agent, amount: number, unit: string) {
+    this.http.post(`http://localhost:3001/agents/${agent._id}/rent`, {
+      amount, 
+      unit
+    }, {
       headers: this.getAuthHeaders()
     }).subscribe({
-      next: () => {
-        alert('¡Agente rentado con éxito! Ahora puedes encontrarlo en "Mis Agentes".');
+      next: (res: any) => {
+        alert(`¡Renta exitosa! Te quedan ${res.remainingCredits} créditos.`);
+        if (res.remainingCredits !== undefined) {
+          this.authService.updateCredits(res.remainingCredits);
+        }
       },
       error: (err) => {
         console.error(err);
-        alert('Ocurrió un error al rentar el agente.');
+        const msg = err.error?.message || 'Error al rentar';
+        alert(msg);
       }
     });
   }

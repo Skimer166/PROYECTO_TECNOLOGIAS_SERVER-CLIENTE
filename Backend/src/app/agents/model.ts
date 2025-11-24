@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
+import { IAgent } from '../interfaces/agent';
 
-const agentSchema = new Schema(
+const agentSchema = new Schema<IAgent>(
   {
     name: { type: String, required: true, index: true }, 
     description: { type: String, required: true },      
@@ -28,6 +29,7 @@ const agentSchema = new Schema(
 
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }, 
     rentedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    rentedUntil: { type: Date },
 
     usageStats: {
       totalSessions: { type: Number, default: 0 },
@@ -37,4 +39,4 @@ const agentSchema = new Schema(
   { timestamps: true, collection: 'agents' }
 );
 
-export const AgentModel = model('Agent', agentSchema);
+export const AgentModel = model<IAgent>('Agent', agentSchema);

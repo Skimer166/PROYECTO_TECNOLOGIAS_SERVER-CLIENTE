@@ -15,34 +15,54 @@ export interface LoginResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly baseUrl = 'http://localhost:3001';
+  private readonly baseUrl = 'http://localhost:3001'; 
+  private platformId = inject(PLATFORM_ID);
+
+  private creditsSubject = new BehaviorSubject<number>(0);
+  credits$ = this.creditsSubject.asObservable();
 
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
-  private platformId = inject(PLATFORM_ID);
+  constructor(private http: HttpClient) {
+    if (this.hasToken()) {
+      this.loadCreditsFromToken();
+    }
+  }
 
-  constructor(private http: HttpClient) {}
+  updateCredits(newAmount: number) {
+    this.creditsSubject.next(newAmount);
+  }
 
-  login(payload: LoginRequest) {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, payload).pipe(
+  private loadCreditsFromToken() {
+    const token = this.getToken();
+    if (!token) return;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const credits = payload.credits !== undefined ? payload.credits : 0;
+      this.creditsSubject.next(credits);
+    } catch {
+      this.creditsSubject.next(0);
+    }
+  }
+
+  login(payload: any) {
+    return this.http.post<any>(`${this.baseUrl}/auth/login`, payload).pipe(
       tap((res) => {
         if (res?.token) {
           this.saveToken(res.token);
           this.isLoggedInSubject.next(true);
+          this.loadCreditsFromToken(); 
         }
       })
     );
   }
 
-  logout() {
-    if (!isPlatformBrowser(this.platformId)) return;
 
-    try {
-      sessionStorage.removeItem('token');
-      localStorage.removeItem('token');
-    } catch {}
+  logout() {
     this.isLoggedInSubject.next(false);
+    this.creditsSubject.next(0); 
   }
 
   private saveToken(token: string) {

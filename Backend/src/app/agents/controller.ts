@@ -222,51 +222,63 @@ export async function searchAgent(req: Request, res: Response) {
 export async function rentAgent(req: Request, res: Response) {
   try {
     const { id } = req.params;
+    // recibimos cantidad y unidad del body
+    const { amount = 1, unit = 'hours' } = req.body; 
+
     const userToken = req.user as any;
     const userId = userToken?.id || userToken?.sub;
 
     if (!userId) return res.status(401).json({ message: 'No autorizado' });
 
-    // buscamos al usuaruio para ver sus créditos
     const user = await UserModel.findById(userId).exec();
-    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
-
-    // buscamos al agente para ver su precio
     const agent = await AgentModel.findById(id).exec();
-    if (!agent) return res.status(404).json({ message: 'Agente no encontrado' });
 
-    // ya lo tiene rentado?
-    if (agent.rentedBy && agent.rentedBy.toString() === userId) {
-       return res.status(400).json({ message: 'Ya tienes rentado este agente' });
+    if (!user || !agent) return res.status(404).json({ message: 'Usuario o Agente no encontrado' });
+
+    if (agent.rentedBy && agent.rentedBy.toString() !== userId) {
+       return res.status(400).json({ message: 'Agente ocupado' });
     }
 
-    // verificamos créditos
-    const costo = agent.pricePerHour;
+    // calculamos costo
+    let multiplier = 1;
+    switch (unit) {
+      case 'days': multiplier = 24; break;
+      case 'months': multiplier = 24 * 30; break; // estandarizamos mes a 30 días
+      default: multiplier = 1; 
+    }
+
+    const totalHours = amount * multiplier;
+    const costo = agent.pricePerHour * totalHours;
+
+    // verificar créditos
     if ((user.credits || 0) < costo) {
-      return res.status(402).json({ 
-        message: `Créditos insuficientes. Tienes ${user.credits || 0} y necesitas ${costo}.` 
-      });
+      return res.status(402).json({ message: `Créditos insuficientes. Necesitas ${costo}.` });
     }
 
-    // transacción
+    // cobrar créditos
     user.credits = (user.credits || 0) - costo;
     await user.save();
 
+    // asignar tiempo
+    const now = new Date();
+    const expirationTime = new Date(now.getTime() + (totalHours * 60 * 60 * 1000)); 
+
     agent.rentedBy = userId;
-    if (!agent.instructions) {
-        agent.instructions = `Eres un experto en ${agent.category}. Ayuda al usuario.`;
-    }
+    agent.rentedUntil = expirationTime;
+    
+    if (!agent.instructions) agent.instructions = "Asistente útil.";
+    
     await agent.save();
 
     res.json({ 
-      message: 'Agente rentado correctamente', 
+      message: `Renta exitosa por ${amount} ${unit}.`, 
       agent,
       remainingCredits: user.credits 
     });
 
   } catch (err) {
-    console.error('Error rentando agente:', err);
-    res.status(500).json({ message: 'Error al rentar agente' });
+    console.error('Error rentando:', err);
+    res.status(500).json({ message: 'Error al rentar' });
   }
 }
 

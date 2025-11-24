@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -27,46 +27,67 @@ import { Footer } from '../../layouts/footer/footer';
     Header, 
     Footer
   ],
-  templateUrl: './mis-agentes.html',
+  // Asegúrate de que estos nombres coincidan con tus archivos (my-agents vs mis-agentes)
+  templateUrl: './mis-agentes.html', 
   styleUrl: './mis-agentes.scss'
 })
-export class MyAgents implements OnInit {
+export class MyAgents implements OnInit, OnDestroy {
   
   agents: any[] = [];
   loading = false;
   
   // Lógica del Chat
-  selectedAgent: any = null; // El agente con el que chateamos
+  selectedAgent: any = null;
   messages: { role: 'user' | 'assistant', text: string }[] = [];
   userMessage = '';
   chatLoading = false;
+  
+  // Variable para el intervalo
+  private timerInterval: any;
 
+  // Inyecciones
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
 
+  constructor() {}
+
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.loadMyAgents();
+      
+      // Iniciar el cronómetro (cada 1 segundo)
+      this.timerInterval = setInterval(() => {
+        this.updateCountdowns();
+      }, 1000);
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
     }
   }
 
   getAuthHeaders() {
+    // Asegúrate de que el token exista
     const token = localStorage.getItem('token');
     return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
   loadMyAgents() {
     this.loading = true;
+    // Ajusta el puerto (3000 o 3001) según tu backend
     this.http.get<any>('http://localhost:3001/agents/my-rentals', { headers: this.getAuthHeaders() })
       .subscribe({
         next: (res) => {
           this.agents = res.agents || [];
+          this.updateCountdowns(); // Calcular tiempos inmediatamente
           this.loading = false;
           this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error(err);
+          console.error('Error cargando mis agentes:', err);
           this.loading = false;
           this.cdr.detectChanges();
         }
@@ -74,18 +95,27 @@ export class MyAgents implements OnInit {
   }
 
   releaseAgent(agent: any, event: Event) {
-    event.stopPropagation(); // Para que no abra el chat
+    event.stopPropagation(); // Evita abrir el chat al hacer clic en eliminar
     if(!confirm('¿Seguro que quieres dejar de usar este agente?')) return;
 
     this.http.post(`http://localhost:3001/agents/${agent._id}/release`, {}, { headers: this.getAuthHeaders() })
       .subscribe({
         next: () => {
+          // Filtrar la lista localmente para que desaparezca sin recargar
           this.agents = this.agents.filter(a => a._id !== agent._id);
-          if (this.selectedAgent?._id === agent._id) this.closeChat();
+          
+          // Si teníamos abierto el chat de este agente, lo cerramos
+          if (this.selectedAgent?._id === agent._id) {
+            this.closeChat();
+          }
+          
           alert('Agente liberado.');
           this.cdr.detectChanges();
         },
-        error: () => alert('Error al liberar agente')
+        error: (err) => {
+          console.error(err);
+          alert('Error al liberar agente');
+        }
       });
   }
 
@@ -93,8 +123,8 @@ export class MyAgents implements OnInit {
 
   openChat(agent: any) {
     this.selectedAgent = agent;
-    this.messages = []; // Limpiar chat previo o cargar historial si tuvieras
-    // Mensaje de bienvenida fake
+    this.messages = []; 
+    // Mensaje de bienvenida simulado
     this.messages.push({ role: 'assistant', text: `¡Hola! Soy ${agent.name}. ${agent.description}. ¿En qué te ayudo hoy?` });
   }
 
@@ -111,7 +141,7 @@ export class MyAgents implements OnInit {
     this.userMessage = '';
     this.chatLoading = true;
     
-    // Auto-scroll
+    // Auto-scroll hacia abajo
     setTimeout(() => this.scrollToBottom(), 100);
 
     // 2. Llamar al Backend (OpenAI)
@@ -127,7 +157,7 @@ export class MyAgents implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.messages.push({ role: 'assistant', text: '⚠️ Error de conexión con el agente.' });
+        this.messages.push({ role: 'assistant', text: 'Error de conexión con el agente.' });
         this.chatLoading = false;
         this.cdr.detectChanges();
       }
@@ -136,6 +166,34 @@ export class MyAgents implements OnInit {
 
   scrollToBottom() {
     const container = document.querySelector('.chat-messages');
-    if (container) container.scrollTop = container.scrollHeight;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }
+
+  // Actualización de contadores de tiempo
+  updateCountdowns() {
+    const now = new Date().getTime();
+    
+    this.agents.forEach(agent => {
+      if (!agent.rentedUntil) return;
+      
+      const end = new Date(agent.rentedUntil).getTime();
+      const diff = end - now;
+
+      if (diff <= 0) {
+        agent.timeLeftDisplay = "Expirado";
+      } else {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        agent.timeLeftDisplay = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      }
+    });
+    
+    // Forzar actualización de vista
+    this.cdr.detectChanges();
   }
 }

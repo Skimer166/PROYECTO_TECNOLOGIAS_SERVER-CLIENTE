@@ -35,6 +35,11 @@
               <div class="card-info">
                 <h3>{{ agent.name }}</h3>
                 <span class="badge">{{ agent.category }}</span>
+
+                <div class="countdown" *ngIf="agent.timeLeftDisplay">
+                    <mat-icon>timer</mat-icon>
+                    <span>{{ agent.timeLeftDisplay }}</span>
+                </div>
               </div>
               <div class="card-actions">
                 <button mat-icon-button color="warn" (click)="releaseAgent(agent, $event)" title="Devolver agente">

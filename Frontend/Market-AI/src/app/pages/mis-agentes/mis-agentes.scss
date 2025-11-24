@@ -166,7 +166,22 @@ header {
   }
 }
 
-/* Typing animation */
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #fbbf24; 
+  background: rgba(251, 191, 36, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  width: fit-content;
+  
+  mat-icon { font-size: 16px; height: 16px; width: 16px; }
+}
+
+/* animacion de escribiendo */
 .typing span {
   animation: blink 1.4s infinite both;
   margin: 0 1px;

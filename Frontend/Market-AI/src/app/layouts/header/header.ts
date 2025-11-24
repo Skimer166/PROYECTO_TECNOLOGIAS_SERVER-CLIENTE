@@ -40,24 +40,18 @@ export class Header implements OnInit {
   }
 
   ngOnInit(): void {
-    this.authService.isLoggedIn$.subscribe((logged) => {
+    this.authService.isLoggedIn$.subscribe(logged => {
       this.isLoggedIn = logged;
       if (logged) {
-        this.loadUserDataFromToken();
-      } else {
-        this.userName = null;
-        this.userPhoto = null;
-        this.userCredits = 0;
+        this.loadUserDataFromToken(); 
       }
-      
       this.cdr.detectChanges();
     });
 
-    if (this.authService.hasToken()) {
-      this.isLoggedIn = true;
-      this.loadUserDataFromToken();
+    this.authService.credits$.subscribe(credits => {
+      this.userCredits = credits;
       this.cdr.detectChanges();
-    }
+    });
   }
 
   private loadUserDataFromToken(): void {
