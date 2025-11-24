@@ -92,7 +92,6 @@ export const googleCallbackController = (
           }
         }
 
-        // generar JWT con name y avatar
         const token = jwt.sign(
           {
             sub: user._id,
@@ -100,6 +99,7 @@ export const googleCallbackController = (
             role: user.role || 'user',
             avatar: user.avatar,
             name: user.name,
+            credits: user.credits
           },
           JWT_KEY,
           { expiresIn: '2h' }

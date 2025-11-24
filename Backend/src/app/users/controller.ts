@@ -94,7 +94,7 @@ export async function updateUser(req: Request, res: Response) {
         email: updated.email,
         name: updated.name,
         role: updated.role || 'user',
-        avatar: updated.avatar 
+        avatar: updated.avatar,
       },
       JWT_SECRET,
       { expiresIn: '2h' }
@@ -159,15 +159,17 @@ export async function loginUser(req: Request, res: Response) {
       return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
     }
 
-    const token = jwt.sign(
+const token = jwt.sign(
       {
         sub: String(user._id),
         email: user.email,
         name: user.name,
         role: user.role || 'user',
+        avatar: user.avatar,
+        credits: user.credits
       },
       JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '2h' }
     );
 
     return res.json({

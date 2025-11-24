@@ -106,3 +106,24 @@
     padding: 0 0.8rem;
   }
 }
+
+.credits-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(251, 191, 36, 0.15); // Fondo dorado sutil
+  color: #fbbf24; // Texto dorado
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-right: 10px;
+  cursor: help;
+
+  .coin-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+}

@@ -1,3 +1,5 @@
+import { Document } from 'mongoose';
+
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -6,4 +8,5 @@ export interface IUser extends Document {
   googleId?: string;
   provider: 'local' | 'google';
   avatar?: string;
+  credits: number;
 }

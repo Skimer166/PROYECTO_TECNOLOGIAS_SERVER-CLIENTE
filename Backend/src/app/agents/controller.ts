@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { AgentModel } from './model'; 
+import { UserModel } from '../users/model'; 
 
 //extraer el userId desde req.user
 function getAuthUser(req: Request): { id?: string; role?: string } {
@@ -70,6 +71,7 @@ export async function createAgent(req: Request, res: Response) {
     const {
       name,
       description,
+      instructions, 
       category,
       language,
       modelVersion,
@@ -77,9 +79,14 @@ export async function createAgent(req: Request, res: Response) {
       pricePerHour
     } = req.body;
 
+    if (!instructions) {
+      return res.status(400).json({ message: 'El campo instructions es obligatorio' });
+    }
+
     const agent = new AgentModel({
       name,
       description,
+      instructions, 
       category,
       language,
       modelVersion,
@@ -126,6 +133,7 @@ export async function updateAgent(req: Request, res: Response) {
     const {
       name,
       description,
+      instructions, 
       category,
       language,
       modelVersion,
@@ -136,6 +144,9 @@ export async function updateAgent(req: Request, res: Response) {
 
     if (name !== undefined) agent.name = name;
     if (description !== undefined) agent.description = description;
+    
+    if (instructions !== undefined) agent.instructions = instructions; 
+    
     if (category !== undefined) agent.category = category;
     if (language !== undefined) agent.language = language;
     if (modelVersion !== undefined) agent.modelVersion = modelVersion;
@@ -207,18 +218,92 @@ export async function searchAgent(req: Request, res: Response) {
   }
 }
 
-// /**
-//  * GET /agents/categories
-//  * De momento hardcodeado (podrías mapear desde el enum del schema si quisieras).
-//  */
-// export function getCategories(req: Request, res: Response) {
-//   const categories = [
-//     { id: 1, key: 'marketing', name: 'Marketing', description: 'Agentes para campañas, anuncios y redes sociales.', example: 'Agente de copies para anuncios' },
-//     { id: 2, key: 'salud', name: 'Salud', description: 'Agentes para hábitos saludables y bienestar (no médicos).', example: 'Coach de hábitos saludables' },
-//     { id: 3, key: 'educacion', name: 'Educación', description: 'Agentes para aprendizaje y tutorías.', example: 'Tutor de matemáticas' },
-//     { id: 4, key: 'asistente', name: 'Asistente', description: 'Asistentes generales para tareas diarias.', example: 'Asistente personal para productividad' },
-//     { id: 5, key: 'otros', name: 'Otros', description: 'Agentes de categorías variadas.', example: 'Agente creativo para historias' }
-//   ];
+// Rentar un agente (Asignarlo al usuario)
+export async function rentAgent(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const userToken = req.user as any;
+    const userId = userToken?.id || userToken?.sub;
 
-//   res.json({ categories });
-// }
+    if (!userId) return res.status(401).json({ message: 'No autorizado' });
+
+    // buscamos al usuaruio para ver sus créditos
+    const user = await UserModel.findById(userId).exec();
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    // buscamos al agente para ver su precio
+    const agent = await AgentModel.findById(id).exec();
+    if (!agent) return res.status(404).json({ message: 'Agente no encontrado' });
+
+    // ya lo tiene rentado?
+    if (agent.rentedBy && agent.rentedBy.toString() === userId) {
+       return res.status(400).json({ message: 'Ya tienes rentado este agente' });
+    }
+
+    // verificamos créditos
+    const costo = agent.pricePerHour;
+    if ((user.credits || 0) < costo) {
+      return res.status(402).json({ 
+        message: `Créditos insuficientes. Tienes ${user.credits || 0} y necesitas ${costo}.` 
+      });
+    }
+
+    // transacción
+    user.credits = (user.credits || 0) - costo;
+    await user.save();
+
+    agent.rentedBy = userId;
+    if (!agent.instructions) {
+        agent.instructions = `Eres un experto en ${agent.category}. Ayuda al usuario.`;
+    }
+    await agent.save();
+
+    res.json({ 
+      message: 'Agente rentado correctamente', 
+      agent,
+      remainingCredits: user.credits 
+    });
+
+  } catch (err) {
+    console.error('Error rentando agente:', err);
+    res.status(500).json({ message: 'Error al rentar agente' });
+  }
+}
+
+// Listar los agentes que YO he rentado
+export async function getMyRentedAgents(req: Request, res: Response) {
+  try {
+    const userId = (req.user as any).sub || (req.user as any).id;
+    if (!userId) return res.status(401).json({ message: 'No autorizado' });
+
+    const agents = await AgentModel.find({ rentedBy: userId }).lean().exec();
+    res.json({ agents });
+  } catch (err) {
+    console.error('Error obteniendo mis agentes:', err);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+}
+
+// Liberar (devolver) un agente
+export async function releaseAgent(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const userId = (req.user as any).sub || (req.user as any).id;
+
+    const agent = await AgentModel.findById(id).exec();
+    if (!agent) return res.status(404).json({ message: 'Agente no encontrado' });
+
+    if (agent.rentedBy?.toString() !== userId) {
+      return res.status(403).json({ message: 'No eres el dueño de este alquiler' });
+    }
+
+    agent.rentedBy = undefined; 
+    await agent.save();
+
+    res.json({ message: 'Agente liberado' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al liberar agente' });
+  }
+}
+

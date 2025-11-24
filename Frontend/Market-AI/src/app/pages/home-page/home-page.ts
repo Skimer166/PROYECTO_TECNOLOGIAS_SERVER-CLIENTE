@@ -237,7 +237,27 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   rentAgent(agent: Agent): void {
-    console.log('Rentar agente:', agent._id);
+    if (!this.isBrowser) return;
+
+    // Verificar si está logueado antes
+    if (!localStorage.getItem('token')) {
+      alert('Debes iniciar sesión para rentar un agente.');
+      return;
+    }
+
+    if(!confirm(`¿Deseas rentar al agente ${agent.name} por $${agent.pricePerHour}/hr?`)) return;
+
+    this.http.post(`http://localhost:3001/agents/${agent._id}/rent`, {}, {
+      headers: this.getAuthHeaders()
+    }).subscribe({
+      next: () => {
+        alert('¡Agente rentado con éxito! Ahora puedes encontrarlo en "Mis Agentes".');
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Ocurrió un error al rentar el agente.');
+      }
+    });
   }
 
   goToAgentPanel(): void {}

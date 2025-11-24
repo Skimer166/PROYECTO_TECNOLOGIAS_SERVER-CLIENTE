@@ -6,7 +6,10 @@ import {
   createAgent,
   getAgentById,
   updateAgent,
-  deleteAgent
+  deleteAgent,
+  rentAgent,
+  getMyRentedAgents,
+  releaseAgent
 } from './controller';
 import { verifyToken, verifyAdmin } from '../middlewares/auth';
 
@@ -22,27 +25,34 @@ const router = Router();
  *       bearerFormat: JWT
  */
 
- /**
-  * @swagger
-  * /agents:
-  *   get:
-  *     tags: [AGENTS]
-  *     description: Listar agentes disponibles
-  *     security:
-  *       - BearerAuth: []
-  *     parameters:
-  *       - in: query
-  *         name: available
-  *         schema:
-  *           type: boolean
-  *         required: false
-  *         description: true para solo disponibles
-  *     responses:
-  *       200:
-  *         description: success
-  *       401:
-  *         description: missing token
-  */
+/**
+ * @swagger
+ * tags:
+ *   - name: AGENTS
+ *     description: Endpoints para gestión de agentes
+ */
+
+/**
+ * @swagger
+ * /agents:
+ *   get:
+ *     tags: [AGENTS]
+ *     description: Listar agentes disponibles
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: available
+ *         schema:
+ *           type: boolean
+ *         required: false
+ *         description: true para solo disponibles
+ *     responses:
+ *       200:
+ *         description: success
+ *       401:
+ *         description: missing token
+ */
 router.get('', verifyToken, getAllAgents);
 
 /**
@@ -86,6 +96,108 @@ router.get('', verifyToken, getAllAgents);
  *         description: Solo administradores
  */
 router.post('', verifyToken, verifyAdmin, createAgent);
+
+/**
+ * NOTE: Las rutas con paths literales (search, my-rentals, :id/rent, :id/release, etc.)
+ * deben declararse antes que la ruta paramétrica '/:id' para evitar colisiones.
+ */
+
+/**
+ * @swagger
+ * /agents/search:
+ *   get:
+ *     tags: [AGENTS]
+ *     description: Buscar agentes por nombre o descripción.
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Texto a buscar (por ejemplo, "python").
+ *     responses:
+ *       200:
+ *         description: Lista de agentes coincidentes
+ */
+router.get('/search', searchAgent);
+
+// /**
+//  * @swagger
+//  * /agents/categories:
+//  *   get:
+//  *     tags: [AGENTS]
+//  *     description: categorias de agentes
+//  *     responses:
+//  *       200:
+//  *         description: success
+//  */
+// router.get('/categories', getCategories);
+
+/**
+ * @swagger
+ * /agents/{id}/rent:
+ *   post:
+ *     tags: [AGENTS]
+ *     description: Rentar un agente
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: false
+ *     responses:
+ *       200:
+ *         description: Agente rentado
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Agente no encontrado
+ */
+router.post('/:id/rent', verifyToken, rentAgent);
+
+/**
+ * @swagger
+ * /agents/{id}/release:
+ *   post:
+ *     tags: [AGENTS]
+ *     description: Liberar (terminar renta) de un agente
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Agente liberado
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Agente no encontrado
+ */
+router.post('/:id/release', verifyToken, releaseAgent);
+
+/**
+ * @swagger
+ * /agents/my-rentals:
+ *   get:
+ *     tags: [AGENTS]
+ *     description: Obtener agentes que el usuario ha rentado
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de agentes rentados por el usuario
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/my-rentals', verifyToken, getMyRentedAgents);
 
 /**
  * @swagger
@@ -170,36 +282,5 @@ router.put('/:id', verifyToken, verifyAdmin, updateAgent);
  *         description: Agente no encontrado
  */
 router.delete('/:id', verifyToken, verifyAdmin, deleteAgent);
-
-/**
- * @swagger
- * /agents/search:
- *   get:
- *     tags: [AGENTS]
- *     description: Buscar agentes por nombre o descripción.
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         required: false
- *         description: Texto a buscar (por ejemplo, "python").
- *     responses:
- *       200:
- *         description: Lista de agentes coincidentes
- */
-router.get('/search', searchAgent);
-
-// /**
-//  * @swagger
-//  * /agents/categories:
-//  *   get:
-//  *     tags: [AGENTS]
-//  *     description: categorias de agentes
-//  *     responses:
-//  *       200:
-//  *         description: success
-//  */
-// router.get('/categories', getCategories);
 
 export default router;

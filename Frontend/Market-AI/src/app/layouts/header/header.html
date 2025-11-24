@@ -24,16 +24,23 @@
 
   <div class="right-section">
     @if (isLoggedIn) {
+      
+      <div class="credits-badge" title="Tus créditos disponibles">
+        <mat-icon class="coin-icon">monetization_on</mat-icon>
+        <span>{{ userCredits || 0 }}</span>
+      </div>
+
       <div class="user-badge" *ngIf="userName">
         @if (userPhoto) {
           <img [src]="userPhoto" alt="Foto" class="mini-avatar" />
         }
-        <span class="mini-name">Hola, {{ userName }}</span>
+        <span class="mini-name">{{ userName }}</span>
       </div>
 
       <button mat-stroked-button color="accent" (click)="logout()">
         Salir
       </button>
+
     } @else {
       <button mat-flat-button color="accent" [routerLink]="['/login']">
         Iniciar sesión

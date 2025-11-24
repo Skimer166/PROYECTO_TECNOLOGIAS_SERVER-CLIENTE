@@ -19,6 +19,12 @@ const userSchema = new Schema<IUser>(
       },
     },
 
+    credits: { 
+      type: Number, 
+      default: 500, // se regalan 500 creditos al registrarse
+      min: 0 
+    },
+
     role: {
       type: String,
       enum: ['user', 'admin'],

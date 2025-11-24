@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ChangeDetectorRef, inject } from '@angular/core'; // 1. Importar ChangeDetectorRef
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -16,7 +16,6 @@ import { AuthService } from '../../shared/services/auth';
     CommonModule,
     RouterModule,
     MatToolbarModule,
-    RouterModule,
     MatIconModule,
     MatButtonModule
   ],
@@ -25,6 +24,10 @@ export class Header implements OnInit {
   isLoggedIn = false;
   userName: string | null = null;
   userPhoto: string | null = null;
+  userCredits: number = 0;
+
+  // detector de cambios
+  private cdr = inject(ChangeDetectorRef);
 
   constructor(
     private authService: AuthService,
@@ -44,12 +47,16 @@ export class Header implements OnInit {
       } else {
         this.userName = null;
         this.userPhoto = null;
+        this.userCredits = 0;
       }
+      
+      this.cdr.detectChanges();
     });
 
     if (this.authService.hasToken()) {
       this.isLoggedIn = true;
       this.loadUserDataFromToken();
+      this.cdr.detectChanges();
     }
   }
 
@@ -67,8 +74,12 @@ export class Header implements OnInit {
 
     this.userName = firstName || null;
     this.userPhoto = payload.avatar || null;
+    
+    this.userCredits = payload.credits !== undefined ? payload.credits : 0;
+    
   }
 
+  
   private decodeJwt(token: string): any | null {
     if (typeof window === 'undefined') return null;
     try {
