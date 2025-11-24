@@ -3,6 +3,7 @@ import authRoutes from './auth/routes'
 import usersRoutes from './users/routes'
 import agentsRoutes from './agents/routes'
 import filesRoutes from './documents/routes'
+import chatRoutes from './chat/routes';
 
 const router = Router();    //creamos instancia de router
 
@@ -12,5 +13,6 @@ router.use('/auth', authRoutes)
 router.use('/users', usersRoutes)
 router.use('/agents', agentsRoutes)
 router.use('/files', filesRoutes)
+router.use('/chat', chatRoutes);
 
 export default router;

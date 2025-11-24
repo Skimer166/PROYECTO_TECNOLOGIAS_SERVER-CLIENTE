@@ -151,7 +151,7 @@ export class HomePage implements OnInit {
   this.error = null;
 
   this.http
-    .get<any>('http://localhost:3001/agents', {  
+    .get<any>('http://localhost:3001/agents?available=true', {    //con el ?available=true solo traemos los agentes activos
       headers: this.getAuthHeaders()
     })
     .subscribe({
