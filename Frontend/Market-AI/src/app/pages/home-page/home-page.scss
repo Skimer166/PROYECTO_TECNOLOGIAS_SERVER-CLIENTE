@@ -286,7 +286,6 @@ mat-card-content {
     
     // Truncar texto a 3 líneas
     display: -webkit-box;
-    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }

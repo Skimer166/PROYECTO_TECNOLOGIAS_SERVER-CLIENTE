@@ -15,6 +15,5 @@ export const routes: Routes = [
     {path: 'login', component: Login, canActivate:[guestOnlyGuard]},
     {path: 'register', component: Register, canActivate:[guestOnlyGuard]},
     {path: 'login/success', component: LoginSuccess},
-    {path: 'mi-perfil', component: MyProfile, canActivate:[authActivateGuard]},
-    {path: '**', redirectTo: 'landing-page' }
+    {path: 'mi-perfil', component: MyProfile, canActivate:[authActivateGuard]}
 ];

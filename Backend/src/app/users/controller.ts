@@ -62,10 +62,10 @@ export async function updateUser(req: Request, res: Response) {
     if (!isValidObjectId(id)) return res.status(400).json({ message: "ID inválido" });
 
     const { name, email, password, avatar } = req.body || {};
-    if (!name && !email && !password) {
+    
+    if (!name && !email && !password && !avatar) {
       return res.status(400).json({ message: "Nada para actualizar" });
     }
-    
 
     if (email) {
       const exists = await UserModel.findOne({ email, _id: { $ne: id } }).lean();
@@ -73,17 +73,39 @@ export async function updateUser(req: Request, res: Response) {
     }
 
     const update: any = {};
-    if (typeof name === 'string') update.name = name;
-    if (typeof email === 'string') update.email = email;
-    if (typeof password === 'string' && password.length > 0) {
+    if (name) update.name = name;
+    if (email) update.email = email;
+    if (avatar) update.avatar = avatar; 
+    if (password) {
       update.passwordHash = await bcrypt.hash(password, 10);
     }
-    if (req.body.avatar) update.avatar = req.body.avatar;
 
-    const updated = await UserModel.findByIdAndUpdate(id, update, { new: true, projection: { name: 1, email: 1 } }).lean();
+    const updated = await UserModel.findByIdAndUpdate(
+      id, 
+      update, 
+      { new: true, projection: { name: 1, email: 1, role: 1, avatar: 1 } }
+    ).lean();
+
     if (!updated) return res.status(404).json({ message: "Usuario no encontrado" });
 
-    return res.json({ id: String(updated._id), name: updated.name, email: updated.email });
+    const token = jwt.sign(
+      {
+        sub: String(updated._id),
+        email: updated.email,
+        name: updated.name,
+        role: updated.role || 'user',
+        avatar: updated.avatar 
+      },
+      JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    // devolvemos el usuario Y el nuevo token
+    return res.json({ 
+      user: { id: String(updated._id), name: updated.name, email: updated.email, avatar: updated.avatar },
+      token: token 
+    });
+
   } catch (err) {
     console.error("Error actualizando usuario:", err);
     return res.status(500).json({ message: "Error del servidor" });
@@ -114,7 +136,7 @@ export function getFavoriteAgents(req: Request, res: Response){
   return res.json({ agents: favorites });
 }
 //login
-const JWT_SECRET = process.env.SECRET_KEY ?? process.env.JWT_KEY ?? process.env.JWT_SECRET ?? 'dev-secret';
+const JWT_SECRET = process.env.SECRET_KEY ?? process.env.JWT_KEY ?? 'dev-secret';
 export async function loginUser(req: Request, res: Response) {
   try {
     const { email, password } = req.body;

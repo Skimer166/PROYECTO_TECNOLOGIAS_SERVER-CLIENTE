@@ -1,34 +1,43 @@
 <mat-toolbar color="primary" class="header-toolbar">
-  <button mat-icon-button [routerLink]="['/']" aria-label="Ir al inicio">
-    <mat-icon>home</mat-icon>
-  </button>
-
-  <span class="brand">Market AI</span>
-
-  @if (isLandingPage) {
-    <span class="spacer"></span>
-    <a mat-button [routerLink]="['/landing-page']" fragment="inicio">Inicio</a>
-    <a mat-button [routerLink]="['/landing-page']" fragment="precios">Precios</a>
-    <a mat-button [routerLink]="['/landing-page']" fragment="servicios">Servicios</a>
-  }
+  <div class="left-section">
+    <button mat-icon-button [routerLink]="['/']" aria-label="Ir al inicio">
+      <mat-icon>home</mat-icon>
+    </button>
+    <span class="brand">Market AI</span>
+  </div>
 
   <span class="spacer"></span>
 
-  @if (isLoggedIn) {
-    <div class="user-info">
-      @if (userPhoto) {
-        <img [src]="userPhoto" alt="Foto de usuario" class="user-photo" />
-      }
-      @if (userName) {
-        <span class="user-name">Hola, {{ userName }}</span>
-      }
+  <nav class="center-nav">
+    @if (isLoggedIn) {
+      <a mat-button routerLink="/home-page" routerLinkActive="active-link">Panel</a>
+      <a mat-button routerLink="/mis-agentes" routerLinkActive="active-link">Mis Agentes</a>
+      <a mat-button routerLink="/mi-perfil" routerLinkActive="active-link">Mi Perfil</a>
+    } @else if (isLandingPage) {
+      <a mat-button [routerLink]="['/landing-page']" fragment="inicio">Inicio</a>
+      <a mat-button [routerLink]="['/landing-page']" fragment="precios">Precios</a>
+      <a mat-button [routerLink]="['/landing-page']" fragment="servicios">Servicios</a>
+    }
+  </nav>
+
+  <span class="spacer"></span>
+
+  <div class="right-section">
+    @if (isLoggedIn) {
+      <div class="user-badge" *ngIf="userName">
+        @if (userPhoto) {
+          <img [src]="userPhoto" alt="Foto" class="mini-avatar" />
+        }
+        <span class="mini-name">Hola, {{ userName }}</span>
+      </div>
+
       <button mat-stroked-button color="accent" (click)="logout()">
-        Cerrar sesión
+        Salir
       </button>
-    </div>
-  } @else {
-    <button mat-flat-button color="accent" [routerLink]="['/login']">
-      Iniciar sesión
-    </button>
-  }
+    } @else {
+      <button mat-flat-button color="accent" [routerLink]="['/login']">
+        Iniciar sesión
+      </button>
+    }
+  </div>
 </mat-toolbar>

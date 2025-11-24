@@ -73,7 +73,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef, // 2. Inyectamos el detector de cambios
+    private cdr: ChangeDetectorRef, // detector de cambios
     @Inject(PLATFORM_ID) private platformId: object
   ) {}
 
@@ -83,14 +83,15 @@ export class HomePage implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.resolveAdminFromStorageOrToken();
-    this.loadAgents();
+    if (this.isBrowser) {
+      this.loadAgents();
+    }
   }
 
   ngOnDestroy(): void {
     this.stopAutoSlide();
   }
 
-  // ==== AUTH & ADMIN CHECK ====
   private safeGet(key: string): string | null {
     if (!this.isBrowser) return null;
     try {
@@ -134,12 +135,10 @@ export class HomePage implements OnInit, OnDestroy {
     return new HttpHeaders({ Authorization: token });
   }
 
-  // ==== DATA LOADING ====
   private loadAgents(): void {
     this.isLoading = true;
     this.error = null;
 
-    // Asegúrate de que el puerto (3000 o 3001) sea el correcto aquí
     this.http.get<any>('http://localhost:3001/agents?available=true', {
       headers: this.getAuthHeaders()
     }).subscribe({
@@ -151,8 +150,7 @@ export class HomePage implements OnInit, OnDestroy {
         this.isLoading = false;
         this.startAutoSlide(); 
 
-        // 3. ¡IMPORTANTE! Forzamos la actualización de la vista manualmente
-        // porque estamos en modo Zoneless y esto es una respuesta asíncrona.
+
         this.cdr.detectChanges(); 
       },
       error: (err) => {
@@ -160,7 +158,6 @@ export class HomePage implements OnInit, OnDestroy {
         this.error = 'No se pudieron cargar los agentes.';
         this.isLoading = false;
         
-        // También forzamos actualización si hay error
         this.cdr.detectChanges(); 
       }
     });
@@ -190,8 +187,7 @@ export class HomePage implements OnInit, OnDestroy {
     this.currentIndex = 0;
   }
 
-  // ==== CAROUSEL LOGIC ====
-
+  //logica del carrusel
   get visibleAgents(): Agent[] {
     if (!this.filteredAgents.length) return [];
     
@@ -227,7 +223,7 @@ export class HomePage implements OnInit, OnDestroy {
     if (this.isBrowser && this.filteredAgents.length > this.itemsPerView) {
       this.autoSlideInterval = setInterval(() => {
         this.next();
-        // 4. También actualizamos la vista cuando el carrusel se mueve solo
+        // actualizamos la vista cuando el carrusel se mueve solo
         this.cdr.detectChanges(); 
       }, 5000); 
     }

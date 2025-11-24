@@ -1,5 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core'; // 1. IMPORTAR ChangeDetectorRef
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -10,7 +10,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-// servicios
 import { AuthService } from '../../shared/services/auth';
 import { User as UserService } from '../../shared/services/user';
 import { Header } from '../../layouts/header/header';
@@ -45,12 +44,16 @@ export class MyProfile implements OnInit {
   private userService = inject(UserService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
+  
+  // 2. INYECTAR EL DETECTOR DE CAMBIOS
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
-      email: [{value: '', disabled: true}], 
-      avatar: ['']  
+      email: [{value: '', disabled: true}],
+      avatar: [''] 
     });
   }
 
@@ -59,6 +62,10 @@ export class MyProfile implements OnInit {
   }
 
   private loadUserProfile() {
+    if (!isPlatformBrowser(this.platformId)) {
+      return; 
+    }
+
     const token = this.auth.getToken();
     if (!token) {
       this.router.navigate(['/login']);
@@ -67,7 +74,8 @@ export class MyProfile implements OnInit {
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      this.userId = payload.id || payload.sub;
+      // Ajuste para leer 'sub' o 'id' por si acaso
+      this.userId = payload.sub || payload.id;
       
       if(this.userId) {
         this.loading = true;
@@ -80,10 +88,14 @@ export class MyProfile implements OnInit {
             });
             this.currentAvatar = user.avatar;
             this.loading = false;
+            
+            // 3. ACTUALIZAR VISTA MANUALMENTE
+            this.cdr.detectChanges();
           },
           error: (err) => {
             console.error(err);
             this.loading = false;
+            this.cdr.detectChanges(); // Actualizar en error también
           }
         });
       }
@@ -95,26 +107,50 @@ export class MyProfile implements OnInit {
 
   triggerFileInput() {
     const fileInput = document.getElementById('avatarInput') as HTMLElement;
-    fileInput.click();
+    if(fileInput) fileInput.click();
   }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
+    
     if (file && this.userId) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen no puede pesar más de 5MB');
+        return;
+      }
+
       this.loading = true;
+      
       this.userService.uploadAvatar(file).subscribe({
         next: (res: any) => {
-
-          const newAvatarUrl = res.url || `https://tu-bucket-s3.amazonaws.com/${res.key}`; 
+          const backendUrl = 'http://localhost:3001'; 
+          // Ajusta según lo que retorne tu backend (res.id es lo esperado)
+          const newAvatarUrl = `${backendUrl}/files/${res.id}/download`; 
           
+          console.log('Imagen subida. Nueva URL:', newAvatarUrl);
+
           this.currentAvatar = newAvatarUrl;
           this.form.patchValue({ avatar: newAvatarUrl });
+          this.form.markAsDirty(); // Marcar formulario como sucio para habilitar el botón "Guardar"
+          
           this.loading = false;
+
+          // 4. ACTUALIZAR VISTA MANUALMENTE (Esto soluciona tu problema)
+          this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('Error subiendo imagen', err);
-          alert('Error al subir la imagen');
+          console.error('Error detallado:', err);
+          
+          if (err.status === 500) {
+            alert('Error del servidor. Revisa credenciales S3.');
+          } else if (err.status === 401) {
+            alert('Error de sesión. Intenta reconectar tu cuenta.');
+          } else {
+            alert('Error al subir la imagen.');
+          }
+          
           this.loading = false;
+          this.cdr.detectChanges();
         }
       });
     }
@@ -130,16 +166,21 @@ export class MyProfile implements OnInit {
     };
 
     this.userService.updateUser(this.userId, updateData).subscribe({
-      next: (res) => {
+      next: (res: any) => {
+        if (res.token) {
+          this.auth.setTokenFromOAuth(res.token); 
+        }
+
         alert('Perfil actualizado correctamente');
         this.loading = false;
-        // Opcional: Recargar página o actualizar Header
-        window.location.reload(); 
+        this.cdr.detectChanges();
+        
       },
       error: (err) => {
         console.error(err);
         alert('Error al actualizar perfil');
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

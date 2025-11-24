@@ -2,12 +2,13 @@ import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, CanMatchFn, CanActivateFn, UrlTree } from '@angular/router';
 
-//rutas permitidas si NO estan logueados
 const PUBLIC_WHITELIST = ['/login', '/register', '/landing-page'];
 
 function hasToken(): boolean {
   const platformId = inject(PLATFORM_ID);
-  if (!isPlatformBrowser(platformId)) return false;
+  
+  if (!isPlatformBrowser(platformId)) return true; 
+  
   try {
     return !!(sessionStorage.getItem('token') || localStorage.getItem('token'));
   } catch {
@@ -16,7 +17,6 @@ function hasToken(): boolean {
 }
 
 function isWhitelisted(url: string): boolean {
-  // por si viene con query params
   const cleanUrl = url.split('?')[0];
   return PUBLIC_WHITELIST.includes(cleanUrl);
 }
@@ -25,17 +25,17 @@ export const authActivateGuard: CanActivateFn = (route, state): boolean | UrlTre
   const router = inject(Router);
 
   if (hasToken()) 
-    return true; //si esta logueado pasa  
+    return true; 
 
   if (isWhitelisted(state.url)) 
-    return true; //si esta en la whitelist pasa
+    return true; 
   
-  return router.parseUrl('/login'); //si no esta log y no es white lo redirige
+  return router.parseUrl('/login');
 };
 
-//si ya esta log, el usuario, lo redirige al landing page
 export const guestOnlyGuard: CanMatchFn = (): boolean | UrlTree => {
   const router = inject(Router);
+  
   if (hasToken()) return router.parseUrl('/'); 
   return true;
 };

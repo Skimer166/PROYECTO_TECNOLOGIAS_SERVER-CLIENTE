@@ -1,34 +1,108 @@
 .header-toolbar {
   display: flex;
   align-items: center;
-  gap: 12px;
   position: sticky;
   top: 0;
   z-index: 1000;
+  background: rgba(18, 16, 45, 0.95);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  height: 64px;
+  padding: 0 1.5rem; /* Un poco más de aire a los lados */
+}
+
+/* IZQUIERDA */
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px; /* Ancho mínimo para equilibrar visualmente */
 }
 
 .brand {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, #fff, #a5b4fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; /* Efecto elegante en el texto */
 }
 
+/* ESPACIADORES PARA CENTRAR */
 .spacer {
   flex: 1 1 auto;
 }
 
-.user-info {
+/* CENTRO (NAVEGACIÓN) */
+.center-nav {
+  display: flex;
+  gap: 0.5rem;
+  
+  a[mat-button] {
+    color: #cbd5e1;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    padding: 0 16px;
+    min-width: auto;
+
+    &:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Clase que agrega Angular automáticamente si usas routerLinkActive */
+    &.active-link {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.2); /* Fondo suave lila/azul */
+      font-weight: 600;
+    }
+  }
+}
+
+/* DERECHA (USUARIO) */
+.right-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  min-width: 150px; /* Equilibrio con la izquierda */
+}
+
+.user-badge {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-right: 0.5rem;
+  
+  /* Ocultar nombre en móviles para no saturar */
+  @media (max-width: 768px) {
+    span { display: none; }
+  }
 }
 
-.user-photo {
-  width: 40px;   
-  height: 40px;  
+.mini-avatar {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid rgba(99, 102, 241, 0.5); /* Borde sutil */
 }
 
-.user-name {
+.mini-name {
+  font-size: 0.9rem;
+  color: #e0e0e0;
   font-weight: 500;
-  font-size: 0.95rem;
+}
+
+/* RESPONSIVE: En móviles, ocultamos el menú central o lo ajustamos */
+@media (max-width: 700px) {
+  .center-nav {
+    display: none; /* Aquí podrías poner un menú hamburguesa si quisieras luego */
+  }
+  
+  .header-toolbar {
+    padding: 0 0.8rem;
+  }
 }

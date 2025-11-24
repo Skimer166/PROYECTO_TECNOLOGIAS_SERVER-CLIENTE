@@ -47,7 +47,7 @@ router.get('', verifyToken, listMyFiles);
  *       404:
  *         description: not found
  */
-router.get('/:id/download', verifyToken, downloadFile);
+router.get('/:id/download', downloadFile);
 
 /**
  * @swagger

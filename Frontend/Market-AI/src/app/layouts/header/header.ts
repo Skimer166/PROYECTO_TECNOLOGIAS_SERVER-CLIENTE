@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,8 +16,9 @@ import { AuthService } from '../../shared/services/auth';
     CommonModule,
     RouterModule,
     MatToolbarModule,
+    RouterModule,
     MatIconModule,
-    MatButtonModule,
+    MatButtonModule
   ],
 })
 export class Header implements OnInit {
@@ -36,7 +37,6 @@ export class Header implements OnInit {
   }
 
   ngOnInit(): void {
-    //nos suscribimos al estado de login
     this.authService.isLoggedIn$.subscribe((logged) => {
       this.isLoggedIn = logged;
       if (logged) {
@@ -47,7 +47,6 @@ export class Header implements OnInit {
       }
     });
 
-    //si al cargar ya había token (por refresh), lo reflejamos
     if (this.authService.hasToken()) {
       this.isLoggedIn = true;
       this.loadUserDataFromToken();
@@ -72,23 +71,17 @@ export class Header implements OnInit {
 
   private decodeJwt(token: string): any | null {
     if (typeof window === 'undefined') return null;
-
     try {
       const parts = token.split('.');
       if (parts.length !== 3) return null;
-
       const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
       const binary = window.atob(base64);
-
       const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-      const json = new TextDecoder('utf-8').decode(bytes);
-
-      return JSON.parse(json);
+      return JSON.parse(new TextDecoder('utf-8').decode(bytes));
     } catch {
       return null;
     }
   }
-
 
   logout(): void {
     this.authService.logout();

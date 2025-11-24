@@ -81,10 +81,6 @@ export async function listMyFiles(req: Request, res: Response) {
 // GET /files/:id/download
 export async function downloadFile(req: Request, res: Response) {
   try {
-    const userId = getAuthUserId(req);
-    if (!userId) {
-      return res.status(401).json({ message: 'No autorizado' });
-    }
 
     const { id } = req.params;
     if (!isValidObjectId(id)) {
@@ -96,10 +92,6 @@ export async function downloadFile(req: Request, res: Response) {
       return res.status(404).json({ message: 'Archivo no encontrado' });
     }
 
-    if (String(file.ownerId) !== userId) {
-      return res.status(403).json({ message: 'No puedes acceder a este archivo' });
-    }
-
     try {
       const obj = await getObject(file.key);
       const bodyStream = obj.Body as any;
@@ -108,6 +100,7 @@ export async function downloadFile(req: Request, res: Response) {
       if (obj.ContentLength != null) {
         res.setHeader('Content-Length', obj.ContentLength.toString());
       }
+      
       const filename = file.originalName || file.key;
       res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
 
