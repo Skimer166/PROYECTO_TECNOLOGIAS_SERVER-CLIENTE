@@ -3,11 +3,15 @@ import { FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../shared/services/auth';
 import { from } from 'rxjs';
+import { Location } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
 
 describe('Login', () => {
   let component: Login;
   let authMock: AuthService;
   let routerMock: Router;
+  let locationMock: Location;
+  let dialogMock: MatDialog;
 
   beforeEach(() => {
     routerMock = {
@@ -20,7 +24,15 @@ describe('Login', () => {
         .and.returnValue(from(Promise.resolve({ token: 'Bearer1234' })))
     } as unknown as AuthService;
 
-    component = new Login(new FormBuilder(), authMock, routerMock);
+    locationMock = {} as unknown as Location;
+    dialogMock = {
+      open: jasmine.createSpy('open')
+      .and.returnValue({
+        close: jasmine.createSpy('close')
+      })
+    } as unknown as MatDialog;
+
+    component = new Login(new FormBuilder(), authMock, routerMock, locationMock, dialogMock);
   });
 
   it('should create', () => {

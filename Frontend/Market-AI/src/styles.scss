@@ -46,3 +46,19 @@ html, body {
   height: 100%;
 }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/*los estilos para los diálogos de notificación */
+.notify-success-dialog .mat-mdc-dialog-surface {
+  background: #9263ff;
+  color: #ffffff;
+  border-radius: 16px;
+  min-width: 420px;
+  padding-inline: 40px;
+}
+.notify-error-dialog .mat-mdc-dialog-surface {
+  background: #9263ff;
+  color: #ffffff;
+  border-radius: 16px;
+  min-width: 420px;
+  padding-inline: 40px;
+}
