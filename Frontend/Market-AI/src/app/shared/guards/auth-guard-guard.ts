@@ -7,8 +7,7 @@ const PUBLIC_WHITELIST = ['/login', '/register', '/landing-page'];
 function hasToken(): boolean {
   const platformId = inject(PLATFORM_ID);
   
-  if (!isPlatformBrowser(platformId)) return true; 
-  
+  if (!isPlatformBrowser(platformId)) return false;  
   try {
     return !!(sessionStorage.getItem('token') || localStorage.getItem('token'));
   } catch {
