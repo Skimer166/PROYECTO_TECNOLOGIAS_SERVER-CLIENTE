@@ -3,10 +3,11 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AuthService } from '../../shared/services/auth';
 import { Location } from '@angular/common';
-
+import { NotificationDialogComponent } from './popup-login';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +20,7 @@ export class Login {
   form: FormGroup;
   loading = false;
 
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router, private location: Location) {
+  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router, private location: Location, private dialog: MatDialog) {
     this.form = this.fb.group({
       Correo: ['', [Validators.required, Validators.email]],
       Contrasena: ['', [Validators.required, Validators.minLength(8)]]
@@ -33,7 +34,7 @@ export class Login {
   doOnSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      alert('El formulario contiene errores, revisa los campos');
+      this.openDialog('El formulario contiene errores, revisa los campos', 'error');
       return;
     }
 
@@ -44,12 +45,12 @@ export class Login {
     this.auth.login({ email, password }).subscribe({
       next: (res) => {
         localStorage.setItem('token', res.token);
-        alert('Inicio de sesion exitoso');
+        this.openDialog('Inicio de sesion exitoso', 'success');
         this.router.navigate(['/home-page']);
       },
       error: (err) => {
         console.error('Error al iniciar sesion', err);
-        alert('Credenciales invalidas o error de conexion');
+        this.openDialog('Credenciales invalidas o error de conexion', 'error');
       },
       complete: () => {
         this.loading = false;
@@ -60,5 +61,17 @@ export class Login {
   loginWithGoogle() {
     const url = this.auth.getGoogleLoginUrl();
     window.location.href = url;
+  }
+
+  private openDialog(message: string, type: 'success' | 'error') {
+    const ref = this.dialog.open(NotificationDialogComponent, {
+      data: { message, type },
+      panelClass: type === 'success' ? 'notify-success-dialog' : 'notify-error-dialog',
+      position: { top: '80px' }
+    });
+
+    setTimeout(() => {
+      ref.close();
+    }, 4000);
   }
 }
