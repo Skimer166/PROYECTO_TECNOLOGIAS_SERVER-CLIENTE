@@ -61,6 +61,7 @@ export class Register {
         next: (res) => {
           alert('Usuario registrado correctamente');
           console.log('Respuesta del servidor:', res);
+          window.location.href = '/login';
         },
         error: (err) => {
           console.error('Error en registro:', err);
