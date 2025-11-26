@@ -85,7 +85,7 @@ app.get('/swagger.json', (req, res) => {
 app.use('/swagger', serve, setup(swaggerDocs));
 
 dbConnect().then(() => {
-  app.listen(PORT, () => {
+  httpServer.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
   });
 }).catch(() => {
