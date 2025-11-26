@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { AgentModel } from './model'; 
-import { UserModel } from '../users/model'; 
+import { AgentModel } from './model';
+import { UserModel } from '../users/model';
+import { io } from '../../index';
 
 //extraer el userId desde req.user
 function getAuthUser(req: Request): { id?: string; role?: string } {
@@ -269,6 +270,27 @@ export async function rentAgent(req: Request, res: Response) {
     if (!agent.instructions) agent.instructions = "Asistente útil.";
     
     await agent.save();
+
+    // noti cuando se termine el tiempo
+    const msUntilEnd = expirationTime.getTime() - Date.now();
+    if (msUntilEnd > 0) {
+      setTimeout(async () => {
+        try {
+          const refreshed = await AgentModel.findById(agent._id).lean().exec();
+          if (!refreshed) return;
+          // si ya no esta rentado o se extendio el tiempo, lo notificamos
+          if (!refreshed.rentedBy || !refreshed.rentedUntil) return;
+          if (new Date(refreshed.rentedUntil).getTime() > Date.now()) return;
+
+          io.to(String(userId)).emit('agent-time-ended', {
+            agentId: String(refreshed._id),
+            name: refreshed.name,
+          });
+        } catch (error) {
+          console.error('Error enviando notificación de fin de tiempo:', error);
+        }
+      }, msUntilEnd);
+    }
 
     res.json({ 
       message: `Renta exitosa por ${amount} ${unit}.`, 
