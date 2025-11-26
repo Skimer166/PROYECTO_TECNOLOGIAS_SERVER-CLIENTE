@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject, PLATFORM_ID, ChangeDetectorRef } 
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-
+import { RouterModule } from '@angular/router';
 // Material
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,6 +19,7 @@ import { Footer } from '../../layouts/footer/footer';
   imports: [
     CommonModule, 
     FormsModule,
+    RouterModule,
     MatCardModule, 
     MatButtonModule, 
     MatIconModule,
