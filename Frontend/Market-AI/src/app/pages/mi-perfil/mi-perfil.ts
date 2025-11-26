@@ -2,6 +2,7 @@ import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angu
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -39,12 +40,16 @@ export class MyProfile implements OnInit {
   loading = false;
   userId: string | null = null;
   currentAvatar: string | null = null;
+  rentedAgentsCount: number = 0;
+
   
   private auth = inject(AuthService);
   private userService = inject(UserService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private http = inject(HttpClient);
+
   
   // 2. INYECTAR EL DETECTOR DE CAMBIOS
   private cdr = inject(ChangeDetectorRef);
@@ -59,6 +64,8 @@ export class MyProfile implements OnInit {
 
   ngOnInit(): void {
     this.loadUserProfile();
+    this.loadRentedAgentsCount();
+
   }
 
   private loadUserProfile() {
@@ -103,6 +110,31 @@ export class MyProfile implements OnInit {
       console.error('Error leyendo token', e);
       this.router.navigate(['/login']);
     }
+  }
+  private loadRentedAgentsCount() {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const token = this.auth.getToken();
+    if (!token) {
+      return;
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    this.http.get<any>('http://localhost:3001/agents/my-rentals', { headers }).subscribe({
+      next: (res) => {
+        const agents = res?.agents || [];
+        this.rentedAgentsCount = agents.length;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando agentes rentados en perfil:', err);
+      }
+    });
   }
 
   triggerFileInput() {
