@@ -56,8 +56,8 @@ export class AuthService {
           this.saveToken(res.token);
           this.isLoggedInSubject.next(true);
           this.loadCreditsFromToken(); 
-
-          this.socketService.disconnect();
+// Reconectamos el socket con el nuevo token
+          this.socketService.reconnect();
         }
       })
     );
@@ -114,5 +114,7 @@ export class AuthService {
   setTokenFromOAuth(token: string) {
     this.saveToken(token);
     this.isLoggedInSubject.next(true);
+    this.loadCreditsFromToken();
+    this.socketService.reconnect();
   }
 }

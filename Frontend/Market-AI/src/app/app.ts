@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { SocketService } from './shared/services/socket';
 import { NotificationDialogComponent } from './pages/login/popup-login';
+import { AuthService } from './shared/services/auth';
 
 import { Header } from './layouts/header/header';
 import { Footer } from './layouts/footer/footer';
@@ -20,17 +21,31 @@ export class App implements OnInit, OnDestroy {
   private socketService = inject(SocketService);
   private dialog = inject(MatDialog);
   private agentTimeEndedSub?: Subscription;
+  private authService = inject(AuthService);
+  private authSub?: Subscription;
 
   ngOnInit() {
-    this.agentTimeEndedSub = this.socketService
-      .onAgentTimeEnded()
-      .subscribe(({ name }) => {
-        this.openDialog(`Tu tiempo con el agente "${name}" ha terminado`);
-      });
+    this.authSub = this.authService.isLoggedIn$.subscribe((isLogged) => {
+      if (isLogged) {
+        if (!this.agentTimeEndedSub) {
+          console.log('Suscribiendo a agent-time-ended');
+          this.agentTimeEndedSub = this.socketService
+            .onAgentTimeEnded()
+            .subscribe(({ name }) => {
+              console.log('Mostrando popup de fin de tiempo para agente:', name);
+              this.openDialog(`Tu tiempo con el agente "${name}" ha terminado`);
+            });
+        }
+      } else {
+        this.agentTimeEndedSub?.unsubscribe();
+        this.agentTimeEndedSub = undefined;
+      }
+    });
   }
 
   ngOnDestroy() {
     this.agentTimeEndedSub?.unsubscribe();
+    this.authSub?.unsubscribe();
   }
 
   private openDialog(message: string) {
