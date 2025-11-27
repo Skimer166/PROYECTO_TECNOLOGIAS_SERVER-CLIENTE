@@ -62,3 +62,17 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   min-width: 420px;
   padding-inline: 40px;
 }
+.notify-time-dialog .mat-mdc-dialog-surface {
+  background: #ff0000b5;
+  color: #ffffff71;
+  border-radius: 16px;
+  min-width: 420px;
+  padding-inline: 40px;
+  /* Color para el recuadro del texto de tiempo de agente */
+  --notify-box-bg: #271211;
+}
+
+.notify-time-dialog .notify-title {
+  line-height: 1.4;
+}
+

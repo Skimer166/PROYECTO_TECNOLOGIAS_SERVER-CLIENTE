@@ -21,7 +21,7 @@ export interface NotificationDialogData {
   `,
   styles: [`
     .notify-box {
-      background: #2b2b33;
+      background: var(--notify-box-bg, #2b2b33);
       color: #ffffff;
       padding: 16px 24px;
       border-radius: 12px;
