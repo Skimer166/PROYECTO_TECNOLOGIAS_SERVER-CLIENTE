@@ -70,7 +70,7 @@ export class MyAgents implements OnInit, OnDestroy {
       this.agentTimeEndedSub = this.socketService
         .onAgentTimeEnded()
         .subscribe(({ agentId, name }) => {
-          alert(`Tu tiempo con el agente "${name}" ha terminado`);
+          //alert(`Tu tiempo con el agente "${name}" ha terminado`);
           this.loadMyAgents();
         });
     }

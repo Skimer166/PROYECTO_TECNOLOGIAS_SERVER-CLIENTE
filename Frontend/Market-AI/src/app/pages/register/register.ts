@@ -9,8 +9,8 @@ import { User as userService } from '../../shared/services/user';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { AuthService } from '../../shared/services/auth';
-
-
+import { MatDialog } from '@angular/material/dialog';
+import { NotificationDialogComponent } from '../login/popup-login';
 @Component({
   selector: 'app-register',
   imports: [FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatCheckboxModule, HttpClientModule],
@@ -21,7 +21,7 @@ export class Register {
 
   form: FormGroup;
 
-  constructor(private activatedRoute: ActivatedRoute, private fb: FormBuilder, private userService: userService, private location: Location, private auth: AuthService) {
+  constructor(private activatedRoute: ActivatedRoute, private fb: FormBuilder, private userService: userService, private location: Location, private auth: AuthService, private dialog: MatDialog) {
     this.form = fb.group({
       Nombre: ['', [Validators.required, Validators.minLength(2)]],
       Correo: ['', [Validators.required, Validators.email]],
@@ -57,11 +57,11 @@ export class Register {
     if (this.form.valid) {
       const { Nombre, Correo, Contraseña } = this.form.value;
       const payload = { name: Nombre, email: Correo, password: Contraseña };
-      this.userService.registerUser(payload).subscribe({
+        this.userService.registerUser(payload).subscribe({
         next: (res) => {
-          alert('Usuario registrado correctamente');
-          console.log('Respuesta del servidor:', res);
-          window.location.href = '/login';
+            this.openDialog('Usuario registrado correctamente', 'success');
+            console.log('Respuesta del servidor:', res);
+            window.location.href = '/login';
         },
         error: (err) => {
           console.error('Error en registro:', err);
@@ -80,4 +80,15 @@ export class Register {
     window.location.href = url;
   }
 
+  private openDialog(message: string, type: 'success' | 'error') {
+    const ref = this.dialog.open(NotificationDialogComponent, {
+      data: { message, type },
+      panelClass: type === 'success' ? 'notify-success-dialog' : 'notify-error-dialog',
+      position: { top: '80px' }
+    });
+
+    setTimeout(() => {
+      ref.close();
+    }, 4000);
+  }
 }
