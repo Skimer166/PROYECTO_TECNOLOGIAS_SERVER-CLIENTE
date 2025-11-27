@@ -3,6 +3,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
+
 // Material
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { Header } from '../../layouts/header/header';
 import { Footer } from '../../layouts/footer/footer';
+import { SocketService } from '../../shared/services/socket';
 
 @Component({
   selector: 'app-my-agents',
@@ -45,11 +48,13 @@ export class MyAgents implements OnInit, OnDestroy {
   
   // Variable para el intervalo
   private timerInterval: any;
+  private agentTimeEndedSub?: Subscription;
 
   // Inyecciones
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
+  private socketService = inject(SocketService);
 
   constructor() {}
 
@@ -61,6 +66,13 @@ export class MyAgents implements OnInit, OnDestroy {
       this.timerInterval = setInterval(() => {
         this.updateCountdowns();
       }, 1000);
+
+      this.agentTimeEndedSub = this.socketService
+        .onAgentTimeEnded()
+        .subscribe(({ agentId, name }) => {
+          alert(`Tu tiempo con el agente "${name}" ha terminado`);
+          this.loadMyAgents();
+        });
     }
   }
 
@@ -68,6 +80,7 @@ export class MyAgents implements OnInit, OnDestroy {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
+    this.agentTimeEndedSub?.unsubscribe();
   }
 
   getAuthHeaders() {
@@ -166,7 +179,7 @@ export class MyAgents implements OnInit, OnDestroy {
   }
 
   scrollToBottom() {
-    const container = document.querySelector('.chat-messages');
+    const container = document.querySelector('.chat-messages') as HTMLElement | null;
     if (container) {
       container.scrollTop = container.scrollHeight;
     }
