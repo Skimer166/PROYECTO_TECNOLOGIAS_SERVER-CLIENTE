@@ -39,4 +39,61 @@ export class SocketService {
       };
     });
   }
+
+  // el suuario se une al soporte
+  joinSupportChat() {
+    this.ensureConnected();
+    this.socket?.emit('support:join');
+  }
+
+  // el admin se une al chat de un usuario
+  adminJoinChat(targetUserId: string) {
+    this.ensureConnected();
+    this.socket?.emit('support:admin-join', targetUserId);
+  }
+
+  disconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = undefined; 
+    }
+  }
+
+  // se envia mensaje
+  sendSupportMessage(text: string, targetUserId?: string) {
+    this.ensureConnected();
+    this.socket?.emit('support:send-message', { text, targetUserId });
+  }
+
+  // el usuario cierra el chat
+  closeSupportChat() {
+    this.ensureConnected();
+    this.socket?.emit('support:close');
+  }
+
+
+  onSupportMessage(): Observable<any> {
+    this.ensureConnected();
+    return new Observable(observer => {
+      this.socket?.on('support:message', (msg) => observer.next(msg));
+    });
+  }
+
+  // recibir lista de sesiones activas
+  onActiveSessions(): Observable<any> {
+    this.ensureConnected();
+    return new Observable(observer => {
+      this.socket?.on('support:active-sessions', (sessions) => observer.next(sessions));
+      this.socket?.on('support:new-session', (session) => observer.next([session])); // Simplificado para recargar o añadir
+    });
+  }
+  
+  onSessionClosed(): Observable<string> {
+    this.ensureConnected();
+    return new Observable(observer => {
+        this.socket?.on('support:session-closed', (id) => observer.next(id));
+    });
+  }
 }
+
+  

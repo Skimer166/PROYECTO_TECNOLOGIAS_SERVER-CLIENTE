@@ -1,0 +1,34 @@
+<div class="admin-dashboard">
+    <div class="user-list">
+        <h3>Chats Activos</h3>
+        <mat-list>
+            <mat-list-item *ngFor="let session of sessions" 
+                            (click)="selectSession(session)"
+                            [class.selected]="selectedSession?.userId === session.userId">
+            <mat-icon matListItemIcon>person</mat-icon>
+            <div matListItemTitle>{{ session.userName }}</div>
+            <div matListItemLine>ID: {{ session.userId }}</div>
+            </mat-list-item>
+            <p *ngIf="sessions.length === 0">No hay solicitudes de soporte.</p>
+        </mat-list>
+        </div>
+
+        <div class="chat-area" *ngIf="selectedSession">
+        <div class="chat-header">
+            Atendiendo a: {{ selectedSession.userName }}
+        </div>
+
+        <div class="messages">
+            <div *ngFor="let msg of chatHistory" 
+                    [class.system]="msg.isSystem"
+                    class="msg-row">
+                <strong>{{ msg.sender }}:</strong> {{ msg.text }}
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input [(ngModel)]="adminReply" (keyup.enter)="sendReply()" placeholder="Responder...">
+            <button mat-flat-button color="primary" (click)="sendReply()">Enviar</button>
+        </div>
+    </div>
+</div>
