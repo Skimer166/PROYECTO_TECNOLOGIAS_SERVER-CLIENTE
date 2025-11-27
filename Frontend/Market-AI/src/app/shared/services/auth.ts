@@ -2,6 +2,7 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { SocketService } from './socket';
 
 interface LoginRequest {
   email: string;
@@ -23,6 +24,7 @@ export class AuthService {
 
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
+  private socketService = inject(SocketService);
 
   constructor(private http: HttpClient) {
     if (this.hasToken()) {
@@ -54,6 +56,8 @@ export class AuthService {
           this.saveToken(res.token);
           this.isLoggedInSubject.next(true);
           this.loadCreditsFromToken(); 
+
+          this.socketService.disconnect();
         }
       })
     );
@@ -67,6 +71,10 @@ export class AuthService {
         localStorage.removeItem('token');
         sessionStorage.removeItem('user_role');
         localStorage.removeItem('user_role');
+        this.socketService.disconnect();
+
+        this.isLoggedInSubject.next(false);
+        this.creditsSubject.next(0);
       } catch (e) {
         console.error('Error limpiando storage', e);
       }
