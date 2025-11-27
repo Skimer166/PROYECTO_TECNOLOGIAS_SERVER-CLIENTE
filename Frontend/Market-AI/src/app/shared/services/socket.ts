@@ -94,6 +94,15 @@ export class SocketService {
         this.socket?.on('support:session-closed', (id) => observer.next(id));
     });
   }
+
+  onChatHistory(): Observable<any[]> {
+    this.ensureConnected();
+    return new Observable(observer => {
+      this.socket?.on('support:chat-history', (history) => observer.next(history));
+    });
+  }
+
+
 }
 
   

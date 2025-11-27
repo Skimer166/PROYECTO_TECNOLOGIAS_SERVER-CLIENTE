@@ -32,9 +32,11 @@ export class SupportWidgetComponent implements OnInit {
     });
 
     this.socket.onSupportMessage().subscribe(msg => {
-      this.messages.push(msg);
-      this.cdr.detectChanges();
-      this.scrollToBottom();
+        if (msg.sender !== this.userName) { 
+          this.messages.push(msg);
+          this.cdr.detectChanges();
+          this.scrollToBottom();
+      }
     });
   }
 
@@ -60,8 +62,20 @@ export class SupportWidgetComponent implements OnInit {
 
   sendMessage() {
     if (!this.newMessage.trim()) return;
-    this.socket.sendSupportMessage(this.newMessage);
+
+    const text = this.newMessage; 
+    
+    this.messages.push({
+        sender: this.userName, 
+        text: text,
+        time: new Date(),
+        isSystem: false
+    });
+    
+    this.socket.sendSupportMessage(text);
     this.newMessage = '';
+    
+    this.scrollToBottom();
   }
 
   scrollToBottom() {

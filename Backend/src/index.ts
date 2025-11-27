@@ -99,12 +99,10 @@ io.on('connection', (socket) => {
     const roomId = `support-${targetUserId}`;
     socket.join(roomId);
     
-    const sysMsg = { sender: 'System', text: `El agente ${currentUser.name} se ha unido.`, time: new Date(), isSystem: true };
-    
-    if (activeSessions[targetUserId]) {
-        activeSessions[targetUserId].messages.push(sysMsg);
+    const session = activeSessions[targetUserId];
+    if (session) {
+        socket.emit('support:chat-history', session.messages);
     }
-    io.to(roomId).emit('support:message', sysMsg);
   });
 
   // se envia algun mensaje
