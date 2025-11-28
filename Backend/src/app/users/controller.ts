@@ -45,10 +45,10 @@ export async function getUserById(req: Request, res: Response) {
     const { id } = req.params;
     if (!isValidObjectId(id)) return res.status(400).json({ message: "ID inválido" });
 
-    const user = await UserModel.findById(id, { name: 1, email: 1 }).lean();
+    const user = await UserModel.findById(id, { name: 1, email: 1, avatar: 1 }).lean();
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
 
-    return res.json({ id: String(user._id), name: user.name, email: user.email });
+    return res.json({ id: String(user._id), name: user.name, email: user.email, avatar: user.avatar });
   } catch (err) {
     console.error("Error obteniendo usuario:", err);
     return res.status(500).json({ message: "Error del servidor" });
