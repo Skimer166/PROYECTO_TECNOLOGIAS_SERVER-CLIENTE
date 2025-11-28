@@ -22,6 +22,16 @@ export async function postUsers(req: Request, res: Response) {
 
     if (!name || !email || !password)
       return res.status(400).json({ message: "Rellena todos los campos" });
+    
+    const emailExists = await UserModel.findOne({ email }).lean();
+    if (emailExists) {
+      return res.status(409).json({ message: "Email ya registrado" });
+    }
+
+    const nameExists = await UserModel.findOne({ name }).lean();
+    if (nameExists) {
+      return res.status(409).json({ message: "Nombre de usuario ya registrado" });
+    }
 
     const exists = await UserModel.findOne({ email }).lean();
     if (exists) return res.status(409).json({ message: "Email ya registrado" });
