@@ -59,9 +59,8 @@ export class Register {
       const payload = { name: Nombre, email: Correo, password: Contraseña };
         this.userService.registerUser(payload).subscribe({
         next: (res) => {
-            this.openDialog('Usuario registrado correctamente', 'success');
-            console.log('Respuesta del servidor:', res);
-            window.location.href = '/login';
+          console.log('Respuesta del servidor:', res);
+          this.openDialog('Usuario registrado correctamente', 'success', '/login');
         },
         error: (err) => {
           console.error('Error en registro:', err);
@@ -80,15 +79,20 @@ export class Register {
     window.location.href = url;
   }
 
-  private openDialog(message: string, type: 'success' | 'error') {
+  private openDialog(message: string, type: 'success' | 'error', redirectUrl?: string) {
     const ref = this.dialog.open(NotificationDialogComponent, {
       data: { message, type },
       panelClass: type === 'success' ? 'notify-success-dialog' : 'notify-error-dialog',
       position: { top: '80px' }
     });
 
+    const duration = 1000;
+
     setTimeout(() => {
       ref.close();
-    }, 4000);
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+      }
+    }, duration);
   }
 }
