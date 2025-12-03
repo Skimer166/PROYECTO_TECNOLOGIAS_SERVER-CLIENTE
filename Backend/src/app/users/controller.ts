@@ -3,6 +3,7 @@ import { isValidObjectId } from "mongoose";
 import { UserModel } from "./model";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { sendWelcomeEmail } from "../mailer/controller";
 
 //GET/users-CRUD: Read (listar usuarios)
 export async function getUsers(req: Request, res: Response) {
@@ -38,6 +39,13 @@ export async function postUsers(req: Request, res: Response) {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await UserModel.create({ name, email, passwordHash });
+
+    //Enviar correo de bienvenida 
+    try {
+      await sendWelcomeEmail(email, name);
+    } catch (emailError) {
+      console.error("Error enviando correo de bienvenida:", emailError);
+    }
 
     return res.status(201).json({
       message: "Usuario creado correctamente",

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { mailer } from "./model";
-import { Options } from "nodemailer/lib/mailer"
+import { Options } from "nodemailer/lib/mailer";
 
 export function sendEmail(req: Request, res: Response) {
     const mailOptions = {
@@ -19,5 +19,19 @@ export function sendEmail(req: Request, res: Response) {
         res.send('Error: ' + error);
     })
 
+}
+
+export async function sendWelcomeEmail(to: string, name: string) {
+  const mailOptions: Options = {
+    from: process.env.EMAIL_USER || "",
+    to,
+    subject: "¡Bienvenido a Market-AI!",
+    html: `<p>Hola <strong>${name}</strong>,</p>
+           <p>¡Gracias por registrarte en Market-AI!</p>
+           <p>Ya puedes iniciar sesión y comenzar a usar la plataforma.</p>`,
+    text: `Hola ${name},\n\nGracias por registrarte en Market-AI.\nYa puedes iniciar sesión y comenzar a usar la plataforma.`,
+  };
+
+  await mailer.sendMail(mailOptions);
 }
 
