@@ -40,7 +40,11 @@ const userSchema = new Schema<IUser>(
       default: 'local',
     },
 
-    avatar: { type: String }, 
+    avatar: { type: String },
+
+    resetPasswordToken: { type: String },
+
+    resetPasswordExpires: { type: Date },
   },
   {
     timestamps: true,

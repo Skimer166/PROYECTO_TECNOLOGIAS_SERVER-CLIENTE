@@ -9,4 +9,6 @@ export interface IUser extends Document {
   provider: 'local' | 'google';
   avatar?: string;
   credits: number;
+   resetPasswordToken?: string;
+   resetPasswordExpires?: Date;
 }
