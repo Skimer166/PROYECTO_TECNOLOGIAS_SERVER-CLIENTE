@@ -7,7 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:Market-AI": "node dist/Market-AI/server/server.mjs"
+    "serve:ssr:Market-AI": "node dist/Market-AI/server/server.mjs",
+    "e2e": "ng e2e",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "prettier": {
     "printWidth": 100,
@@ -23,6 +26,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/animations": "^20.3.14",
     "@angular/cdk": "^20.2.10",
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.3.0",
@@ -33,19 +37,23 @@
     "@angular/platform-server": "^20.3.6",
     "@angular/router": "^20.3.0",
     "@angular/ssr": "^20.3.6",
+    "cypress": "^15.7.1",
     "express": "^5.1.0",
     "jwt-decode": "^4.0.0",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.1",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "zone.js": "^0.15.1"
   },
   "devDependencies": {
     "@angular/build": "^20.3.2",
     "@angular/cli": "^20.3.2",
     "@angular/compiler-cli": "^20.3.0",
+    "@cypress/schematic": "^4.1.4",
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
+    "cypress": "15.7.1",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
