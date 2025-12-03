@@ -86,3 +86,73 @@ Si tú no creaste esta cuenta, puedes ignorar este correo.
   await mailer.sendMail(mailOptions);
 }
 
+export async function sendPasswordResetEmail(to: string, name: string, resetLink: string) {
+  const mailOptions: Options = {
+    from: process.env.EMAIL_USER || "",
+    to,
+    subject: "Restablecer tu contraseña - Market-AI",
+    html: `<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Restablecer contraseña</title>
+  </head>
+  <body style="margin:0;padding:0;background-color:#f4f4f4;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:24px 0;">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+            <tr>
+              <td style="background:linear-gradient(135deg, #1e1e2f, #3a0ca3, #7209b7, #f72585);padding:24px 32px;color:#ffffff;">
+                <h1 style="margin:0;font-size:24px;font-weight:700;">Market-AI</h1>
+                <p style="margin:8px 0 0;font-size:14px;opacity:0.9;">Solicitud para restablecer tu contraseña.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 32px;color:#111827;font-size:14px;line-height:1.6;">
+                <p style="margin:0 0 12px;">Hola <strong>${name}</strong>,</p>
+                <p style="margin:0 0 12px;">
+                  Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en <strong>Market-AI</strong>.
+                </p>
+                <p style="margin:0 0 16px;">
+                  Haz clic en el siguiente botón para crear una nueva contraseña. Este enlace es válido solo por 1 hora.
+                </p>
+                <p style="margin:0 0 24px;text-align:center;">
+                  <a href="${resetLink}" style="display:inline-block;padding:10px 20px;background-color:#3b82f6;color:#ffffff;text-decoration:none;border-radius:9999px;font-weight:600;">
+                    Restablecer contraseña
+                  </a>
+                </p>
+                <p style="margin:0 0 12px;">
+                  Si el botón no funciona, copia y pega este enlace en tu navegador:
+                </p>
+                <p style="margin:0 0 24px;font-size:12px;color:#4b5563;word-break:break-all;">
+                  ${resetLink}
+                </p>
+                <p style="margin:0 0 4px;color:#6b7280;font-size:12px;">
+                  Si tú no solicitaste este cambio, puedes ignorar este correo y tu contraseña seguirá siendo la misma.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 32px;border-top:1px solid #e5e7eb;color:#9ca3af;font-size:11px;text-align:center;">
+                c ${new Date().getFullYear()} Market-AI. Todos los derechos reservados.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`,
+    text: `Hola ${name},
+
+Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Market-AI.
+
+Usa este enlace para crear una nueva contraseña (válido por 1 hora):
+${resetLink}
+
+Si tú no solicitaste este cambio, puedes ignorar este correo.`,
+  };
+
+  await mailer.sendMail(mailOptions);
+}
