@@ -58,6 +58,39 @@ export class Login {
     });
   }
 
+  onForgotPassword(event: Event) {
+    event.preventDefault();
+
+    const control = this.form.get('Correo');
+    if (!control || control.invalid) {
+      control?.markAsTouched();
+      this.openDialog('Ingresa un correo electrónico válido primero.', 'error');
+      return;
+    }
+
+    const email = control.value;
+    this.loading = true;
+
+    this.auth.requestPasswordReset(email).subscribe({
+      next: () => {
+        this.openDialog(
+          'Si el correo está registrado, te enviamos un enlace para restablecer tu contraseña.',
+          'success'
+        );
+      },
+      error: (err) => {
+        console.error('Error al solicitar recuperación de contraseña', err);
+        this.openDialog(
+          'Ocurrió un error al procesar la recuperación. Intenta más tarde.',
+          'error'
+        );
+      },
+      complete: () => {
+        this.loading = false;
+      }
+    });
+  }
+
   loginWithGoogle() {
     const url = this.auth.getGoogleLoginUrl();
     window.location.href = url;
