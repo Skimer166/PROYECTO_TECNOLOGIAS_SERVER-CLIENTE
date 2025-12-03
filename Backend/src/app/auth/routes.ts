@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { googleAuthController, googleCallbackController, login} from "./controller";
+import { googleAuthController, googleCallbackController, login, forgotPassword, resetPassword } from "./controller";
 import { postUsers } from "../users/controller";
 
 const router = Router();
@@ -54,6 +54,54 @@ router.post('/login', login);    //se pone solamente login porque creamos la fun
  *         description: Usuario registrado
  */
 router.post('/signup', postUsers);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     tags: [AUTH]
+ *     description: Enviar correo de recuperación de contraseña
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Si el correo está registrado, se envía un enlace
+ */
+router.post('/forgot-password', forgotPassword);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     tags: [AUTH]
+ *     description: Establecer una nueva contraseña usando un token de recuperación
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada correctamente
+ *       400:
+ *         description: Token inválido o expirado
+ */
+router.post('/reset-password', resetPassword);
 
 
 //rutas para el login y signup con google
