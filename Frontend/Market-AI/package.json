@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --ssr=false",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:Market-AI": "node dist/Market-AI/server/server.mjs",

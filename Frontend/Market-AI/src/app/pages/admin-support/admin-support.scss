@@ -1,9 +1,80 @@
-.admin-dashboard { display: flex; height: 500px; gap: 20px; border: 1px solid #ccc; padding: 20px; color: white;}
-.user-list { width: 30%; border-right: 1px solid rgba(255,255,255,0.1); }
-.selected { background: rgba(99,102,241,0.2); }
-.chat-area { flex: 1; display: flex; flex-direction: column; }
-.messages { flex: 1; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.3); margin-bottom: 10px;}
-.system { color: yellow; font-style: italic; }
-.msg-row { margin-bottom: 5px; }
-.input-area { display: flex; gap: 10px; }
-input { flex: 1; padding: 10px; }
+.admin-dashboard { 
+    display: flex; 
+    height: 500px; 
+    gap: 20px; 
+    border: 1px solid #ccc; 
+    padding: 20px; 
+    color: white;
+}
+.user-list {
+  width: 30%;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-y: auto; 
+
+  h3 {
+    padding: 10px 15px;
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  mat-list-item {
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &.selected {
+      background: rgba(79, 70, 229, 0.3); 
+      border-left: 4px solid #fbbf24; 
+    }
+
+    [matListItemTitle] {
+      color: #fbbf24; 
+      font-weight: 700; 
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    [matListItemLine] {
+      color: #94a3b8; 
+      font-size: 0.8rem;
+    }
+    
+    mat-icon {
+        color: #e0e7ff;
+    }
+  }
+}
+
+.selected {
+    background: rgba(99,102,241,0.2); 
+}
+.chat-area { 
+    flex: 1; display: flex; 
+    flex-direction: column; 
+}
+.messages { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 10px; 
+    background: rgba(0,0,0,0.3); 
+    margin-bottom: 10px;
+}
+.system { 
+    color: yellow; 
+    font-style: italic; 
+}
+.msg-row { 
+    margin-bottom: 5px; 
+}
+.input-area { 
+    display: flex; 
+    gap: 10px; 
+}
+input { 
+    flex: 1; 
+    padding: 10px; 
+}
