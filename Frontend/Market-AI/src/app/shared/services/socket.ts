@@ -1,7 +1,7 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { io, Socket as IOSocket } from 'socket.io-client';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, BehaviorSubject } from 'rxjs'; 
 
 @Injectable({
   providedIn: 'root',
@@ -10,16 +10,24 @@ export class SocketService {
   private socket?: IOSocket;
   private platformId = inject(PLATFORM_ID);
 
+  private activeSessionsSubject = new BehaviorSubject<any[]>([]);
+
+  private messageSubject = new Subject<any>();
+  private sessionClosedSubject = new Subject<string>();
+  private chatHistorySubject = new Subject<any[]>();
   private agentTimeEndedSubject = new Subject<{ agentId: string; name: string }>();
 
   private ensureConnected() {
     if (!isPlatformBrowser(this.platformId)) return;
-    if (this.socket) return;
+    
+    if (this.socket && this.socket.connected) return;
 
     const token = localStorage.getItem('token') || '';
-    if (!token) {
-      //Si no hay token (usuario no logueado) no abrimos conexion
-      return;
+
+    if (this.socket) {
+      this.socket.removeAllListeners();
+      this.socket.disconnect();
+      this.socket = undefined;
     }
 
     this.socket = io('http://localhost:3001', {
@@ -27,100 +35,108 @@ export class SocketService {
       transports: ['websocket'],
     });
 
-    this.registerAgentTimeEndedListener();
-  }
 
-  private registerAgentTimeEndedListener() {
-    if (!this.socket) return;
+    // 1. Lista completa de sesiones (llega al conectarse el admin)
+    this.socket.on('support:active-sessions', (sessions: any[]) => {
+      console.log('Recibida lista inicial de sesiones:', sessions);
+      this.activeSessionsSubject.next(sessions);
+    });
 
-    //Evitar listeners duplicados si se reconecta
-    this.socket.off('agent-time-ended');
+    // 2. Nueva sesión individual (llega cuando un usuario abre chat)
+    this.socket.on('support:new-session', (newSession: any) => {
+      console.log('Nueva sesión recibida:', newSession);
+      const currentList = this.activeSessionsSubject.value;
+      
+      const exists = currentList.find(s => s.userId === newSession.userId);
+      if (!exists) {
+        this.activeSessionsSubject.next([...currentList, newSession]);
+      }
+    });
 
+    // 3. Sesión cerrada
+    this.socket.on('support:session-closed', (userId: string) => {
+      this.sessionClosedSubject.next(userId);
+      
+      const currentList = this.activeSessionsSubject.value;
+      const updatedList = currentList.filter(s => s.userId !== userId);
+      this.activeSessionsSubject.next(updatedList);
+    });
+
+    // 4. Mensajes de chat
+    this.socket.on('support:message', (msg: any) => {
+      this.messageSubject.next(msg);
+    });
+
+    // 5. Historial de chat
+    this.socket.on('support:chat-history', (history: any[]) => {
+      this.chatHistorySubject.next(history);
+    });
+
+    // 6. Agentes (Tiempo terminado)
     this.socket.on('agent-time-ended', (payload: any) => {
-      console.log('Evento agent-time-ended recibido en cliente:', payload);
       this.agentTimeEndedSubject.next(payload);
     });
   }
 
+
+  disconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = undefined;
+    }
+  }
+
+  reconnect() {
+    this.disconnect();
+    this.ensureConnected();
+  }
+
+
+  // observables
+  onActiveSessions(): Observable<any[]> {
+    this.ensureConnected();
+    return this.activeSessionsSubject.asObservable();
+  }
+
+  onSupportMessage(): Observable<any> {
+    this.ensureConnected();
+    return this.messageSubject.asObservable();
+  }
+  
+  onSessionClosed(): Observable<string> {
+    this.ensureConnected();
+    return this.sessionClosedSubject.asObservable();
+  }
+
+  onChatHistory(): Observable<any[]> {
+    this.ensureConnected();
+    return this.chatHistorySubject.asObservable();
+  }
+
   onAgentTimeEnded(): Observable<{ agentId: string; name: string }> {
     this.ensureConnected();
-    this.registerAgentTimeEndedListener();
-
     return this.agentTimeEndedSubject.asObservable();
   }
 
-  // el suuario se une al soporte
+  // emits
+
   joinSupportChat() {
     this.ensureConnected();
     this.socket?.emit('support:join');
   }
 
-  // el admin se une al chat de un usuario
   adminJoinChat(targetUserId: string) {
     this.ensureConnected();
     this.socket?.emit('support:admin-join', targetUserId);
   }
 
-  disconnect() {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = undefined; 
-    }
-  }
-
-  // se envia mensaje
   sendSupportMessage(text: string, targetUserId?: string) {
     this.ensureConnected();
     this.socket?.emit('support:send-message', { text, targetUserId });
   }
 
-  // el usuario cierra el chat
   closeSupportChat() {
     this.ensureConnected();
     this.socket?.emit('support:close');
-  }
-
-
-  onSupportMessage(): Observable<any> {
-    this.ensureConnected();
-    return new Observable(observer => {
-      this.socket?.on('support:message', (msg) => observer.next(msg));
-    });
-  }
-
-  // recibir lista de sesiones activas
-  onActiveSessions(): Observable<any> {
-    this.ensureConnected();
-    return new Observable(observer => {
-      this.socket?.on('support:active-sessions', (sessions) => observer.next(sessions));
-      this.socket?.on('support:new-session', (session) => observer.next([session])); // Simplificado para recargar o añadir
-    });
-  }
-  
-  onSessionClosed(): Observable<string> {
-    this.ensureConnected();
-    return new Observable(observer => {
-        this.socket?.on('support:session-closed', (id) => observer.next(id));
-    });
-  }
-
-  onChatHistory(): Observable<any[]> {
-    this.ensureConnected();
-    return new Observable(observer => {
-      this.socket?.on('support:chat-history', (history) => observer.next(history));
-    });
-  }
-
-  reconnect() {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    // Forzamos cierre de la conexión actual (si existe)
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = undefined;
-    }
-
-    // Y tratamos de abrir una nueva con el token actual
-    this.ensureConnected();
   }
 }

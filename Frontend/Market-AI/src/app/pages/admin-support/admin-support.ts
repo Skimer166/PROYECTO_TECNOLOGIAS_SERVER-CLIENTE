@@ -24,14 +24,8 @@ export class AdminSupport implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
-    this.socket.onActiveSessions().subscribe((data: any) => {
-      if (Array.isArray(data)) {
-        this.sessions = data;
-      } else {
-        if (!this.sessions.find(s => s.userId === data.userId)) {
-          this.sessions.push(data);
-        }
-      }
+    this.socket.onActiveSessions().subscribe((sessions) => {
+      this.sessions = sessions; 
       this.cdr.detectChanges();
     });
 
