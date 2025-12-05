@@ -95,7 +95,7 @@
 
 
       <div class="botones">
-        <button class="cancelButton" matButton="elevated">Cancelar</button>
+        <button type="button"class="cancelButton"matButton="elevated"(click)="onCancel()">Cancelar</button>
         <button [disabled]="form.invalid" matButton="elevated">Enviar</button>
       </div>
 
