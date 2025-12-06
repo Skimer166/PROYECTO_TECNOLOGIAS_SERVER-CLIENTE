@@ -20,6 +20,7 @@ interface AdminUser {
   email: string;
   role: 'user' | 'admin';
   credits: number;
+  status: 'active' | 'blocked';
 }
 
 @Component({
@@ -77,12 +78,15 @@ interface AdminUser {
 
             <div class="user-row" *ngFor="let user of users">
               <div class="user-col user-col--state">
-                <span
+                <button
+                  mat-stroked-button
                   class="state-chip"
-                  [class.state-chip--active]="user.role === 'admin'"
+                  [class.state-chip--active]="user.status === 'active'"
+                  [class.state-chip--blocked]="user.status === 'blocked'"
+                  (click)="toggleStatus(user)"
                 >
-                  {{ user.role === 'admin' ? 'Activo' : 'Pendiente' }}
-                </span>
+                  {{ user.status === 'blocked' ? 'Bloqueado' : 'Activo' }}
+                </button>
               </div>
 
               <div class="user-col user-col--role">
@@ -286,16 +290,22 @@ interface AdminUser {
       }
 
       .state-chip {
-        padding: 4px 10px;
         border-radius: 999px;
+        padding: 4px 10px;
         font-size: 0.8rem;
         background: rgba(148, 163, 184, 0.25);
         color: #e5e7eb;
+        border: none;
       }
 
       .state-chip--active {
         background: rgba(16, 185, 129, 0.3);
         color: #bbf7d0;
+      }
+
+      .state-chip--blocked {
+        background: rgba(239, 68, 68, 0.3);
+        color: #fecaca;
       }
 
       /* Estilos para que el dropdown de Rol se vea claro sobre el fondo oscuro */
@@ -380,6 +390,7 @@ export class AdminUsers implements OnInit {
           this.users = (res.users || []).map((u) => ({
             ...u,
             credits: u.credits ?? 0,
+            status: (u as any).status ?? 'active',
           }));
           this.originalRoles.clear();
           this.users.forEach((u) => this.originalRoles.set(u.id, u.role));
@@ -431,6 +442,35 @@ export class AdminUsers implements OnInit {
     const original = this.originalRoles.get(user.id);
     if (!original || original === user.role) return;
     user.role = original;
+  }
+
+  toggleStatus(user: AdminUser): void {
+    const nextStatus: AdminUser['status'] =
+      user.status === 'active' ? 'blocked' : 'active';
+    this.changeStatus(user, nextStatus);
+  }
+
+  changeStatus(user: AdminUser, newStatus: AdminUser['status']): void {
+    if (user.status === newStatus) return;
+
+    this.http
+      .put<{ id: string; status: AdminUser['status'] }>(
+        `http://localhost:3001/users/${user.id}/status`,
+        { status: newStatus },
+        { headers: this.getAuthHeaders() }
+      )
+      .subscribe({
+        next: (res) => {
+          user.status = res.status;
+          this.openNotifyDialog('Estado actualizado correctamente.', true);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error actualizando estado del usuario:', err);
+          this.openNotifyDialog('No se pudo actualizar el estado.', false);
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   deleteUser(user: AdminUser): void {
