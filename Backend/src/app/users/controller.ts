@@ -16,6 +16,7 @@ export async function getUsers(req: Request, res: Response) {
   }
 }
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 //POST/users-CRUD: Create (crear usuario)
 export async function postUsers(req: Request, res: Response) {
   try {
@@ -23,7 +24,11 @@ export async function postUsers(req: Request, res: Response) {
 
     if (!name || !email || !password)
       return res.status(400).json({ message: "Rellena todos los campos" });
-    
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Formato de correo inválido" });
+    }
+      
     const emailExists = await UserModel.findOne({ email }).lean();
     if (emailExists) {
       return res.status(409).json({ message: "Email ya registrado" });
