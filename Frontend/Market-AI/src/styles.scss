@@ -168,3 +168,31 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   padding-inline: 40px;
   --notify-box-bg: #3c1020;
 }
+
+/* Modal del Panel de agentes admin */
+.admin-agents-dialog .mat-mdc-dialog-surface {
+  background: #1e1b4b; 
+  color: #ffffff;
+  border-radius: 20px;
+  min-width: 720px;
+  padding: 20px 28px;
+}
+
+.admin-agents-dialog .mat-mdc-dialog-content {
+  padding-top: 8px;
+}
+
+/* Campos de texto dentro del Panel de agentes */
+.admin-agents-dialog .mat-mdc-text-field-wrapper {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.admin-agents-dialog .mat-mdc-input-element,
+.admin-agents-dialog .mat-mdc-floating-label {
+  color: #ffffff !important;
+}
+
+.admin-agents-dialog .mat-mdc-input-element::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
