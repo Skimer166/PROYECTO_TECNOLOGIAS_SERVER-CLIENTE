@@ -38,7 +38,7 @@ export class CreateAgentDialogComponent {
   constructor() {
     this.form = this.fb.group({
       name: ['', Validators.required],
-      modelVersion: ['gpt-3.5-turbo', Validators.required],
+      modelVersion: ['gpt-4o-mini', Validators.required],
       description: ['', Validators.required],
       instructions: ['', Validators.required],
       category: ['otros', Validators.required],
