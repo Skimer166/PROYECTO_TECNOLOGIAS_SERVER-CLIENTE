@@ -10,11 +10,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { AuthService } from '../../shared/services/auth';
 import { User as UserService } from '../../shared/services/user';
 import { Header } from '../../layouts/header/header';
 import { Footer } from '../../layouts/footer/footer';
+import { NotificationDialogComponent } from '../login/popup-login';
 
 @Component({
   selector: 'app-my-profile',
@@ -23,11 +25,12 @@ import { Footer } from '../../layouts/footer/footer';
     CommonModule, 
     ReactiveFormsModule, 
     MatCardModule, 
-    MatButtonModule, 
+    MatButtonModule,    
     MatInputModule, 
     MatFormFieldModule, 
     MatIconModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
     Header,
     Footer
   ],
@@ -49,7 +52,7 @@ export class MyProfile implements OnInit {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
-
+  private dialog = inject(MatDialog);
   
   // 2. INYECTAR EL DETECTOR DE CAMBIOS
   private cdr = inject(ChangeDetectorRef);
@@ -147,7 +150,7 @@ export class MyProfile implements OnInit {
     
     if (file && this.userId) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('La imagen no puede pesar más de 5MB');
+        this.openAvatarSizeDialog('La imagen no puede pesar más de 5MB');
         return;
       }
 
@@ -200,20 +203,45 @@ export class MyProfile implements OnInit {
     this.userService.updateUser(this.userId, updateData).subscribe({
       next: (res: any) => {
         if (res.token) {
-          this.auth.setTokenFromOAuth(res.token); 
+          this.auth.setTokenFromOAuth(res.token);
         }
 
-        alert('Perfil actualizado correctamente');
+        this.openProfileDialog('Perfil actualizado correctamente', true);
         this.loading = false;
         this.cdr.detectChanges();
         
       },
       error: (err) => {
         console.error(err);
-        alert('Error al actualizar perfil');
+        this.openProfileDialog('Error al actualizar perfil', false);
         this.loading = false;
         this.cdr.detectChanges();
       }
     });
+  }
+  private openProfileDialog(message: string, success: boolean) {
+    const ref = this.dialog.open(NotificationDialogComponent, {
+      data: { message, type: success ? 'success' : 'error' },
+      panelClass: success
+        ? 'notify-profile-success-dialog'
+        : 'notify-profile-error-dialog',
+      position: { top: '80px' },
+    });
+
+    setTimeout(() => {
+      ref.close();
+    }, 3000);
+  }
+
+  private openAvatarSizeDialog(message: string) {
+    const ref = this.dialog.open(NotificationDialogComponent, {
+      data: { message, type: 'error' },
+      panelClass: 'notify-avatar-size-dialog',
+      position: { top: '80px' },
+    });
+
+    setTimeout(() => {
+      ref.close();
+    }, 3000);
   }
 }

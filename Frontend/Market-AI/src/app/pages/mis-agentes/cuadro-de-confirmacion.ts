@@ -40,7 +40,7 @@ export interface CuadroDeConfirmacionData {
       }
       .notify-actions {
         display: flex;
-        justify-content: flex-end;
+        justify-content: center;
         gap: 8px;
         margin-top: 4px;
       }
