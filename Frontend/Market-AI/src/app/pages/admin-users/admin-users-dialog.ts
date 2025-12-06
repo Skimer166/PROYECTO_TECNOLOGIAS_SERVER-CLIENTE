@@ -218,7 +218,7 @@ interface AdminUser {
 
       .user-row {
         display: grid;
-        grid-template-columns: 0.8fr 0.9fr 1.4fr 2fr 0.8fr 0.9fr;
+        grid-template-columns: repeat(6, 1fr);
         gap: 12px;
         align-items: center;
         padding: 8px 0;
@@ -233,6 +233,7 @@ interface AdminUser {
       .user-col--actions {
         display: flex;
         justify-content: flex-end;
+        gap: 10px;
       }
 
       .user-col--credits {
@@ -262,13 +263,17 @@ interface AdminUser {
 
       .user-btn {
         border-radius: 999px;
-        padding-inline: 14px;
+        padding-inline: 18px;
         font-weight: 500;
       }
 
       .user-btn-role {
-        border-color: #a5b4fc;
-        color: #e0e7ff;
+        background-color: #5e60ce;
+        border: none;
+      }
+
+      .user-btn-role:hover {
+        background-color: #7a7cff;
       }
 
       .user-btn-role[disabled] {
@@ -280,8 +285,20 @@ interface AdminUser {
       }
 
       .user-btn-delete {
-        border-color: #ff4d6a;
-        color: #ff8a9a;
+        background-color: #ff4d6a;
+        border: none;
+      }
+
+      .user-btn-delete:hover {
+        background-color: #ff6f88;
+      }
+
+      /* Forzar texto blanco dentro de los botones de acciones (sobrescribe Material) */
+      :host ::ng-deep .user-btn-role,
+      :host ::ng-deep .user-btn-role .mdc-button__label,
+      :host ::ng-deep .user-btn-delete,
+      :host ::ng-deep .user-btn-delete .mdc-button__label {
+        color: #ffffff !important;
       }
 
       .user-col--state {
@@ -291,32 +308,31 @@ interface AdminUser {
 
       .state-chip {
         border-radius: 999px;
-        padding: 4px 10px;
-        font-size: 0.8rem;
-        background: rgba(148, 163, 184, 0.25);
-        color: #e5e7eb;
+        padding: 4px 16px;
+        font-size: 0.85rem;
         border: none;
+        background: #64ce5eff;
       }
 
       .state-chip--active {
-        background: rgba(16, 185, 129, 0.3);
-        color: #bbf7d0;
+        background: #65ce5eff;
       }
 
       .state-chip--blocked {
-        background: rgba(239, 68, 68, 0.3);
-        color: #fecaca;
+        background: #ff4d6a;
       }
 
       /* Estilos para que el dropdown de Rol se vea claro sobre el fondo oscuro */
       .admin-users-card .mat-mdc-text-field-wrapper {
-        background: rgba(0, 0, 0, 0.35);
+        background: #3f3f9b;
         border-radius: 10px;
       }
 
-      .admin-users-card .mat-mdc-select-value-text,
-      .admin-users-card .mat-mdc-select-placeholder,
-      .admin-users-card .mat-mdc-form-field-subscript-wrapper {
+      /* Texto del select de Rol en blanco */
+      :host ::ng-deep .inline-field--small .mat-mdc-select-trigger,
+      :host ::ng-deep .inline-field--small .mat-mdc-select-value-text,
+      :host ::ng-deep .inline-field--small .mat-mdc-select-placeholder,
+      :host ::ng-deep .inline-field--small .mat-mdc-select-min-line {
         color: #ffffff !important;
       }
 
@@ -331,6 +347,12 @@ interface AdminUser {
       .admin-users-card .mat-mdc-form-field-outline-start,
       .admin-users-card .mat-mdc-form-field-outline-end {
         border-color: rgba(255, 255, 255, 0.35);
+      }
+
+      /* Forzar texto blanco en botones de estado */
+      :host ::ng-deep .state-chip,
+      :host ::ng-deep .state-chip .mdc-button__label {
+        color: #ffffff !important;
       }
 
       @media (max-width: 900px) {
