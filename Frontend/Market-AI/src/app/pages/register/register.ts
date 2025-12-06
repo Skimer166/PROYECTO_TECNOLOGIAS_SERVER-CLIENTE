@@ -86,7 +86,7 @@ export class Register {
       position: { top: '80px' }
     });
 
-    const duration = 1000;
+    const duration = 2000;
 
     setTimeout(() => {
       ref.close();
