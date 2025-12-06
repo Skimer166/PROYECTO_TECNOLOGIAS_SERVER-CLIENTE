@@ -11,6 +11,7 @@ import { MyAgents } from './pages/mis-agentes/mis-agentes';
 import { AdminSupport } from './pages/admin-support/admin-support';
 import { AdminUsers } from './pages/admin-users/admin-users-dialog';
 import { ResetPassword } from './pages/reset-password/reset-password';
+import { AdminAgentsComponent } from './pages/admin-agents/admin-agents';
 
 export const routes: Routes = [
     {path: 'landing-page', component: LandingPage},
@@ -24,5 +25,6 @@ export const routes: Routes = [
     {path: 'mi-perfil', component: MyProfile, canActivate:[authActivateGuard]},
     {path: 'mis-agentes', component: MyAgents, canActivate: [authActivateGuard] },
     {path: 'admin/support', component: AdminSupport, canActivate: [authActivateGuard]},
-    {path: 'admin/users', component: AdminUsers, canActivate: [authActivateGuard]}
+    {path: 'admin/users', component: AdminUsers, canActivate: [authActivateGuard]},
+    {path: 'admin/agents', component: AdminAgentsComponent, canActivate: [authActivateGuard]}
 ];
