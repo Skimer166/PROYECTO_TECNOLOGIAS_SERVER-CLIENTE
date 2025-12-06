@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUsers, getUserById, postUsers, updateUser, deleteUser, getFavoriteAgents, updateUserRole, addUserCredits } from "./controller";
+import { getUsers, getUserById, postUsers, updateUser, deleteUser, getFavoriteAgents, updateUserRole, addUserCredits, updateUserStatus } from "./controller";
 import { authMiddleware, verifyAdmin, verifyToken } from "../middlewares/auth";
 const router = Router();
 
@@ -228,6 +228,9 @@ router.get('/favorites', verifyToken, getFavoriteAgents);
  */
 // PUT /users/:id/role - Admin: actualizar rol
 router.put('/:id/role', verifyToken, verifyAdmin, updateUserRole)
+
+// PUT /users/:id/status - Admin: actualizar estado (active/blocked)
+router.put('/:id/status', verifyToken, verifyAdmin, updateUserStatus)
 
 // PUT /users/:id/credits - Admin: agregar créditos
 router.put('/:id/credits', verifyToken, verifyAdmin, addUserCredits)

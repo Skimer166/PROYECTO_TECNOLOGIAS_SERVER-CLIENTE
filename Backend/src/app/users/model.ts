@@ -32,6 +32,13 @@ const userSchema = new Schema<IUser>(
       index: true,
     },
 
+    status: {
+      type: String,
+      enum: ['active', 'blocked'],
+      default: 'active',
+      index: true,
+    },
+
     googleId: { type: String },
 
     provider: {

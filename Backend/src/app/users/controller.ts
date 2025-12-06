@@ -8,9 +8,9 @@ import { sendWelcomeEmail } from "../mailer/controller";
 //GET/users-CRUD: Read (listar usuarios)
 export async function getUsers(req: Request, res: Response) {
   try {
-    const users = await UserModel.find({}, { name: 1, email: 1, role: 1, credits: 1 }).lean();
+    const users = await UserModel.find({}, { name: 1, email: 1, role: 1, credits: 1, status: 1 }).lean();
     return res.json({
-      users: users.map((u) => ({id: String(u._id),name: u.name,email: u.email,role: (u as any).role || 'user',credits: (u as any).credits ?? 0,})),
+      users: users.map((u) => ({id: String(u._id),name: u.name,email: u.email,role: (u as any).role || 'user',credits: (u as any).credits ?? 0,status: (u as any).status || 'active',})),
     });
   } catch (err) {
     console.error("Error listando usuarios:", err);
@@ -70,10 +70,10 @@ export async function getUserById(req: Request, res: Response) {
     const { id } = req.params;
     if (!isValidObjectId(id)) return res.status(400).json({ message: "ID inválido" });
 
-    const user = await UserModel.findById(id, { name: 1, email: 1, avatar: 1 }).lean();
+    const user = await UserModel.findById(id, { name: 1, email: 1, avatar: 1, status: 1 }).lean();
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
 
-    return res.json({ id: String(user._id), name: user.name, email: user.email, avatar: user.avatar });
+    return res.json({ id: String(user._id), name: user.name, email: user.email, avatar: user.avatar, status: (user as any).status || 'active' });
   } catch (err) {
     console.error("Error obteniendo usuario:", err);
     return res.status(500).json({ message: "Error del servidor" });
@@ -108,7 +108,7 @@ export async function updateUser(req: Request, res: Response) {
     const updated = await UserModel.findByIdAndUpdate(
       id, 
       update, 
-      { new: true, projection: { name: 1, email: 1, role: 1, avatar: 1 } }
+      { new: true, projection: { name: 1, email: 1, role: 1, avatar: 1, status: 1 } }
     ).lean();
 
     if (!updated) return res.status(404).json({ message: "Usuario no encontrado" });
@@ -119,6 +119,7 @@ export async function updateUser(req: Request, res: Response) {
         email: updated.email,
         name: updated.name,
         role: updated.role || 'user',
+        status: (updated as any).status || 'active',
         avatar: updated.avatar,
       },
       JWT_SECRET,
@@ -191,7 +192,8 @@ const token = jwt.sign(
         name: user.name,
         role: user.role || 'user',
         avatar: user.avatar,
-        credits: user.credits
+        credits: user.credits,
+        status: (user as any).status || 'active',
       },
       JWT_SECRET,
       { expiresIn: '2h' }
@@ -234,6 +236,41 @@ export async function updateUserRole(req: Request, res: Response) {
   } catch (err) {
     console.error("Error actualizando rol:", err);
     return res.status(500).json({ message: "Error del servidor" });
+  }
+}
+
+// PUT /users/:id/status - Admin: actualizar estado (activo/bloqueado)
+export async function updateUserStatus(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
+
+    const { status } = req.body || {};
+    if (!status || !['active', 'blocked'].includes(status)) {
+      return res.status(400).json({ message: "Estado inválido. Usa 'active' o 'blocked'" });
+    }
+
+    const updated = await UserModel.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true, projection: { name: 1, email: 1, status: 1 } }
+    ).lean();
+
+    if (!updated) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    return res.json({
+      id: String(updated._id),
+      name: updated.name,
+      email: updated.email,
+      status: (updated as any).status,
+    });
+  } catch (err) {
+    console.error('Error actualizando estado:', err);
+    return res.status(500).json({ message: 'Error del servidor' });
   }
 }
 

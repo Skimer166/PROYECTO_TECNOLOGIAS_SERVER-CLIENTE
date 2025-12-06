@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { IUser } from "../interfaces/user"
 import jwt from 'jsonwebtoken';
+import { UserModel } from '../users/model';
 
 declare global {
     namespace Express {
@@ -47,7 +48,7 @@ export interface AuthRequest extends Request {
   user?: any;
 }
 
-export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const verifyToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ message: 'Required token' });
 
@@ -57,11 +58,25 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
   try {
     const decoded = jwt.verify(token, JWT_SECRET as string) as any;
 
+    const userId = decoded.sub || decoded.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'Invalid token payload' });
+    }
+
+    const dbUser = await UserModel.findById(userId, { status: 1, role: 1, email: 1, name: 1 }).lean();
+    if (!dbUser) {
+      return res.status(401).json({ message: 'Usuario no encontrado' });
+    }
+
+    if ((dbUser as any).status === 'blocked') {
+      return res.status(403).json({ message: 'Tu cuenta está bloqueada. Contacta al administrador.' });
+    }
+
     req.user = {
-      id: decoded.sub || decoded.id,
-      email: decoded.email,
-      name: decoded.name,
-      role: decoded.role,
+      id: userId,
+      email: dbUser.email,
+      name: dbUser.name,
+      role: dbUser.role,
     };
 
     next();

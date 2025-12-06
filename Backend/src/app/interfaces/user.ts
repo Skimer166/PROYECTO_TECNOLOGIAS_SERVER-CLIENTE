@@ -5,6 +5,7 @@ export interface IUser extends Document {
   email: string;
   passwordHash?: string;
   role: 'user' | 'admin';
+  status?: 'active' | 'blocked';
   googleId?: string;
   provider: 'local' | 'google';
   avatar?: string;
