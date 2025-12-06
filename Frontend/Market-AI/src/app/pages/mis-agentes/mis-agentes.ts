@@ -11,10 +11,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { Header } from '../../layouts/header/header';
 import { Footer } from '../../layouts/footer/footer';
 import { SocketService } from '../../shared/services/socket';
+import { NotificationDialogComponent } from '../login/popup-login';
+import { CuadroDeConfirmacionComponent } from './cuadro-de-confirmacion';
 
 @Component({
   selector: 'app-my-agents',
@@ -28,6 +31,7 @@ import { SocketService } from '../../shared/services/socket';
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
     Header, 
     Footer
   ],
@@ -55,6 +59,7 @@ export class MyAgents implements OnInit, OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
   private socketService = inject(SocketService);
+  private dialog = inject(MatDialog);
 
   constructor() {}
 
@@ -110,27 +115,36 @@ export class MyAgents implements OnInit, OnDestroy {
 
   releaseAgent(agent: any, event: Event) {
     event.stopPropagation(); // Evita abrir el chat al hacer clic en eliminar
-    if(!confirm('¿Seguro que quieres dejar de usar este agente?')) return;
 
-    this.http.post(`http://localhost:3001/agents/${agent._id}/release`, {}, { headers: this.getAuthHeaders() })
-      .subscribe({
-        next: () => {
-          // Filtrar la lista localmente para que desaparezca sin recargar
-          this.agents = this.agents.filter(a => a._id !== agent._id);
-          
-          // Si teníamos abierto el chat de este agente, lo cerramos
-          if (this.selectedAgent?._id === agent._id) {
-            this.closeChat();
-          }
-          
-          alert('Agente liberado.');
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error(err);
-          alert('Error al liberar agente');
-        }
-      });
+    const ref = this.dialog.open(CuadroDeConfirmacionComponent, {
+      data: { message: '¿Seguro que quieres dejar de usar este agente?' },
+      panelClass: 'confirm-release-dialog',
+      position: { top: '80px' },
+    });
+
+    ref.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) return;
+
+      this.http.post(`http://localhost:3001/agents/${agent._id}/release`,{},{ headers: this.getAuthHeaders() })
+        .subscribe({
+          next: () => {
+            // Filtrar la lista localmente para que desaparezca sin recargar
+            this.agents = this.agents.filter((a) => a._id !== agent._id);
+
+            // Si teníamos abierto el chat de este agente, lo cerramos
+            if (this.selectedAgent?._id === agent._id) {
+              this.closeChat();
+            }
+
+            this.openReleaseResultDialog('Agente liberado.', true);
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            console.error(err);
+            this.openReleaseResultDialog('Error al liberar agente', false);
+          },
+        });
+    });
   }
 
   // --- CHAT LOGIC ---
@@ -210,4 +224,18 @@ export class MyAgents implements OnInit, OnDestroy {
     // Forzar actualización de vista
     this.cdr.detectChanges();
   }
+  private openReleaseResultDialog(message: string, success: boolean) {
+    const ref = this.dialog.open(NotificationDialogComponent, {
+      data: { message, type: success ? 'success' : 'error' },
+      panelClass: success
+        ? 'notify-release-success-dialog'
+        : 'notify-release-error-dialog',
+      position: { top: '80px' },
+    });
+
+    setTimeout(() => {
+      ref.close();
+    }, 4000);
+  }
 }
+

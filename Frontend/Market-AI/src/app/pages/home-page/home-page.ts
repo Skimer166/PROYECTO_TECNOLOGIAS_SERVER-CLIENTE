@@ -15,6 +15,7 @@ import { Header } from '../../layouts/header/header';
 import { Footer } from '../../layouts/footer/footer';
 import { RentDialogComponent } from '../rent-dialog/rent-dialog';
 import { AuthService } from '../../shared/services/auth';
+import { NotificationDialogComponent } from '../login/popup-login';
 
 interface Agent {
   _id: string;
@@ -267,21 +268,39 @@ export class HomePage implements OnInit, OnDestroy {
       unit
     }, {
       headers: this.getAuthHeaders()
-    }).subscribe({
-      next: (res: any) => {
-        alert(`¡Renta exitosa! Te quedan ${res.remainingCredits} créditos.`);
-        if (res.remainingCredits !== undefined) {
-          this.authService.updateCredits(res.remainingCredits);
         }
-      },
-      error: (err) => {
-        console.error(err);
-        const msg = err.error?.message || 'Error al rentar';
-        alert(msg);
-      }
-    });
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.openRentDialog(
+            `¡Renta exitosa! Te quedan ${res.remainingCredits} créditos.`,
+            true
+          );
+          if (res.remainingCredits !== undefined) {
+            this.authService.updateCredits(res.remainingCredits);
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          const msg = err.error?.message || 'Error al rentar';
+          this.openRentDialog(msg, false);
+        },
+      });
   }
 
   goToAgentPanel(): void {}
   goToUserPanel(): void {}
+  private openRentDialog(message: string, isSuccess: boolean) {
+    const ref = this.dialog.open(NotificationDialogComponent, {
+      data: { message, type: isSuccess ? 'success' : 'error' },
+      panelClass: isSuccess
+        ? 'notify-rent-success-dialog'
+        : 'notify-rent-error-dialog',
+      position: { top: '80px' },
+    });
+
+    setTimeout(() => {
+      ref.close();
+    }, 4000);
+  }
 }
