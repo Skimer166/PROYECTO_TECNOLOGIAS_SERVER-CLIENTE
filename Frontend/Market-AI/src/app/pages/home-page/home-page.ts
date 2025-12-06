@@ -16,6 +16,7 @@ import { Footer } from '../../layouts/footer/footer';
 import { RentDialogComponent } from '../rent-dialog/rent-dialog';
 import { AuthService } from '../../shared/services/auth';
 import { NotificationDialogComponent } from '../login/popup-login';
+import { AdminAgentsDialogComponent } from '../admin-agents/admin-agents-dialog';
 
 interface Agent {
   _id: string;
@@ -288,7 +289,16 @@ export class HomePage implements OnInit, OnDestroy {
       });
   }
 
-  goToAgentPanel(): void {}
+  goToAgentPanel(): void {
+    if (!this.isBrowser) return;
+
+    this.dialog.open(AdminAgentsDialogComponent, {
+      width: '900px',
+      maxHeight: '80vh',
+      panelClass: 'admin-agents-dialog'
+    });
+  }
+
   goToUserPanel(): void {}
   private openRentDialog(message: string, isSuccess: boolean) {
     const ref = this.dialog.open(NotificationDialogComponent, {
