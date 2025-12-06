@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -6,10 +6,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
 import { User as userService } from '../../shared/services/user';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { AuthService } from '../../shared/services/auth';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { NotificationDialogComponent } from '../login/popup-login';
 @Component({
   selector: 'app-register',
@@ -17,18 +17,35 @@ import { NotificationDialogComponent } from '../login/popup-login';
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
-export class Register {
-
+export class Register implements OnInit {
   form: FormGroup;
+  private static emailUsedErrorHandled = false;
+  private currentDialogRef?: MatDialogRef<NotificationDialogComponent>;
 
   constructor(private activatedRoute: ActivatedRoute, private fb: FormBuilder, private userService: userService, private location: Location, private auth: AuthService, private dialog: MatDialog) {
-    this.form = fb.group({
+    this.form = this.fb.group(
+      {
       Nombre: ['', [Validators.required, Validators.minLength(2)]],
       Correo: ['', [Validators.required, Validators.email]],
       Contraseña: ['', [Validators.required, Validators.minLength(8)]],
       Confirmar_contraseña: ['', [Validators.required, Validators.minLength(8)]],
       Terms: [false, Validators.requiredTrue]
     }, {validators: this.match('Contraseña', 'Confirmar_contraseña')});
+  }
+
+  ngOnInit(): void {
+    // Mostrar errores que vengan desde el backend (por ejemplo, email ya usado en Google)
+    this.activatedRoute.queryParamMap.subscribe((params) => {
+      const error = params.get('error');
+
+      if (error === 'email_already_used' && !Register.emailUsedErrorHandled) {
+        Register.emailUsedErrorHandled = true;
+        this.openDialog(
+          'Este correo ya está registrado. Inicia sesión con esa cuenta.',
+          'error'
+        );
+      }
+    });
   }
 
   private match(control: string, confirm: string) {
@@ -65,8 +82,11 @@ export class Register {
         error: (err) => {
           console.error('Error en registro:', err);
           const msg = typeof err?.error === 'string' ? err.error : (err?.error?.message || 'Error desconocido');
-          alert(`Ocurrió un error al registrar el usuario. Código: ${err.status || 'N/A'} - ${msg}`);
-        }
+          this.openDialog(
+            `Ocurrió un error al registrar el usuario. Código: ${err.status || 'N/A'} - ${msg}`,
+            'error'
+          );
+        },
       });
     } else {
       this.form.markAllAsTouched();
@@ -75,23 +95,33 @@ export class Register {
   }
 
   registerWithGoogle() {
-    const url = this.auth.getGoogleLoginUrl();
+    const url = this.auth.getGoogleLoginUrl('register');
     window.location.href = url;
   }
 
   private openDialog(message: string, type: 'success' | 'error', redirectUrl?: string) {
+    // Cerrar cualquier diálogo previo para evitar que se muestren dos veces seguidas
+    if (this.currentDialogRef) {
+      this.currentDialogRef.close();
+    }
+
     const ref = this.dialog.open(NotificationDialogComponent, {
       data: { message, type },
       panelClass: type === 'success' ? 'notify-success-dialog' : 'notify-error-dialog',
       position: { top: '80px' }
     });
 
-    const duration = 2000;
+    this.currentDialogRef = ref;
+
+    const duration = redirectUrl ? 2000 : 2500;
 
     setTimeout(() => {
-      ref.close();
-      if (redirectUrl) {
-        window.location.href = redirectUrl;
+      if (this.currentDialogRef === ref) {
+        ref.close();
+        this.currentDialogRef = undefined;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+        }
       }
     }, duration);
   }

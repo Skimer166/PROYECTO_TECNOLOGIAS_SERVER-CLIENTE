@@ -107,8 +107,8 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  getGoogleLoginUrl(): string {
-    return `${this.baseUrl}/auth/google`;
+  getGoogleLoginUrl(mode: 'login' | 'register' = 'login'): string {
+    return `${this.baseUrl}/auth/google?mode=${mode}`;
   }
 
   setTokenFromOAuth(token: string) {

@@ -108,10 +108,19 @@ export async function resetPassword(req: Request, res: Response) {
 }
 
 //redirige a google para que inicie sesion
-export const googleAuthController = passport.authenticate('google', {
-  scope: ['profile', 'email'],
-  session: false,
-});
+export const googleAuthController = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const mode = (req.query.mode as string) === 'register' ? 'register' : 'login';
+
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    session: false,
+    state: mode,
+  })(req, res, next);
+};
 
 //callback que recibe google despues de iniciar sesion
 export const googleCallbackController = (
@@ -122,64 +131,23 @@ export const googleCallbackController = (
   passport.authenticate(
     'google',
     { session: false },
-    async (err: any, googleUser: any) => {
+    async (err: any, googleUser: any, info?: any) => {
       if (err || !googleUser) {
         console.error('Error en Google Auth:', err);
         return res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
       }
 
       try {
-        const { email, name, googleId, avatar } = googleUser;
+        const mode = (req.query.state as string) === 'register' ? 'register' : 'login';
+        const isNewUser = info && (info as any).isNewUser;
 
-        if (!email) {
-          return res.redirect(
-            `${FRONTEND_URL}/login?error=no_email_from_google`
-          );
+        // Si viene desde "Registrarse con Google" y el usuario YA existía,
+        // redirigimos al REGISTRO con error de email en uso.
+        if (mode === 'register' && !isNewUser) {
+          return res.redirect(`${FRONTEND_URL}/register?error=email_already_used`);
         }
 
-        //buscar usuario por email
-        let user = await UserModel.findOne({ email });
-
-        // si no existe, crearlo
-        if (!user) {
-          user = await UserModel.create({
-            name: name || 'Usuario Google',
-            email,
-            googleId,
-            provider: 'google',
-            avatar,
-          });
-        } else {
-          // si existe, actualizamos datos relacionados con google si hace falta
-          let updated = false;
-
-          const emailAlias = email.split('@')[0];
-
-          // si no tenía nombre o su nombre es igual al alias del correo, actualizamos al nombre de Google
-          if (!user.name || user.name === emailAlias) {
-            user.name = name || user.name || emailAlias;
-            updated = true;
-          }
-
-          if (!user.googleId) {
-            user.googleId = googleId;
-            updated = true;
-          }
-
-          if (user.provider !== 'google') {
-            user.provider = 'google';
-            updated = true;
-          }
-
-          if (avatar && user.avatar !== avatar) {
-            user.avatar = avatar;
-            updated = true;
-          }
-
-          if (updated) {
-            await user.save();
-          }
-        }
+        const user = googleUser;
 
         const token = jwt.sign(
           {

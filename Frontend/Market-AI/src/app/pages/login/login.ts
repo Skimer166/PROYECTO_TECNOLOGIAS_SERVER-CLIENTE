@@ -92,7 +92,7 @@ export class Login {
   }
 
   loginWithGoogle() {
-    const url = this.auth.getGoogleLoginUrl();
+    const url = this.auth.getGoogleLoginUrl('login');
     window.location.href = url;
   }
 

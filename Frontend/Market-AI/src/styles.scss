@@ -149,3 +149,22 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   padding-inline: 40px;
   --notify-box-bg: #3e0b0b;
 }
+
+/* Popups registro manual o con Googl) */
+.notify-register-success-dialog .mat-mdc-dialog-surface {
+  background: #4caf50;
+  color: #ffffff;
+  border-radius: 16px;
+  min-width: 420px;
+  padding-inline: 40px;
+  --notify-box-bg: #1b3b1d;
+}
+
+.notify-register-error-dialog .mat-mdc-dialog-surface {
+  background: #ff4081; 
+  color: #ffffff;
+  border-radius: 16px;
+  min-width: 420px;
+  padding-inline: 40px;
+  --notify-box-bg: #3c1020;
+}

@@ -33,18 +33,22 @@ passport.use(
 
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const email = profile.emails?.[0]?.value;
+        const rawEmail = profile.emails?.[0]?.value;
         const name = profile.displayName || '';
         const avatar = profile.photos?.[0]?.value; 
 
-        if (!email) {
+        if (!rawEmail) {
           return done(new Error('No se recibió email desde Google'), undefined);
         }
 
+        const email = rawEmail.trim().toLowerCase();
+
         let user = await UserModel.findOne({ email });
         const cleanName = name ? normalizeUtf8(name) : 'Usuario Google';
+        let isNewUser = false;
 
         if (!user) {
+          isNewUser = true;
           user = await UserModel.create({
             name: cleanName,
             email,
@@ -79,7 +83,7 @@ passport.use(
           if (updated) await user.save();
         }
 
-        return done(null, user);
+        return done(null, user, { isNewUser });
       } catch (err) {
         return done(err as any, undefined);
       }
