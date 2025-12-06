@@ -9,6 +9,7 @@ import { LoginSuccess } from './pages/login-success/login-success';
 import { MyProfile } from './pages/mi-perfil/mi-perfil';
 import { MyAgents } from './pages/mis-agentes/mis-agentes';
 import { AdminSupport } from './pages/admin-support/admin-support';
+import { AdminUsers } from './pages/admin-users/admin-users-dialog';
 import { ResetPassword } from './pages/reset-password/reset-password';
 
 export const routes: Routes = [
@@ -22,5 +23,6 @@ export const routes: Routes = [
     {path: 'login/success', component: LoginSuccess},
     {path: 'mi-perfil', component: MyProfile, canActivate:[authActivateGuard]},
     {path: 'mis-agentes', component: MyAgents, canActivate: [authActivateGuard] },
-    {path: 'admin/support', component: AdminSupport, canActivate: [authActivateGuard]}
+    {path: 'admin/support', component: AdminSupport, canActivate: [authActivateGuard]},
+    {path: 'admin/users', component: AdminUsers, canActivate: [authActivateGuard]}
 ];

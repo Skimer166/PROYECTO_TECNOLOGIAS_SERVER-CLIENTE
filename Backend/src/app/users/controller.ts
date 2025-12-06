@@ -8,8 +8,10 @@ import { sendWelcomeEmail } from "../mailer/controller";
 //GET/users-CRUD: Read (listar usuarios)
 export async function getUsers(req: Request, res: Response) {
   try {
-    const users = await UserModel.find({}, { name: 1, email: 1 }).lean();
-    return res.json({ users: users.map(u => ({ id: String(u._id), name: u.name, email: u.email })) });
+    const users = await UserModel.find({}, { name: 1, email: 1, role: 1, credits: 1 }).lean();
+    return res.json({
+      users: users.map((u) => ({id: String(u._id),name: u.name,email: u.email,role: (u as any).role || 'user',credits: (u as any).credits ?? 0,})),
+    });
   } catch (err) {
     console.error("Error listando usuarios:", err);
     return res.status(500).json({ message: "Error del servidor" });
@@ -227,6 +229,39 @@ export async function updateUserRole(req: Request, res: Response) {
   } catch (err) {
     console.error("Error actualizando rol:", err);
     return res.status(500).json({ message: "Error del servidor" });
+  }
+}
+
+// PUT /users/:id/credits - Admin: agregar créditos a un usuario
+export async function addUserCredits(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
+
+    const { amount } = req.body || {};
+    const numericAmount = Number(amount);
+
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      return res.status(400).json({ message: 'Cantidad de créditos inválida' });
+    }
+
+    const user = await UserModel.findById(id).exec();
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    user.credits = (user.credits ?? 0) + numericAmount;
+    await user.save();
+
+    return res.json({
+      id: String(user._id),
+      credits: user.credits,
+    });
+  } catch (err) {
+    console.error('Error agregando créditos:', err);
+    return res.status(500).json({ message: 'Error del servidor' });
   }
 }
 

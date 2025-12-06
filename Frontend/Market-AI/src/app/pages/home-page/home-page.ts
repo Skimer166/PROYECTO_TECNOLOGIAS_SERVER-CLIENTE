@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit, OnDestroy, PLATFORM_ID, ChangeDetectorRef } from '@angular/core'; // 1. Importar ChangeDetectorRef
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -82,6 +82,7 @@ export class HomePage implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef, // detector de cambios
     private dialog: MatDialog,
     private authService: AuthService,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: object
   ) {}
 
@@ -299,7 +300,10 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
-  goToUserPanel(): void {}
+  goToUserPanel(): void {
+    if (!this.isBrowser) return;
+    this.router.navigate(['/admin/users']);
+  }
   private openRentDialog(message: string, isSuccess: boolean) {
     const ref = this.dialog.open(NotificationDialogComponent, {
       data: { message, type: isSuccess ? 'success' : 'error' },

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUsers, getUserById, postUsers, updateUser, deleteUser, getFavoriteAgents, updateUserRole } from "./controller";
+import { getUsers, getUserById, postUsers, updateUser, deleteUser, getFavoriteAgents, updateUserRole, addUserCredits } from "./controller";
 import { authMiddleware, verifyAdmin, verifyToken } from "../middlewares/auth";
 const router = Router();
 
@@ -136,7 +136,7 @@ router.put('/:id', verifyToken, updateUser)
  * /users/{id}:
  *   delete:
  *     tags: [USERS]
- *     description: Eliminar un usuario por ID
+ *     description: Eliminar un usuario por ID (solo admin)
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -153,7 +153,7 @@ router.put('/:id', verifyToken, updateUser)
  *       401:
  *         description: missing token
  */
-router.delete('/:id', verifyToken, deleteUser)
+router.delete('/:id', verifyToken, verifyAdmin, deleteUser)
 
 /**
  * @swagger
@@ -228,6 +228,9 @@ router.get('/favorites', verifyToken, getFavoriteAgents);
  */
 // PUT /users/:id/role - Admin: actualizar rol
 router.put('/:id/role', verifyToken, verifyAdmin, updateUserRole)
+
+// PUT /users/:id/credits - Admin: agregar créditos
+router.put('/:id/credits', verifyToken, verifyAdmin, addUserCredits)
 
 
 export default router;
