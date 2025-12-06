@@ -4,15 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
-
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card'; 
+import { MatDialog } from '@angular/material/dialog'; 
 
+import { CreateAgentDialogComponent } from '../create-agent-dialog/create-agent-dialog';
 import { NotificationDialogComponent } from '../login/popup-login';
-import { MatDialog } from '@angular/material/dialog'; // para el popup
 
 interface AdminAgent {
   _id: string;
@@ -33,15 +32,14 @@ interface AdminAgent {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule,
-    MatCardModule
+    MatIconModule
   ],
   templateUrl: './admin-agents.html',
-  styleUrls: ['./admin-agents.scss']
+  styleUrl: './admin-agents.scss'
 })
 export class AdminAgentsComponent implements OnInit {
   private http = inject(HttpClient);
-  private dialog = inject(MatDialog); 
+  private dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef);
 
   agents: AdminAgent[] = [];
@@ -51,7 +49,6 @@ export class AdminAgentsComponent implements OnInit {
   editingAgentId: string | null = null;
   editName = '';
   editDescription = '';
-
   deletingAgentId: string | null = null;
 
   ngOnInit(): void {
@@ -63,6 +60,19 @@ export class AdminAgentsComponent implements OnInit {
     if (!token) return new HttpHeaders();
     const value = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
     return new HttpHeaders({ Authorization: value });
+  }
+
+  openCreateDialog() {
+    const ref = this.dialog.open(CreateAgentDialogComponent, {
+      width: '600px',
+      disableClose: true 
+    });
+
+    ref.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadAgents();
+      }
+    });
   }
 
   loadAgents(): void {
@@ -88,9 +98,7 @@ export class AdminAgentsComponent implements OnInit {
   }
 
   startEdit(agent: AdminAgent): void {
-    // Si ya estaba borrando, cancelo el borrado
     this.deletingAgentId = null;
-    
     this.editingAgentId = agent._id;
     this.editName = agent.name;
     this.editDescription = agent.description || '';
@@ -116,18 +124,18 @@ export class AdminAgentsComponent implements OnInit {
           agent.name = updated.name;
           agent.description = updated.description;
           this.editingAgentId = null;
-          this.openNotifyDialog('Agente actualizado correctamente.', true);
+          this.openNotifyDialog('Agente actualizado.', true);
           this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error al actualizar:', err);
-          this.openNotifyDialog('No se pudo actualizar el agente.', false);
+          this.openNotifyDialog('Error al actualizar.', false);
         },
       });
   }
 
   askDelete(agent: AdminAgent): void {
-    this.editingAgentId = null; // Cancelar edición si la hubiera
+    this.editingAgentId = null;
     this.deletingAgentId = agent._id;
   }
 
@@ -148,7 +156,7 @@ export class AdminAgentsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al borrar:', err);
-          this.openNotifyDialog('Error al eliminar agente.', false);
+          this.openNotifyDialog('Error al eliminar.', false);
         },
       });
   }
@@ -159,9 +167,6 @@ export class AdminAgentsComponent implements OnInit {
       panelClass: success ? 'notify-success-dialog' : 'notify-error-dialog',
       position: { top: '80px' },
     });
-
-    setTimeout(() => {
-      ref.close();
-    }, 3000);
+    setTimeout(() => ref.close(), 3000);
   }
 }

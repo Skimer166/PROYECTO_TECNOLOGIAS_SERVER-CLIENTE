@@ -1,0 +1,22 @@
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 10px;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .form-row { 
+    flex-direction: column; 
+    gap: 0; 
+  }
+}

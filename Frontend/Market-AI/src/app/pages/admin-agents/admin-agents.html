@@ -1,82 +1,89 @@
 <div class="admin-page-container">
       
-      <div class="page-header">
+  <div class="page-header">
+    <div class="header-left">
         <button mat-icon-button routerLink="/home-page">
-          <mat-icon>arrow_back</mat-icon>
+        <mat-icon>arrow_back</mat-icon>
         </button>
         <h1>Panel de Administración de Agentes</h1>
+    </div>
+    
+    <button mat-raised-button color="accent" (click)="openCreateDialog()">
+        Crear Agente <mat-icon iconPositionEnd>add</mat-icon>
+    </button>
+  </div>
+
+  <div class="content-wrapper">
+    
+    <div *ngIf="loading" class="state-message">
+      <mat-icon>hourglass_empty</mat-icon>
+      <span>Cargando agentes...</span>
+    </div>
+
+    <div *ngIf="error" class="state-message state-message--error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <div *ngIf="!loading && !error && !agents.length" class="state-message">
+      <mat-icon>search_off</mat-icon>
+      <span>No hay agentes registrados.</span>
+    </div>
+
+    <div *ngIf="!loading && !error && agents.length" class="agent-list-container">
+      
+      <div class="list-header-row">
+        <div class="col col-name">Nombre</div>
+        <div class="col col-desc">Descripción</div>
+        <div class="col col-actions">Acciones</div>
       </div>
 
-      <div class="content-wrapper">
-        <div *ngIf="loading" class="state-message">
-          <mat-icon>hourglass_empty</mat-icon>
-          <span>Cargando agentes...</span>
+      <div class="list-row" *ngFor="let agent of agents">
+        
+        <div class="col col-name">
+          <span *ngIf="editingAgentId !== agent._id" class="text-display">{{ agent.name }}</span>
+          <mat-form-field *ngIf="editingAgentId === agent._id" appearance="outline" class="dense-field">
+            <input matInput [(ngModel)]="editName" placeholder="Nombre" />
+          </mat-form-field>
         </div>
 
-        <div *ngIf="error" class="state-message state-message--error">
-          <mat-icon>error_outline</mat-icon>
-          <span>{{ error }}</span>
+        <div class="col col-desc">
+          <span *ngIf="editingAgentId !== agent._id" class="text-display description-text">
+            {{ agent.description }}
+          </span>
+          <mat-form-field *ngIf="editingAgentId === agent._id" appearance="outline" class="dense-field full-width">
+            <textarea matInput rows="1" [(ngModel)]="editDescription" placeholder="Descripción"></textarea>
+          </mat-form-field>
         </div>
 
-        <div *ngIf="!loading && !error && !agents.length" class="state-message">
-          <mat-icon>search_off</mat-icon>
-          <span>No hay agentes registrados.</span>
-        </div>
-
-        <div *ngIf="!loading && !error && agents.length" class="agent-list-container">
+        <div class="col col-actions">
           
-          <div class="list-header-row">
-            <div class="col col-name">Nombre</div>
-            <div class="col col-desc">Descripción</div>
-            <div class="col col-actions">Acciones</div>
-          </div>
+          <ng-container *ngIf="editingAgentId !== agent._id && deletingAgentId !== agent._id">
+            <button mat-icon-button class="btn-icon-edit" (click)="startEdit(agent)" title="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="btn-icon-delete" (click)="askDelete(agent)" title="Eliminar">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </ng-container>
 
-          <div class="list-row" *ngFor="let agent of agents">
-            
-            <div class="col col-name">
-              <span *ngIf="editingAgentId !== agent._id" class="text-display">{{ agent.name }}</span>
-              <mat-form-field *ngIf="editingAgentId === agent._id" appearance="outline" class="dense-field">
-                <input matInput [(ngModel)]="editName" placeholder="Nombre" />
-              </mat-form-field>
-            </div>
+          <ng-container *ngIf="editingAgentId === agent._id">
+            <button mat-icon-button color="warn" (click)="cancelEdit()" title="Cancelar">
+              <mat-icon>close</mat-icon>
+            </button>
+            <button mat-icon-button class="btn-save" (click)="saveEdit(agent)" title="Guardar">
+              <mat-icon>check</mat-icon>
+            </button>
+          </ng-container>
 
-            <div class="col col-desc">
-              <span *ngIf="editingAgentId !== agent._id" class="text-display description-text">
-                {{ agent.description }}
-              </span>
-              <mat-form-field *ngIf="editingAgentId === agent._id" appearance="outline" class="dense-field full-width">
-                <textarea matInput rows="1" [(ngModel)]="editDescription" placeholder="Descripción"></textarea>
-              </mat-form-field>
-            </div>
+          <ng-container *ngIf="deletingAgentId === agent._id">
+            <span class="confirm-label">¿Seguro?</span>
+            <button mat-button color="primary" (click)="cancelDelete()">No</button>
+            <button mat-flat-button color="warn" (click)="confirmDelete(agent)">Si</button>
+          </ng-container>
 
-            <div class="col col-actions">
-              
-              <ng-container *ngIf="editingAgentId !== agent._id && deletingAgentId !== agent._id">
-                <button mat-icon-button class="btn-icon-edit" (click)="startEdit(agent)" title="Editar">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button class="btn-icon-delete" (click)="askDelete(agent)" title="Eliminar">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </ng-container>
-
-              <ng-container *ngIf="editingAgentId === agent._id">
-                <button mat-icon-button color="warn" (click)="cancelEdit()" title="Cancelar">
-                  <mat-icon>close</mat-icon>
-                </button>
-                <button mat-icon-button class="btn-save" (click)="saveEdit(agent)" title="Guardar">
-                  <mat-icon>check</mat-icon>
-                </button>
-              </ng-container>
-
-              <ng-container *ngIf="deletingAgentId === agent._id">
-                <span class="confirm-label">¿Seguro?</span>
-                <button mat-button color="primary" (click)="cancelDelete()">No</button>
-                <button mat-flat-button color="warn" (click)="confirmDelete(agent)">Si</button>
-              </ng-container>
-
-            </div>
-          </div>
         </div>
       </div>
     </div>
+  </div>
+</div>

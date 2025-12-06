@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>Crear Nuevo Agente</h2>
+    
+<mat-dialog-content>
+  <form [formGroup]="form" class="create-form">
+    
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre del Agente</mat-label>
+        <input matInput formControlName="name" placeholder="Ej. Experto Python">
+        <mat-error *ngIf="form.get('name')?.hasError('required')">Requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Modelo (IA)</mat-label>
+        <input matInput formControlName="modelVersion" placeholder="Ej. gpt-4o">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría</mat-label>
+        <mat-select formControlName="category">
+          <mat-option value="marketing">Marketing</mat-option>
+          <mat-option value="salud">Salud</mat-option>
+          <mat-option value="educacion">Educación</mat-option>
+          <mat-option value="asistente">Asistente</mat-option>
+          <mat-option value="otros">Otros</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Idioma</mat-label>
+        <input matInput formControlName="language" placeholder="Ej. es, en">
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Precio por Hora (Créditos)</mat-label>
+      <input matInput type="number" formControlName="pricePerHour">
+      <span matTextPrefix>$&nbsp;</span>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Descripción (Visible al usuario)</mat-label>
+      <textarea matInput formControlName="description" rows="2"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Instrucciones (Prompt del Sistema)</mat-label>
+      <textarea matInput formControlName="instructions" rows="4" placeholder="Ej. Eres un experto en..."></textarea>
+      <mat-hint>Estas son las reglas internas que seguirá la IA.</mat-hint>
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Cancelar</button>
+  <button mat-flat-button color="primary" [disabled]="form.invalid || loading" (click)="save()">
+    {{ loading ? 'Guardando...' : 'Crear Agente' }}
+  </button>
+</mat-dialog-actions>
