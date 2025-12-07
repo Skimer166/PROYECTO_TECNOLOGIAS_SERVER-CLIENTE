@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { SocketService } from './socket';
+import { environment } from '../config'; 
 
 interface LoginRequest {
   email: string;
@@ -16,7 +17,7 @@ export interface LoginResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly baseUrl = 'http://localhost:3001'; 
+  private readonly baseUrl = environment.apiUrl; 
   private platformId = inject(PLATFORM_ID);
 
   private creditsSubject = new BehaviorSubject<number>(0);

@@ -19,6 +19,8 @@ import { SocketService } from '../../shared/services/socket';
 import { NotificationDialogComponent } from '../login/popup-login';
 import { CuadroDeConfirmacionComponent } from './cuadro-de-confirmacion';
 
+import { environment } from '../../shared/config';
+
 @Component({
   selector: 'app-my-agents',
   standalone: true,
@@ -97,7 +99,7 @@ export class MyAgents implements OnInit, OnDestroy {
   loadMyAgents() {
     this.loading = true;
     // Ajusta el puerto (3000 o 3001) según tu backend
-    this.http.get<any>('http://localhost:3001/agents/my-rentals', { headers: this.getAuthHeaders() })
+    this.http.get<any>(`${environment.apiUrl}/agents/my-rentals`, { headers: this.getAuthHeaders() })
       .subscribe({
         next: (res) => {
           this.agents = res.agents || [];
@@ -173,7 +175,7 @@ export class MyAgents implements OnInit, OnDestroy {
     setTimeout(() => this.scrollToBottom(), 100);
 
     // 2. Llamar al Backend (OpenAI)
-    this.http.post<any>('http://localhost:3001/chat', {
+    this.http.post<any>(`${environment.apiUrl}/chat`, {
       agentId: this.selectedAgent._id,
       message: text
     }, { headers: this.getAuthHeaders() }).subscribe({

@@ -2,6 +2,7 @@ import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { io, Socket as IOSocket } from 'socket.io-client';
 import { Observable, Subject, BehaviorSubject } from 'rxjs'; 
+import { environment } from '../config';
 
 @Injectable({
   providedIn: 'root',
@@ -30,7 +31,7 @@ export class SocketService {
       this.socket = undefined;
     }
 
-    this.socket = io('http://localhost:3001', {
+    this.socket = io(environment.socketUrl, {
       auth: { token },
       transports: ['websocket'],
     });
