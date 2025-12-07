@@ -39,15 +39,18 @@ interface AdminUser {
     <div class="admin-users-page">
       <div class="admin-users-card">
         <div class="admin-users-header">
-          <button
-            mat-icon-button
-            routerLink="/home-page"
-            title="Volver al inicio"
-            class="back-button"
-          >
-            <mat-icon>arrow_back</mat-icon>
-          </button>
-          <h2 class="admin-users-title">Panel de usuarios</h2>
+          <div class="header-left">
+            <button
+              mat-icon-button
+              routerLink="/home-page"
+              title="Volver al inicio"
+            >
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+            <h1 class="admin-users-title">
+              Panel de Administración de Usuarios
+            </h1>
+          </div>
         </div>
 
         <div class="admin-users-content">
@@ -66,7 +69,7 @@ interface AdminUser {
             <span>No hay usuarios registrados.</span>
           </div>
 
-          <div *ngIf="!loading && !error && users.length" class="user-list">
+          <div *ngIf="!loading && !error && users.length" class="user-list-container">
             <div class="user-row user-row--header">
               <div class="user-col user-col--state">Estado</div>
               <div class="user-col user-col--role">Rol</div>
@@ -150,49 +153,47 @@ interface AdminUser {
   styles: [
     `
       .admin-users-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
         min-height: 100vh;
-        display: flex;
-        align-items: stretch;
-        justify-content: center;
-        padding: 8px;
+        color: #ffffff;
         box-sizing: border-box;
       }
 
       .admin-users-card {
-        width: 95vw;
-        max-width: 1400px;
-        background: #1e1b4b;
-        color: #ffffff;
-        border-radius: 24px;
-        padding: 0 24px 12px 24px;
-        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+        width: 100%;
         display: flex;
         flex-direction: column;
       }
 
       .admin-users-title {
-        font-size: 1.4rem;
-        font-weight: 600;
         margin: 0;
+        font-size: 1.8rem;
+        font-weight: 300;
         color: #ffffff;
       }
 
       .admin-users-header {
-        background: #6366f1;
-        margin: 0 -24px 12px -24px;
-        padding: 8px 24px;
-        border-radius: 24px 24px 0 0;
         display: flex;
         align-items: center;
-        gap: 8px;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1rem;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .header-left button {
+        color: #a5b4fc;
       }
 
       .admin-users-content {
-        margin-top: 8px;
         flex: 1;
-        max-height: none;
-        overflow: auto;
-        padding-bottom: 0;
       }
 
       .state-message {
@@ -208,12 +209,12 @@ interface AdminUser {
         color: #ffcdd2;
       }
 
-      .user-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-top: 8px;
-        color: #ffffff;
+      .user-list-container {
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        margin-top: 1rem;
       }
 
       .user-row {
@@ -221,13 +222,29 @@ interface AdminUser {
         grid-template-columns: repeat(6, 1fr);
         gap: 12px;
         align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: background 0.2s;
+      }
+
+      .user-row:last-child {
+        border-bottom: none;
+      }
+
+      .user-row:hover:not(.user-row--header) {
+        background: rgba(255, 255, 255, 0.03);
       }
 
       .user-row--header {
-        font-weight: 600;
-        border-bottom-width: 2px;
+        background: rgba(99, 102, 241, 0.2);
+        font-weight: 700;
+        color: #a5b4fc;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .user-col {
+        padding: 0 0.5rem;
+        overflow: hidden;
       }
 
       .user-col--actions {
@@ -356,15 +373,20 @@ interface AdminUser {
       }
 
       @media (max-width: 900px) {
-        .user-row {
-          grid-template-columns: 1fr 1fr;
-          grid-template-rows: auto auto;
+        .admin-users-page {
+          padding: 1rem;
         }
 
-        .user-col--email,
-        .user-col--credits,
-        .user-col--actions {
-          grid-column: span 2;
+        .admin-users-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+
+        .user-row,
+        .user-row.user-row--header {
+          grid-template-columns: 1fr;
+          gap: 1rem;
         }
 
         .user-col--actions {
