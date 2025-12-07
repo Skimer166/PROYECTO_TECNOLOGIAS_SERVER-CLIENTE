@@ -6,6 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { PLATFORM_ID } from '@angular/core';
 import { AuthService } from '../../shared/services/auth';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { AddCreditsDialogComponent } from '../../pages/add-credits-dialog/add-credits-dialog';
 
 @Component({
   selector: 'app-header',
@@ -25,7 +27,6 @@ export class Header implements OnInit {
   userName: string | null = null;
   userPhoto: string | null = null;
   userCredits: number = 0;
-
   // detector de cambios
   private cdr = inject(ChangeDetectorRef);
 
@@ -37,6 +38,14 @@ export class Header implements OnInit {
 
   get isLandingPage(): boolean {
     return this.router.url.includes('landing-page');
+  }
+
+  //para stripe
+  private dialog = inject(MatDialog);
+  openRechargeDialog() {
+    this.dialog.open(AddCreditsDialogComponent, {
+      width: '400px'
+    });
   }
 
   ngOnInit(): void {

@@ -1,0 +1,18 @@
+<div class="status-container">
+    <div *ngIf="verifying" class="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <h2>Verificando tu pago...</h2>
+    </div>
+
+    <div *ngIf="success" class="success">
+    <h1>¡Pago Exitoso! 🎉</h1>
+    <p>Se han agregado los créditos a tu cuenta.</p>
+    <button mat-raised-button color="primary" (click)="goHome()">Volver al Panel</button>
+    </div>
+
+    <div *ngIf="error" class="error">
+    <h1>Ups...</h1>
+    <p>{{ error }}</p>
+    <button mat-button color="warn" (click)="goHome()">Volver</button>
+    </div>
+</div>

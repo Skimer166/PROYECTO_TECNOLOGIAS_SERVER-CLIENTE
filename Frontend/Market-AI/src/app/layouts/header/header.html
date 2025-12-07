@@ -25,6 +25,10 @@
   <div class="right-section">
     @if (isLoggedIn) {
       
+      <button mat-stroked-button class="recharge-btn" (click)="openRechargeDialog()">
+        <mat-icon>add</mat-icon> Recargar
+      </button>
+      
       <div class="credits-badge" title="Tus créditos disponibles">
         <mat-icon class="coin-icon">monetization_on</mat-icon>
         <span>{{ userCredits || 0 }}</span>

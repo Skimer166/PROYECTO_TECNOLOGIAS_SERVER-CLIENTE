@@ -1,6 +1,7 @@
 .header-toolbar {
   display: flex;
-  align-items: center;
+  align-items: center;      
+  justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -8,15 +9,60 @@
   backdrop-filter: blur(10px);
   color: #fff;
   height: 64px;
-  padding: 0 1.5rem; /* Un poco más de aire a los lados */
+  padding: 0 1.5rem;
+  box-sizing: border-box;  
 }
 
-/* IZQUIERDA */
-.left-section {
+.left-section, .right-section {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 150px; /* Ancho mínimo para equilibrar visualmente */
+  align-items: center;     
+  height: 100%;            
+  min-width: 150px;
+}
+
+.left-section { gap: 8px; }
+
+.right-section {
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.center-nav {
+  display: flex;
+  align-items: center;     
+  justify-content: center;  
+  gap: 0.5rem;
+  
+  align-self: center;       
+  height: auto;             
+  margin: 0;
+  padding: 0;
+
+  a[mat-button] {
+    color: #cbd5e1;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    padding: 0 16px;
+    min-width: auto;
+    line-height: normal;   
+    
+    height: 36px;           
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    &.active-link {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.2);
+      font-weight: 600;
+    }
+  }
 }
 
 .brand {
@@ -26,60 +72,39 @@
   background: linear-gradient(90deg, #fff, #a5b4fc);
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent; /* Efecto elegante en el texto */
+  color: transparent;
+  line-height: 1;           
+  display: inline-block;
 }
 
-/* ESPACIADORES PARA CENTRAR */
-.spacer {
-  flex: 1 1 auto;
-}
+.spacer { flex: 1 1 auto; }
 
-/* CENTRO (NAVEGACIÓN) */
-.center-nav {
-  display: flex;
-  gap: 0.5rem;
-  
-  a[mat-button] {
-    color: #cbd5e1;
-    font-weight: 500;
-    font-size: 0.95rem;
-    border-radius: 8px;
-    padding: 0 16px;
-    min-width: auto;
 
-    &:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    /* Clase que agrega Angular automáticamente si usas routerLinkActive */
-    &.active-link {
-      color: #fff;
-      background: rgba(99, 102, 241, 0.2); /* Fondo suave lila/azul */
-      font-weight: 600;
-    }
-  }
-}
-
-/* DERECHA (USUARIO) */
-.right-section {
+.credits-badge {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 1rem;
-  min-width: 150px; /* Equilibrio con la izquierda */
+  gap: 4px;
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  font-weight: 600;
+  font-size: 0.9rem;
+  height: 32px;           
+  box-sizing: border-box;
+  margin-right: 0;         
+  cursor: help;
+
+  .coin-icon { font-size: 18px; width: 18px; height: 18px; }
 }
 
 .user-badge {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-right: 0.5rem;
   
-  /* Ocultar nombre en móviles para no saturar */
-  @media (max-width: 768px) {
-    span { display: none; }
-  }
+  @media (max-width: 768px) { span { display: none; } }
 }
 
 .mini-avatar {
@@ -87,7 +112,8 @@
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(99, 102, 241, 0.5); /* Borde sutil */
+  border: 2px solid rgba(99, 102, 241, 0.5);
+  display: block;         
 }
 
 .mini-name {
@@ -96,34 +122,38 @@
   font-weight: 500;
 }
 
-/* RESPONSIVE: En móviles, ocultamos el menú central o lo ajustamos */
-@media (max-width: 700px) {
-  .center-nav {
-    display: none; /* Aquí podrías poner un menú hamburguesa si quisieras luego */
-  }
+:host ::ng-deep button.recharge-btn {
+  border: 1px solid #fbbf24 !important;
+  background: transparent !important;
+  margin-right: 10px;
+  border-radius: 99px;
+  height: 32px;     
   
-  .header-toolbar {
-    padding: 0 0.8rem;
+  .mdc-button__label {
+    color: #fbbf24 !important;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+  }
+
+  mat-icon {
+    color: #fbbf24 !important;
+    margin-right: 4px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background-color: rgba(251, 191, 36, 0.15) !important;
+    border-color: #fcd34d !important;
+
+    .mdc-button__label { color: #fcd34d !important; }
+    mat-icon { color: #fcd34d !important; }
   }
 }
 
-.credits-badge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(251, 191, 36, 0.15); // Fondo dorado sutil
-  color: #fbbf24; // Texto dorado
-  padding: 4px 10px;
-  border-radius: 99px;
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-right: 10px;
-  cursor: help;
-
-  .coin-icon {
-    font-size: 18px;
-    height: 18px;
-    width: 18px;
-  }
+@media (max-width: 700px) {
+  .center-nav { display: none; }
+  .header-toolbar { padding: 0 0.8rem; }
 }

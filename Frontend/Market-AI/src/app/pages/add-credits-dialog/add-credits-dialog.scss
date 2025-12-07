@@ -1,0 +1,23 @@
+.credits-content { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 1.5rem; 
+    padding-top: 10px; 
+    min-width: 350px;
+}
+
+.full-width { 
+    width: 100%; 
+}
+
+.summary { 
+    background: rgba(99,102,241,0.1); 
+    padding: 10px; 
+    border-radius: 8px; 
+    text-align: center; 
+    color: #6366f1;
+}
+
+mat-slider { 
+    width: 100%; 
+}

@@ -90,21 +90,24 @@
 ::ng-deep .dense-field .mat-mdc-form-field-subscript-wrapper { display: none; }
 
 :host ::ng-deep {
+  
   .agent-list-container {
-    mat-form-field.mat-mdc-form-field {
-      .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex {
-        .mat-mdc-input-element {
-          color: #ffffff; 
-          caret-color: #a5b4fc; 
-        }
-
-        .mat-mdc-form-field-input-control::placeholder {
-          color: rgba(255, 255, 255, 0.5);
-        }
-      }
+    .dense-field.mat-mdc-form-field {
       .mat-mdc-text-field-wrapper {
-        background-color: rgba(0, 0, 0, 0.2); 
+        background-color: rgba(0, 0, 0, 0.2);
+        .mat-mdc-form-field-flex {
+          .mat-mdc-input-element {
+            color: #ffffff;
+            caret-color: #a5b4fc;
+          }
+          .mat-mdc-form-field-input-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+          }
+        }
       }
+    }
+        textarea.mat-mdc-input-element {
+        color: #ffffff;
     }
   }
 }

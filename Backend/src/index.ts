@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
 
       if (currentUser.id) {
         socket.join(String(currentUser.id));
-        console.log('Socket conectado para usuario', currentUser.id);
+        //console.log('Socket conectado para usuario', currentUser.id);
 
         // si eres admin...
         if (currentUser.role === 'admin') {
@@ -64,7 +64,7 @@ io.on('connection', (socket) => {
     }
   }
 
-  console.log('Cliente conectado', socket.id);
+  //console.log('Cliente conectado', socket.id);
   // cuando el usuario abre el chat
   socket.on('support:join', () => {
     if (!currentUser) {

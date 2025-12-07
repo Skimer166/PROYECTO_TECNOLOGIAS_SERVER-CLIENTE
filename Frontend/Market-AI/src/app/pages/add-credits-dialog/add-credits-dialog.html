@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>Recargar Créditos</h2>
+    <mat-dialog-content class="credits-content">
+      <div class="current-info">
+        <p>1 Crédito = $1.00 MXN</p>
+      </div>
+
+      <div class="amount-selector">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Cantidad a recargar</mat-label>
+          <input matInput type="number" [(ngModel)]="amount" min="10" step="10">
+          <span matTextPrefix>$&nbsp;</span>
+          <span matTextSuffix>.00</span>
+        </mat-form-field>
+        
+        <mat-slider min="10" max="2000" step="10" showTickMarks discrete>
+          <input matSliderThumb [(ngModel)]="amount">
+        </mat-slider>
+      </div>
+
+      <div class="summary">
+        <p>Total a pagar: <strong>\${{ amount | number:'1.2-2' }} MXN</strong></p>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Cancelar</button>
+      <button mat-flat-button color="primary" (click)="goToCheckout()" [disabled]="loading || amount < 10">
+        {{ loading ? 'Procesando...' : 'Continuar a Stripe' }}
+      </button>
+    </mat-dialog-actions>

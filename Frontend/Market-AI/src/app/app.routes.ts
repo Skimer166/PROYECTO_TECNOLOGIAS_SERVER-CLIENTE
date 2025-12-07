@@ -12,6 +12,7 @@ import { AdminSupport } from './pages/admin-support/admin-support';
 import { AdminUsers } from './pages/admin-users/admin-users-dialog';
 import { ResetPassword } from './pages/reset-password/reset-password';
 import { AdminAgentsComponent } from './pages/admin-agents/admin-agents';
+import { PaymentSuccessComponent } from './pages/payment-success/payment-success';
 
 export const routes: Routes = [
     {path: 'landing-page', component: LandingPage},
@@ -26,5 +27,7 @@ export const routes: Routes = [
     {path: 'mis-agentes', component: MyAgents, canActivate: [authActivateGuard] },
     {path: 'admin/support', component: AdminSupport, canActivate: [authActivateGuard]},
     {path: 'admin/users', component: AdminUsers, canActivate: [authActivateGuard]},
-    {path: 'admin/agents', component: AdminAgentsComponent, canActivate: [authActivateGuard]}
+    {path: 'admin/agents', component: AdminAgentsComponent, canActivate: [authActivateGuard]},
+    { path: 'payment/success', component: PaymentSuccessComponent, canActivate: [authActivateGuard] },
+    { path: 'payment/cancel', redirectTo: '/home-page' } // redirect por si cancela
 ];
