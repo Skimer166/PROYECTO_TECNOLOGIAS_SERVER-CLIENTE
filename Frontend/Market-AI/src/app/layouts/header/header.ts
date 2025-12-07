@@ -50,10 +50,10 @@ export class Header implements OnInit {
       this.isLandingPage = event.url === '/' || event.url === '/landing-page' || event.url.includes('#');
     });
 
-    // Subscribirse al estado del usuario (incluyendo créditos actualizados)
     this.auth.user$.subscribe((user: User | null) => {
       this.isLoggedIn = !!user;
       if (user) {
+        console.log(user)
         this.userName = user.name;
         this.userPhoto = user.image || null;
         this.userCredits = user.credits || 0;
