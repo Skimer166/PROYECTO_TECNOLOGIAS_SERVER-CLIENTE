@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu'; // <--- NUEVO IMPORT
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
 
 import { AuthService } from '../../shared/services/auth';
 import { User } from '../../shared/types/user';
@@ -23,8 +24,9 @@ import { AddCreditsDialogComponent } from '../../pages/add-credits-dialog/add-cr
     MatToolbarModule, 
     MatButtonModule, 
     MatIconModule,
-    MatMenuModule, // <--- AGREGAR AQUÍ
-    MatDialogModule
+    MatMenuModule, 
+    MatDialogModule,
+    MatDividerModule
   ],
   templateUrl: './header.html',
   styleUrl: './header.scss'

@@ -1,6 +1,7 @@
+/* TOOLBAR PRINCIPAL */
 .header-toolbar {
   display: flex;
-  align-items: center;      
+  align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
@@ -10,49 +11,63 @@
   color: #fff;
   height: 64px;
   padding: 0 1.5rem;
-  box-sizing: border-box;  
+  box-sizing: border-box;
 }
 
-.logo-btn {
-  padding: 0; 
-  margin-right: 8px;
-  
-  width: 40px; 
-  height: 40px;
-}
-
-.app-logo {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; 
-  border-radius: 4px; 
-}
-
+/* SECCIONES IZQ / DER */
 .left-section, .right-section {
   display: flex;
-  align-items: center;     
-  height: 100%;            
-  min-width: 150px;
+  align-items: center;
+  gap: 10px;
 }
-
-.left-section { gap: 8px; }
 
 .right-section {
   justify-content: flex-end;
   gap: 1rem;
 }
 
+.spacer { flex: 1 1 auto; }
+
+/* ELEMENTOS VISUALES */
+.logo-btn {
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  margin-right: 4px;
+  
+  .app-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  background: linear-gradient(90deg, #fff, #a5b4fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  white-space: nowrap;
+}
+
+/* MENÚ CENTRAL */
 .center-nav {
   display: flex;
-  align-items: center;     
-  justify-content: center;  
+  align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   
-  align-self: center;       
-  height: auto;             
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  
   margin: 0;
   padding: 0;
 
+  /* Estilos de los enlaces */
   a[mat-button] {
     color: #cbd5e1;
     font-weight: 500;
@@ -60,9 +75,8 @@
     border-radius: 8px;
     padding: 0 16px;
     min-width: auto;
-    line-height: normal;   
-    
-    height: 36px;           
+    line-height: normal;
+    height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -80,36 +94,23 @@
   }
 }
 
-.brand {
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.5px;
-  background: linear-gradient(90deg, #fff, #a5b4fc);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  line-height: 1;           
-  display: inline-block;
-}
-
-.spacer { flex: 1 1 auto; }
-
-
+/* BADGES Y AVATAR */
 .credits-badge {
   display: flex;
   align-items: center;
   gap: 4px;
   background: rgba(251, 191, 36, 0.15);
   color: #fbbf24;
-  padding: 4px 10px;
+  padding: 0 10px;
   border-radius: 99px;
   border: 1px solid rgba(251, 191, 36, 0.3);
   font-weight: 600;
   font-size: 0.9rem;
-  height: 32px;           
+  height: 32px;
   box-sizing: border-box;
-  margin-right: 0;         
+  margin-right: 0;
   cursor: help;
+  white-space: nowrap;
 
   .coin-icon { font-size: 18px; width: 18px; height: 18px; }
 }
@@ -118,8 +119,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  
-  @media (max-width: 768px) { span { display: none; } }
+  cursor: pointer;
 }
 
 .mini-avatar {
@@ -128,7 +128,7 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(99, 102, 241, 0.5);
-  display: block;         
+  display: block;
 }
 
 .mini-name {
@@ -137,12 +137,13 @@
   font-weight: 500;
 }
 
+/* BOTÓN RECARGAR (Fix Amarillo) */
 :host ::ng-deep button.recharge-btn {
   border: 1px solid #fbbf24 !important;
   background: transparent !important;
   margin-right: 10px;
   border-radius: 99px;
-  height: 32px;     
+  height: 32px;
   
   .mdc-button__label {
     color: #fbbf24 !important;
@@ -168,7 +169,32 @@
   }
 }
 
-@media (max-width: 700px) {
-  .center-nav { display: none; }
-  .header-toolbar { padding: 0 0.8rem; }
+.text-gold { color: #fbbf24; }
+
+
+
+.mobile-menu-btn { display: none; }
+
+@media (max-width: 900px) {
+  .header-toolbar { padding: 0 1rem; }
+  
+  .mobile-menu-btn { display: block; margin-right: -8px; }
+  
+  .desktop-only { display: none !important; }
+  
+  .center-nav { display: none; } 
+  
+  .right-section { gap: 8px; }
+}
+
+@media (max-width: 450px) {
+  .header-toolbar { padding: 0 0.5rem; }
+  
+  .brand { display: none; } 
+  
+  .credits-badge { 
+    padding: 0 6px; 
+    font-size: 0.8rem;
+    span { font-size: 0.8rem; }
+  }
 }
