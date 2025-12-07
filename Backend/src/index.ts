@@ -14,20 +14,32 @@ import passport from './app/auth/google';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import jwt from 'jsonwebtoken';
-import { SupportSession } from './app/interfaces/support'; //interfaz para soporte
+import { SupportSession } from './app/interfaces/support';
 
 const app = express();
 
-// conectar el http server y el socketio
 const httpServer = createServer(app);
+
+const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:4200';
 
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: 'http://localhost:4200',
+    origin: allowedOrigin,
     credentials: true,
   },
 });
 export { io };
+
+app.use(cors({
+  origin: allowedOrigin,
+  credentials: true,
+}));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
+
+app.use(routes);
 
 const JWT_SECRET = process.env.SECRET_KEY ?? process.env.JWT_KEY ?? 'dev-secret';
 
@@ -50,25 +62,19 @@ io.on('connection', (socket) => {
 
       if (currentUser.id) {
         socket.join(String(currentUser.id));
-        //console.log('Socket conectado para usuario', currentUser.id);
 
-        // si eres admin...
         if (currentUser.role === 'admin') {
             socket.join('admins');
-            //le damos lls chats abiertos
             socket.emit('support:active-sessions', Object.values(activeSessions));
         }
       }
     } catch (err) {
-      console.log('Error verificando token en socket:', err);
+      console.log(err);
     }
   }
 
-  //console.log('Cliente conectado', socket.id);
-  // cuando el usuario abre el chat
   socket.on('support:join', () => {
     if (!currentUser) {
-      console.log('Intento de soporte sin usuario autenticado. Socket ID:', socket.id);
       return;
     }
 
@@ -82,7 +88,6 @@ io.on('connection', (socket) => {
         messages: [],
         active: true
       };
-      // avisamos a los administradores que hay un cliente en soporte
       io.to('admins').emit('support:new-session', activeSessions[currentUser.id]);
     }
     const sysMsg = { sender: 'System', text: `${currentUser.name} se ha unido al chat.`, time: new Date(), isSystem: true };
@@ -92,7 +97,6 @@ io.on('connection', (socket) => {
     io.to(roomId).emit('support:message', sysMsg);
   });
 
-  // un admin se une al chat
   socket.on('support:admin-join', (targetUserId: string) => {
     if (currentUser?.role !== 'admin') return;
     
@@ -105,7 +109,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // se envia algun mensaje
   socket.on('support:send-message', (data: { text: string, targetUserId?: string }) => {
     if (!currentUser) return;
 
@@ -121,7 +124,6 @@ io.on('connection', (socket) => {
     io.to(roomId).emit('support:message', msg);
   });
 
-  // un usuario da por terminado el soporte
   socket.on('support:close', () => {
     if (!currentUser) return;
     const roomId = `support-${currentUser.id}`;
@@ -141,28 +143,12 @@ io.on('connection', (socket) => {
   });
 });
 
-// google Auth
-app.use(passport.initialize());
-
-// middlewares
-app.use(express.json());
-app.use(cors({
-  origin: 'http://localhost:4200',
-  credentials: true,
-}));
-
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-
-app.use(routes); 
-
 app.get('/', (req, res) => {
     res.send('La api funciona (navegador)')
 });
 
 const PORT = process.env.PORT || 3000;
 
-//swagger
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.get('/swagger.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
