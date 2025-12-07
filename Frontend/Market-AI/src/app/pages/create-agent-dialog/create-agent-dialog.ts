@@ -9,7 +9,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { NotificationDialogComponent } from '../login/popup-login';
- 
+import { environment } from '../../shared/config';
+
 @Component({
   selector: 'app-create-agent-dialog',
   standalone: true,
@@ -61,7 +62,7 @@ export class CreateAgentDialogComponent {
     this.loading = true;
     const body = this.form.value;
 
-    this.http.post('http://localhost:3001/agents', body, { headers: this.getAuthHeaders() })
+    this.http.post(`${environment.apiUrl}/agents`, body, { headers: this.getAuthHeaders() })
       .subscribe({
         next: () => {
           this.openNotify('Agente creado exitosamente', true);

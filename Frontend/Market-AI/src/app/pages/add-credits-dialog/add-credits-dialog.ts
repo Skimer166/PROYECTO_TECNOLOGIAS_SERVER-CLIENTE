@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider'; 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-
+import { environment } from '../../shared/config';
 @Component({
   selector: 'app-add-credits-dialog',
   standalone: true,
@@ -33,7 +33,7 @@ export class AddCreditsDialogComponent {
   goToCheckout() {
     this.loading = true;
     
-    this.http.post<any>('http://localhost:3001/payments/create-checkout-session', { amount: this.amount }, { headers: this.getAuthHeaders() })
+    this.http.post<any>(`${environment.apiUrl}/payments/create-checkout-session`, { amount: this.amount }, { headers: this.getAuthHeaders() })
       .subscribe({
         next: (res) => {
           // Redirigir a Stripe

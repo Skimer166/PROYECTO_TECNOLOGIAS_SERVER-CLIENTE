@@ -13,6 +13,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { CreateAgentDialogComponent } from '../create-agent-dialog/create-agent-dialog';
 import { NotificationDialogComponent } from '../login/popup-login';
 
+import { environment } from '../../shared/config';
+
 interface AdminAgent {
   _id: string;
   name: string;
@@ -79,7 +81,7 @@ export class AdminAgentsComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.http.get<{ agents: AdminAgent[] }>('http://localhost:3001/agents', {
+    this.http.get<{ agents: AdminAgent[] }>(`${environment.apiUrl}/agents`, {
         headers: this.getAuthHeaders(),
       })
       .subscribe({
@@ -116,7 +118,7 @@ export class AdminAgentsComponent implements OnInit {
       description: this.editDescription,
     };
 
-    this.http.put<AdminAgent>(`http://localhost:3001/agents/${agent._id}`, body, {
+    this.http.put<AdminAgent>(`${environment.apiUrl}/agents/${agent._id}`, body, {
           headers: this.getAuthHeaders(),
       })
       .subscribe({
@@ -144,7 +146,7 @@ export class AdminAgentsComponent implements OnInit {
   }
 
   confirmDelete(agent: AdminAgent): void {
-    this.http.delete(`http://localhost:3001/agents/${agent._id}`, {
+    this.http.delete(`${environment.apiUrl}/agents/${agent._id}`, {
         headers: this.getAuthHeaders(),
       })
       .subscribe({

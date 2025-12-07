@@ -18,6 +18,8 @@ import { AuthService } from '../../shared/services/auth';
 import { NotificationDialogComponent } from '../login/popup-login';
 import { AdminAgentsComponent } from '../admin-agents/admin-agents';
 
+import { environment } from '../../shared/config';
+
 interface Agent {
   _id: string;
   name: string;
@@ -148,7 +150,7 @@ export class HomePage implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = null;
 
-    this.http.get<any>('http://localhost:3001/agents?available=true', {
+    this.http.get<any>(`${environment.apiUrl}/agents?available=true`, {
       headers: this.getAuthHeaders()
     }).subscribe({
       next: (res) => {
@@ -265,7 +267,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   private processRent(agent: Agent, amount: number, unit: string) {
-    this.http.post(`http://localhost:3001/agents/${agent._id}/rent`, {
+    this.http.post(`${environment.apiUrl}/agents/${agent._id}/rent`, {
       amount, 
       unit
     }, {

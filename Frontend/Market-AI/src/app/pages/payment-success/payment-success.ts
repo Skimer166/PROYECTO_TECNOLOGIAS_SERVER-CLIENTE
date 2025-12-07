@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../shared/services/auth'; // Para actualizar creditos locales
+import { environment } from '../../shared/config';
 
 @Component({
   selector: 'app-payment-success',
@@ -39,7 +40,7 @@ export class PaymentSuccessComponent implements OnInit {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
-    this.http.post<any>('http://localhost:3001/payments/verify-success', { session_id: sessionId }, { headers })
+    this.http.post<any>(`${environment.apiUrl}/payments/verify-success`, { session_id: sessionId }, { headers })
       .subscribe({
         next: (res) => {
           this.verifying = false;
