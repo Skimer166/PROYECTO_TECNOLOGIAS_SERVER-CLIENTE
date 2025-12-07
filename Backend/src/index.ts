@@ -5,7 +5,7 @@ dotenv.config();
 
 import swaggerJsDoc from 'swagger-jsdoc';
 import { setup, serve } from 'swagger-ui-express';
-import swaggerOptions from '../swagger.config';
+import swaggerOptions from './swagger.config';
 import { dbConnect } from './database';
 
 import routes from './app/routes';
