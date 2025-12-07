@@ -84,7 +84,7 @@
           </button>
 
           <div class="carousel-grid">
-            <mat-card class="agent-card" *ngFor="let agent of visibleAgents">
+            <mat-card class="agent-card" *ngFor="let agent of visibleAgents; trackBy: trackByAgentId">
               <div class="agent-card__image">
                 <img *ngIf="agent.imageUrl" [src]="agent.imageUrl" [alt]="agent.name" />
                 <div *ngIf="!agent.imageUrl" class="placeholder-img">

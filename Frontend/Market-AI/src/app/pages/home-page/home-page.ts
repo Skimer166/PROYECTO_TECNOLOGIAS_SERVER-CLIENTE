@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy, PLATFORM_ID, ChangeDetectorRef } from '@angular/core'; // 1. Importar ChangeDetectorRef
+import { Component, Inject, OnInit, OnDestroy, PLATFORM_ID, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core'; 
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
@@ -54,11 +54,17 @@ interface Agent {
     MatDialogModule
   ],
   templateUrl: './home-page.html',
-  styleUrls: ['./home-page.scss']
+  styleUrls: ['./home-page.scss'],
+  // Estrategia OnPush para reducir consumo de CPU
+  changeDetection: ChangeDetectionStrategy.OnPush 
 })
 export class HomePage implements OnInit, OnDestroy {
   agents: Agent[] = [];
   filteredAgents: Agent[] = [];
+  
+  // Array fijo para evitar recálculos en cada frame
+  visibleAgents: Agent[] = []; 
+
   isLoading = false;
   error: string | null = null;
 
@@ -81,7 +87,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef, // detector de cambios
+    private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private authService: AuthService,
     private router: Router,
@@ -156,20 +162,19 @@ export class HomePage implements OnInit, OnDestroy {
       next: (res) => {
         const agents = Array.isArray(res) ? res : res.agents;
         this.agents = agents || [];
-        this.applyFilters();
+        this.applyFilters(); // Esto llamará a updateVisibleAgents
         
         this.isLoading = false;
         this.startAutoSlide(); 
 
-
-        this.cdr.detectChanges(); 
+        this.cdr.markForCheck(); // Avisar cambios
       },
       error: (err) => {
         console.error('Error cargando agentes', err);
         this.error = 'No se pudieron cargar los agentes.';
         this.isLoading = false;
         
-        this.cdr.detectChanges(); 
+        this.cdr.markForCheck(); 
       }
     });
   }
@@ -196,22 +201,29 @@ export class HomePage implements OnInit, OnDestroy {
     });
     
     this.currentIndex = 0;
+    // Actualizamos la vista manualmente solo cuando cambian los filtros
+    this.updateVisibleAgents(); 
   }
 
-  //logica del carrusel
-  get visibleAgents(): Agent[] {
-    if (!this.filteredAgents.length) return [];
+  // Calcula los agentes visibles solo cuando se le llama
+  updateVisibleAgents(): void {
+    if (!this.filteredAgents.length) {
+      this.visibleAgents = [];
+      this.cdr.markForCheck();
+      return;
+    }
     
     if (this.filteredAgents.length <= this.itemsPerView) {
-      return this.filteredAgents;
+      this.visibleAgents = [...this.filteredAgents];
+    } else {
+      const result: Agent[] = [];
+      for (let i = 0; i < this.itemsPerView; i++) {
+        const index = (this.currentIndex + i) % this.filteredAgents.length;
+        result.push(this.filteredAgents[index]);
+      }
+      this.visibleAgents = result;
     }
-
-    const result: Agent[] = [];
-    for (let i = 0; i < this.itemsPerView; i++) {
-      const index = (this.currentIndex + i) % this.filteredAgents.length;
-      result.push(this.filteredAgents[index]);
-    }
-    return result;
+    this.cdr.markForCheck(); // Notificar a la vista que el array cambió
   }
 
   get hasAgents(): boolean {
@@ -221,11 +233,13 @@ export class HomePage implements OnInit, OnDestroy {
   next(): void {
     if (!this.hasAgents) return;
     this.currentIndex = (this.currentIndex + 1) % this.filteredAgents.length;
+    this.updateVisibleAgents(); // Recalcular vista
   }
 
   prev(): void {
     if (!this.hasAgents) return;
     this.currentIndex = (this.currentIndex - 1 + this.filteredAgents.length) % this.filteredAgents.length;
+    this.updateVisibleAgents(); // Recalcular vista
   }
 
   // Auto-slide
@@ -233,9 +247,8 @@ export class HomePage implements OnInit, OnDestroy {
     this.stopAutoSlide();
     if (this.isBrowser && this.filteredAgents.length > this.itemsPerView) {
       this.autoSlideInterval = setInterval(() => {
-        this.next();
-        // actualizamos la vista cuando el carrusel se mueve solo
-        this.cdr.detectChanges(); 
+        this.next(); 
+        
       }, 5000); 
     }
   }
@@ -245,6 +258,10 @@ export class HomePage implements OnInit, OnDestroy {
       clearInterval(this.autoSlideInterval);
       this.autoSlideInterval = null;
     }
+  }
+
+  trackByAgentId(index: number, agent: Agent): string {
+    return agent._id;
   }
 
   rentAgent(agent: Agent): void {
@@ -272,9 +289,7 @@ export class HomePage implements OnInit, OnDestroy {
       unit
     }, {
       headers: this.getAuthHeaders()
-        }
-      )
-      .subscribe({
+    }).subscribe({
         next: (res: any) => {
           this.openRentDialog(
             `¡Renta exitosa! Te quedan ${res.remainingCredits} créditos.`,
@@ -283,11 +298,13 @@ export class HomePage implements OnInit, OnDestroy {
           if (res.remainingCredits !== undefined) {
             this.authService.updateCredits(res.remainingCredits);
           }
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error(err);
           const msg = err.error?.message || 'Error al rentar';
           this.openRentDialog(msg, false);
+          this.cdr.markForCheck();
         },
       });
   }
@@ -306,6 +323,7 @@ export class HomePage implements OnInit, OnDestroy {
     if (!this.isBrowser) return;
     this.router.navigate(['/admin/users']);
   }
+
   private openRentDialog(message: string, isSuccess: boolean) {
     const ref = this.dialog.open(NotificationDialogComponent, {
       data: { message, type: isSuccess ? 'success' : 'error' },
