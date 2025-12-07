@@ -86,8 +86,8 @@
           <div class="carousel-grid">
             <mat-card class="agent-card" *ngFor="let agent of visibleAgents; trackBy: trackByAgentId">
               <div class="agent-card__image">
-                <img *ngIf="agent.imageUrl" [src]="agent.imageUrl" [alt]="agent.name" />
-                <div *ngIf="!agent.imageUrl" class="placeholder-img">
+                <img *ngIf="agent.imageUrl" loading="lazy" [src]="agent.imageUrl" [alt]="agent.name" />
+                <div *ngIf="!agent.imageUrl" loading="lazy" class="placeholder-img">
                   <mat-icon>smart_toy</mat-icon>
                 </div>
               </div>

@@ -1,7 +1,10 @@
-import { Component, Inject, OnInit, OnDestroy, PLATFORM_ID, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core'; 
+import { Component, Inject, OnInit, OnDestroy, PLATFORM_ID, ChangeDetectorRef, ChangeDetectionStrategy, NgZone } from '@angular/core'; 
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -55,14 +58,11 @@ interface Agent {
   ],
   templateUrl: './home-page.html',
   styleUrls: ['./home-page.scss'],
-  // Estrategia OnPush para reducir consumo de CPU
   changeDetection: ChangeDetectionStrategy.OnPush 
 })
 export class HomePage implements OnInit, OnDestroy {
   agents: Agent[] = [];
   filteredAgents: Agent[] = [];
-  
-  // Array fijo para evitar recálculos en cada frame
   visibleAgents: Agent[] = []; 
 
   isLoading = false;
@@ -71,6 +71,9 @@ export class HomePage implements OnInit, OnDestroy {
   searchTerm = '';
   selectedCategory: string = 'all';
   
+  private searchSubject = new Subject<string>();
+  private searchSubscription: Subscription | undefined;
+
   currentIndex = 0;
   private autoSlideInterval: any;
   itemsPerView = 3; 
@@ -91,6 +94,7 @@ export class HomePage implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private authService: AuthService,
     private router: Router,
+    private ngZone: NgZone, 
     @Inject(PLATFORM_ID) private platformId: object
   ) {}
 
@@ -100,6 +104,16 @@ export class HomePage implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.resolveAdminFromStorageOrToken();
+    
+   
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(300), // Espera 300ms a que el usuario deje de escribir
+      distinctUntilChanged()
+    ).subscribe(term => {
+      this.searchTerm = term;
+      this.applyFilters();
+    });
+
     if (this.isBrowser) {
       this.loadAgents();
     }
@@ -107,7 +121,107 @@ export class HomePage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopAutoSlide();
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
   }
+
+  onSearchTermChange(value: string): void {
+    // En lugar de filtrar directo, enviamos el valor al Subject
+    this.searchSubject.next(value);
+  }
+
+  onCategoryClick(categoryKey: string): void {
+    this.selectedCategory = categoryKey;
+    this.applyFilters();
+  }
+
+  private applyFilters(): void {
+    const term = this.searchTerm.trim().toLowerCase();
+    
+    // Optimizamos el filtrado para no crear arrays intermedios innecesarios
+    this.filteredAgents = this.agents.filter(agent => {
+      const matchesCategory = this.selectedCategory === 'all' || agent.category === this.selectedCategory;
+      
+      // Si no coincide la categoría...
+      if (!matchesCategory) return false;
+
+      if (!term) return true; 
+
+      return agent.name.toLowerCase().includes(term) ||
+             agent.description.toLowerCase().includes(term) ||
+             agent.modelVersion.toLowerCase().includes(term);
+    });
+    
+    this.currentIndex = 0;
+    this.updateVisibleAgents(); 
+  }
+
+
+  updateVisibleAgents(): void {
+    if (!this.filteredAgents.length) {
+      this.visibleAgents = [];
+      this.cdr.markForCheck();
+      return;
+    }
+    
+    if (this.filteredAgents.length <= this.itemsPerView) {
+      this.visibleAgents = [...this.filteredAgents];
+    } else {
+      const result: Agent[] = [];
+      const len = this.filteredAgents.length;
+      for (let i = 0; i < this.itemsPerView; i++) {
+        const index = (this.currentIndex + i) % len;
+        result.push(this.filteredAgents[index]);
+      }
+      this.visibleAgents = result;
+    }
+    this.cdr.markForCheck(); 
+  }
+
+  get hasAgents(): boolean {
+    return this.filteredAgents.length > 0;
+  }
+
+  next(): void {
+    if (!this.hasAgents) return;
+    this.currentIndex = (this.currentIndex + 1) % this.filteredAgents.length;
+    this.updateVisibleAgents();
+  }
+
+  prev(): void {
+    if (!this.hasAgents) return;
+    this.currentIndex = (this.currentIndex - 1 + this.filteredAgents.length) % this.filteredAgents.length;
+    this.updateVisibleAgents();
+  }
+
+  startAutoSlide(): void {
+    this.stopAutoSlide();
+    if (this.isBrowser && this.filteredAgents.length > this.itemsPerView) {
+      
+      this.ngZone.runOutsideAngular(() => {
+        
+        this.autoSlideInterval = setInterval(() => {
+          this.ngZone.run(() => {
+            this.next();
+          });
+        }, 5000);
+
+      });
+    }
+  }
+
+  stopAutoSlide(): void {
+    if (this.autoSlideInterval) {
+      clearInterval(this.autoSlideInterval);
+      this.autoSlideInterval = null;
+    }
+  }
+
+  trackByAgentId(index: number, agent: Agent): string {
+    return agent._id;
+  }
+
 
   private safeGet(key: string): string | null {
     if (!this.isBrowser) return null;
@@ -162,106 +276,20 @@ export class HomePage implements OnInit, OnDestroy {
       next: (res) => {
         const agents = Array.isArray(res) ? res : res.agents;
         this.agents = agents || [];
-        this.applyFilters(); // Esto llamará a updateVisibleAgents
+        this.applyFilters(); 
         
         this.isLoading = false;
         this.startAutoSlide(); 
 
-        this.cdr.markForCheck(); // Avisar cambios
+        this.cdr.markForCheck(); 
       },
       error: (err) => {
         console.error('Error cargando agentes', err);
         this.error = 'No se pudieron cargar los agentes.';
         this.isLoading = false;
-        
         this.cdr.markForCheck(); 
       }
     });
-  }
-
-  onSearchTermChange(value: string): void {
-    this.searchTerm = value;
-    this.applyFilters();
-  }
-
-  onCategoryClick(categoryKey: string): void {
-    this.selectedCategory = categoryKey;
-    this.applyFilters();
-  }
-
-  private applyFilters(): void {
-    const term = this.searchTerm.trim().toLowerCase();
-    this.filteredAgents = this.agents.filter((agent) => {
-      const matchesSearch = !term ||
-        agent.name.toLowerCase().includes(term) ||
-        agent.description.toLowerCase().includes(term) ||
-        agent.modelVersion.toLowerCase().includes(term);
-      const matchesCategory = this.selectedCategory === 'all' || agent.category === this.selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-    
-    this.currentIndex = 0;
-    // Actualizamos la vista manualmente solo cuando cambian los filtros
-    this.updateVisibleAgents(); 
-  }
-
-  // Calcula los agentes visibles solo cuando se le llama
-  updateVisibleAgents(): void {
-    if (!this.filteredAgents.length) {
-      this.visibleAgents = [];
-      this.cdr.markForCheck();
-      return;
-    }
-    
-    if (this.filteredAgents.length <= this.itemsPerView) {
-      this.visibleAgents = [...this.filteredAgents];
-    } else {
-      const result: Agent[] = [];
-      for (let i = 0; i < this.itemsPerView; i++) {
-        const index = (this.currentIndex + i) % this.filteredAgents.length;
-        result.push(this.filteredAgents[index]);
-      }
-      this.visibleAgents = result;
-    }
-    this.cdr.markForCheck(); // Notificar a la vista que el array cambió
-  }
-
-  get hasAgents(): boolean {
-    return this.filteredAgents.length > 0;
-  }
-
-  next(): void {
-    if (!this.hasAgents) return;
-    this.currentIndex = (this.currentIndex + 1) % this.filteredAgents.length;
-    this.updateVisibleAgents(); // Recalcular vista
-  }
-
-  prev(): void {
-    if (!this.hasAgents) return;
-    this.currentIndex = (this.currentIndex - 1 + this.filteredAgents.length) % this.filteredAgents.length;
-    this.updateVisibleAgents(); // Recalcular vista
-  }
-
-  // Auto-slide
-  startAutoSlide(): void {
-    this.stopAutoSlide();
-    if (this.isBrowser && this.filteredAgents.length > this.itemsPerView) {
-      this.autoSlideInterval = setInterval(() => {
-        this.next(); 
-        
-      }, 5000); 
-    }
-  }
-
-  stopAutoSlide(): void {
-    if (this.autoSlideInterval) {
-      clearInterval(this.autoSlideInterval);
-      this.autoSlideInterval = null;
-    }
-  }
-
-  trackByAgentId(index: number, agent: Agent): string {
-    return agent._id;
   }
 
   rentAgent(agent: Agent): void {
