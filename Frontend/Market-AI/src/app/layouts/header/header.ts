@@ -1,104 +1,76 @@
-import { Component, OnInit, Inject, ChangeDetectorRef, inject } from '@angular/core'; // 1. Importar ChangeDetectorRef
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+
+// Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { PLATFORM_ID } from '@angular/core';
-import { AuthService } from '../../shared/services/auth';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu'; // <--- NUEVO IMPORT
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+
+import { AuthService } from '../../shared/services/auth';
+import { User } from '../../shared/types/user';
 import { AddCreditsDialogComponent } from '../../pages/add-credits-dialog/add-credits-dialog';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  templateUrl: './header.html',
-  styleUrls: ['./header.scss'],
   imports: [
-    CommonModule,
-    RouterModule,
-    MatToolbarModule,
+    CommonModule, 
+    RouterModule, 
+    MatToolbarModule, 
+    MatButtonModule, 
     MatIconModule,
-    MatButtonModule
+    MatMenuModule, // <--- AGREGAR AQUÍ
+    MatDialogModule
   ],
+  templateUrl: './header.html',
+  styleUrl: './header.scss'
 })
 export class Header implements OnInit {
   isLoggedIn = false;
+  isLandingPage = false;
   userName: string | null = null;
   userPhoto: string | null = null;
   userCredits: number = 0;
-  // detector de cambios
-  private cdr = inject(ChangeDetectorRef);
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
 
-  get isLandingPage(): boolean {
-    return this.router.url.includes('landing-page');
+  ngOnInit(): void {
+    // Detectar si es Landing Page
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.isLandingPage = event.url === '/' || event.url === '/landing-page' || event.url.includes('#');
+    });
+
+    // Subscribirse al estado del usuario (incluyendo créditos actualizados)
+    this.auth.user$.subscribe((user: User | null) => {
+      this.isLoggedIn = !!user;
+      if (user) {
+        this.userName = user.name;
+        this.userPhoto = user.image || null;
+        this.userCredits = user.credits || 0;
+      } else {
+        this.userName = null;
+        this.userPhoto = null;
+        this.userCredits = 0;
+      }
+    });
   }
 
-  //para stripe
-  private dialog = inject(MatDialog);
+  logout() {
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
+
   openRechargeDialog() {
     this.dialog.open(AddCreditsDialogComponent, {
       width: '400px'
     });
-  }
-
-  ngOnInit(): void {
-    this.authService.isLoggedIn$.subscribe(logged => {
-      this.isLoggedIn = logged;
-      if (logged) {
-        this.loadUserDataFromToken(); 
-      }
-      this.cdr.detectChanges();
-    });
-
-    this.authService.credits$.subscribe(credits => {
-      this.userCredits = credits;
-      this.cdr.detectChanges();
-    });
-  }
-
-  private loadUserDataFromToken(): void {
-    const token = this.authService.getToken();
-    if (!token) return;
-
-    const payload = this.decodeJwt(token);
-    if (!payload) return;
-
-    const fullName: string =
-      payload.name ||
-      (payload.email ? String(payload.email).split('@')[0] : '');
-    const firstName = fullName.split(' ')[0];
-
-    this.userName = firstName || null;
-    this.userPhoto = payload.avatar || null;
-    
-    this.userCredits = payload.credits !== undefined ? payload.credits : 0;
-    
-  }
-
-  
-  private decodeJwt(token: string): any | null {
-    if (typeof window === 'undefined') return null;
-    try {
-      const parts = token.split('.');
-      if (parts.length !== 3) return null;
-      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-      const binary = window.atob(base64);
-      const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-      return JSON.parse(new TextDecoder('utf-8').decode(bytes));
-    } catch {
-      return null;
-    }
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/landing-page']);
   }
 }

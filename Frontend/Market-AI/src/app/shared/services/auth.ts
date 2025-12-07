@@ -4,48 +4,64 @@ import { BehaviorSubject, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { SocketService } from './socket';
 import { environment } from '../config'; 
-
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  token: string;
-  user?: any; 
-}
+import { User } from '../types/user'; 
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly baseUrl = environment.apiUrl; 
   private platformId = inject(PLATFORM_ID);
 
+  private userSubject = new BehaviorSubject<User | null>(null);
+  user$ = this.userSubject.asObservable();
+
   private creditsSubject = new BehaviorSubject<number>(0);
   credits$ = this.creditsSubject.asObservable();
 
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
+  
   private socketService = inject(SocketService);
 
   constructor(private http: HttpClient) {
     if (this.hasToken()) {
-      this.loadCreditsFromToken();
+      this.loadUserFromToken();
     }
   }
 
   updateCredits(newAmount: number) {
     this.creditsSubject.next(newAmount);
+    const currentUser = this.userSubject.value;
+    if (currentUser) {
+      this.userSubject.next({ ...currentUser, credits: newAmount });
+    }
   }
 
-  private loadCreditsFromToken() {
+  private loadUserFromToken() {
     const token = this.getToken();
-    if (!token) return;
+    if (!token) {
+      this.userSubject.next(null);
+      this.creditsSubject.next(0);
+      return;
+    }
     
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const credits = payload.credits !== undefined ? payload.credits : 0;
-      this.creditsSubject.next(credits);
-    } catch {
+      
+      const user: User = {
+        id: payload.id || payload.sub,
+        name: payload.name,
+        email: payload.email,
+        image: payload.image || payload.picture, 
+        credits: payload.credits || 0,
+        role: payload.role
+      };
+
+      this.userSubject.next(user);
+      this.creditsSubject.next(user.credits || 0);
+      
+    } catch (e) {
+      console.error('Error decodificando token', e);
+      this.userSubject.next(null);
       this.creditsSubject.next(0);
     }
   }
@@ -56,14 +72,12 @@ export class AuthService {
         if (res?.token) {
           this.saveToken(res.token);
           this.isLoggedInSubject.next(true);
-          this.loadCreditsFromToken(); 
-// Reconectamos el socket con el nuevo token
+          this.loadUserFromToken(); 
           this.socketService.reconnect();
         }
       })
     );
   }
-
 
   logout() {
     if (isPlatformBrowser(this.platformId)) {
@@ -73,22 +87,18 @@ export class AuthService {
         sessionStorage.removeItem('user_role');
         localStorage.removeItem('user_role');
         this.socketService.disconnect();
-
-        this.isLoggedInSubject.next(false);
-        this.creditsSubject.next(0);
       } catch (e) {
         console.error('Error limpiando storage', e);
       }
     }
 
-    // 2. Actualizar estado de la app
     this.isLoggedInSubject.next(false);
+    this.userSubject.next(null);
     this.creditsSubject.next(0); 
   }
 
   private saveToken(token: string) {
     if (!isPlatformBrowser(this.platformId)) return;
-
     try {
       sessionStorage.setItem('token', token);
       localStorage.setItem('token', token);
@@ -115,7 +125,7 @@ export class AuthService {
   setTokenFromOAuth(token: string) {
     this.saveToken(token);
     this.isLoggedInSubject.next(true);
-    this.loadCreditsFromToken();
+    this.loadUserFromToken(); 
     this.socketService.reconnect();
   }
 
