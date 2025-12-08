@@ -14,6 +14,10 @@ const options: SwaggerOptions = {
         },
         servers: [
             {
+                url: "https://market-ai-api.onrender.com", 
+                description: "Production Server"
+            },
+            {
                 url: process.env.BACKEND_URL || `http://localhost:${port}`,
                 description: "Servidor Principal"
             }
