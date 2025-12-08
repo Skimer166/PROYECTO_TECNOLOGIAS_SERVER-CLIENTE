@@ -218,6 +218,14 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
+  scrollToAgents(): void {
+    if (!this.isBrowser) return;
+    const el = document.getElementById('agents-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   trackByAgentId(index: number, agent: Agent): string {
     return agent._id;
   }

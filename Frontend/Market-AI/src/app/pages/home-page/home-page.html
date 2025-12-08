@@ -10,7 +10,7 @@
           educación, salud y mucho más.
         </p>
         <div class="hero__actions">
-          <button mat-raised-button color="primary">
+          <button mat-raised-button color="primary" (click)="scrollToAgents()">
             <mat-icon>bolt</mat-icon> Explorar agentes
           </button>
         </div>
@@ -61,7 +61,7 @@
       </div>
     </section>
 
-    <section class="carousel-section">
+    <section class="carousel-section" id="agents-section">
       <div *ngIf="isLoading" class="state-message">
         <mat-icon>hourglass_empty</mat-icon><span>Cargando agentes...</span>
       </div>
