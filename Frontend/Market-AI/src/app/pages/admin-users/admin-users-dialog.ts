@@ -131,7 +131,11 @@ interface AdminUser {
                 <button
                   mat-stroked-button
                   class="user-btn user-btn-role"
-                  [disabled]="updatingRoleId === user.id"
+                  [disabled]="
+                    updatingRoleId === user.id ||
+                    revertingUserId === user.id ||
+                    !hasChanges(user)
+                  "
                   (click)="resetRole(user)"
                 >
                   Revertir
@@ -407,7 +411,9 @@ export class AdminUsers implements OnInit {
   error: string | null = null;
 
   updatingRoleId: string | null = null;
+  revertingUserId: string | null = null;
   private originalRoles = new Map<string, AdminUser['role']>();
+  private originalStatuses = new Map<string, AdminUser['status']>();
 
   ngOnInit(): void {
     this.loadUsers();
@@ -437,7 +443,8 @@ export class AdminUsers implements OnInit {
             status: (u as any).status ?? 'active',
           }));
           this.originalRoles.clear();
-          this.users.forEach((u) => this.originalRoles.set(u.id, u.role));
+          this.originalStatuses.clear();
+          this.users.forEach((u) => {this.originalRoles.set(u.id, u.role);this.originalStatuses.set(u.id, u.status);});
           this.loading = false;
           this.cdr.detectChanges();
         },
@@ -450,8 +457,18 @@ export class AdminUsers implements OnInit {
       });
   }
 
-  changeRole(user: AdminUser, newRole: AdminUser['role']): void {
-    if (user.role === newRole) return;
+  changeRole(
+    user: AdminUser,
+    newRole: AdminUser['role'],
+    options?: { silent?: boolean; onComplete?: () => void; onError?: () => void }
+  ): void {
+    if (user.role === newRole) {
+      options?.onComplete?.();
+      return;
+    }
+
+    const silent = options?.silent ?? false;
+    const previousRole = user.role;
 
     this.updatingRoleId = user.id;
 
@@ -464,28 +481,78 @@ export class AdminUsers implements OnInit {
       .subscribe({
         next: (res) => {
           user.role = res.role;
-          this.originalRoles.set(user.id, res.role);
           this.updatingRoleId = null;
-          this.openNotifyDialog('Rol actualizado correctamente.', true);
+          if (!silent) {
+            this.openNotifyDialog('Rol actualizado correctamente.', true);
+          }
           this.cdr.detectChanges();
+          options?.onComplete?.();
         },
         error: (err) => {
           console.error('Error al actualizar rol del usuario:', err);
-          const previous = this.originalRoles.get(user.id);
-          if (previous) {
-            user.role = previous;
-          }
+          user.role = previousRole;
           this.updatingRoleId = null;
-          this.openNotifyDialog('No se pudo actualizar el rol.', false);
+          if (!silent) {
+            this.openNotifyDialog('No se pudo actualizar el rol.', false);
+          }
           this.cdr.detectChanges();
+          options?.onError?.();
         },
       });
   }
 
   resetRole(user: AdminUser): void {
-    const original = this.originalRoles.get(user.id);
-    if (!original || original === user.role) return;
-    user.role = original;
+    const originalRole = this.originalRoles.get(user.id);
+    const originalStatus = this.originalStatuses.get(user.id);
+
+    const roleChanged =
+      originalRole !== undefined && user.role !== originalRole;
+    const statusChanged =
+      originalStatus !== undefined && user.status !== originalStatus;
+
+    if (!roleChanged && !statusChanged) {
+      return;
+    }
+
+    this.revertingUserId = user.id;
+
+    let pending = (roleChanged ? 1 : 0) + (statusChanged ? 1 : 0);
+    let hadError = false;
+
+    const handleDone = () => {
+      pending -= 1;
+      if (pending === 0) {
+        this.revertingUserId = null;
+        this.cdr.detectChanges();
+        this.openNotifyDialog(
+          hadError
+            ? 'No se pudieron revertir todos los cambios.'
+            : 'Cambios revertidos correctamente.',
+          !hadError
+        );
+      }
+    };
+
+    const handleError = () => {
+      hadError = true;
+      handleDone();
+    };
+
+    if (roleChanged && originalRole) {
+      this.changeRole(user, originalRole, {
+        silent: true,
+        onComplete: handleDone,
+        onError: handleError,
+      });
+    }
+
+    if (statusChanged && originalStatus) {
+      this.changeStatus(user, originalStatus, {
+        silent: true,
+        onComplete: handleDone,
+        onError: handleError,
+      });
+    }
   }
 
   toggleStatus(user: AdminUser): void {
@@ -494,8 +561,18 @@ export class AdminUsers implements OnInit {
     this.changeStatus(user, nextStatus);
   }
 
-  changeStatus(user: AdminUser, newStatus: AdminUser['status']): void {
-    if (user.status === newStatus) return;
+  changeStatus(
+    user: AdminUser,
+    newStatus: AdminUser['status'],
+    options?: { silent?: boolean; onComplete?: () => void; onError?: () => void }
+  ): void {
+    if (user.status === newStatus) {
+      options?.onComplete?.();
+      return;
+    }
+
+    const silent = options?.silent ?? false;
+    const previousStatus = user.status;
 
     this.http
       .put<{ id: string; status: AdminUser['status'] }>(
@@ -506,15 +583,32 @@ export class AdminUsers implements OnInit {
       .subscribe({
         next: (res) => {
           user.status = res.status;
-          this.openNotifyDialog('Estado actualizado correctamente.', true);
+          if (!silent) {
+            this.openNotifyDialog('Estado actualizado correctamente.', true);
+          }
           this.cdr.detectChanges();
+          options?.onComplete?.();
         },
         error: (err) => {
           console.error('Error actualizando estado del usuario:', err);
-          this.openNotifyDialog('No se pudo actualizar el estado.', false);
+          user.status = previousStatus;
+          if (!silent) {
+            this.openNotifyDialog('No se pudo actualizar el estado.', false);
+          }
           this.cdr.detectChanges();
+          options?.onError?.();
         },
       });
+  }
+
+  hasChanges(user: AdminUser): boolean {
+    const originalRole = this.originalRoles.get(user.id);
+    const originalStatus = this.originalStatuses.get(user.id);
+
+    return (
+      (originalRole !== undefined && originalRole !== user.role) ||
+      (originalStatus !== undefined && originalStatus !== user.status)
+    );
   }
 
   deleteUser(user: AdminUser): void {
