@@ -9,20 +9,30 @@ dotenv.config();
 export const bucketName = process.env.S3_BUCKET || '';
 const region = process.env.S3_REGION;
 const accessKeyId = process.env.S3_ACCESS_KEY;
-const secretAccessKey = process.env.S3_SECRET_KEY;
+// Recuperamos el fallback por si en Render la llamaste SE_SECRET_KEY
+const secretAccessKey = process.env.S3_SECRET_KEY || process.env.SE_SECRET_KEY; 
+
+// --- DIAGNÓSTICO DE ARRANQUE ---
+if (!accessKeyId || !secretAccessKey || !bucketName || !region) {
+  console.error('\n❌ [ERROR CRÍTICO S3] Faltan variables de entorno:');
+  console.error(` - S3_REGION: ${region}`);
+  console.error(` - S3_ACCESS_KEY: ${accessKeyId ? 'OK' : 'FALTA'}`);
+  console.error(` - S3_SECRET_KEY: ${secretAccessKey ? 'OK' : 'FALTA'}`);
+  console.error(` - S3_BUCKET: ${bucketName ? 'OK' : 'FALTA'}\n`);
+}
 
 export const s3Client = new S3Client({
-  region,
+  region: region || 'us-east-1', // Default para evitar crash inmediato
   credentials: {
-    accessKeyId: accessKeyId!,
-    secretAccessKey: secretAccessKey!
+    accessKeyId: accessKeyId || '',
+    secretAccessKey: secretAccessKey || ''
   }
 });
 
-// Alias para compatibilidad con código antiguo
+// Alias para compatibilidad
 export const s3 = s3Client; 
 
-// --- 2. FUNCIONES HELPERS (Restauradas para Documents) ---
+// --- 2. FUNCIONES HELPERS ---
 
 export async function deleteObject(key: string) {
   if (!bucketName) throw new Error('S3_BUCKET no configurado');
@@ -50,17 +60,16 @@ export async function uploadBuffer(key: string, buffer: Buffer, contentType: str
 
 // --- 3. MIDDLEWARES DE MULTER ---
 
-// A) Para AGENTES (El nuevo que creamos)
+// A) Para AGENTES
 export const uploadMiddleware = multer({
   storage: multerS3({
     s3: s3Client,
     bucket: bucketName,
-    acl: 'public-read',
+    // acl: 'public-read', // Descomenta si tu bucket lo requiere explícitamente
     metadata: function (req, file, cb) {
       cb(null, { fieldName: file.fieldname });
     },
     key: function (req, file, cb) {
-      // Guarda en carpeta 'agents/' con nombre limpio
       const uniqueName = `agents/${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
       cb(null, uniqueName);
     }
@@ -68,18 +77,15 @@ export const uploadMiddleware = multer({
   limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// B) Para DOCUMENTOS (El antiguo que restauramos)
-// Lo reconstruimos para que use s3Client pero mantenga la firma que espera tu controlador
+// B) Para DOCUMENTOS
 export function createImageUpload(maxBytes = 5 * 1024 * 1024) {
   return multer({
     storage: multerS3({
       s3: s3Client,
       bucket: bucketName,
-      acl: 'public-read',
       contentType: multerS3.AUTO_CONTENT_TYPE,
       metadata: (req, file, cb) => cb(null, { originalName: file.originalname }),
       key: (req: any, file, cb) => {
-        // Estructura antigua para documentos
         const userId = req.user?.id || req.user?.sub || 'anonymous';
         const ext = (file.originalname.split('.').pop() || '').toLowerCase();
         cb(null, `documents/${userId}/${Date.now()}.${ext}`);
@@ -87,7 +93,6 @@ export function createImageUpload(maxBytes = 5 * 1024 * 1024) {
     }),
     limits: { fileSize: maxBytes },
     fileFilter: (req, file, cb) => {
-      // Filtro básico de imágenes
       const isImage = file.mimetype.startsWith('image/');
       cb(null, isImage);
     }
