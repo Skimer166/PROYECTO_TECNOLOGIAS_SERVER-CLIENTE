@@ -33,6 +33,9 @@ export class CreateAgentDialogComponent {
   private dialogRef = inject(MatDialogRef<CreateAgentDialogComponent>);
   private dialog = inject(MatDialog);
 
+  //para imagen
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
   form: FormGroup;
   loading = false;
 
@@ -56,24 +59,48 @@ export class CreateAgentDialogComponent {
     });
   }
 
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   save() {
     if (this.form.invalid) return;
-    
     this.loading = true;
-    const body = this.form.value;
 
-    this.http.post(`${environment.apiUrl}/agents`, body, { headers: this.getAuthHeaders() })
-      .subscribe({
-        next: () => {
-          this.openNotify('Agente creado exitosamente', true);
-          this.dialogRef.close(true);
-        },
-        error: (err) => {
-          console.error(err);
-          this.openNotify('Error al crear agente', false);
-          this.loading = false;
-        }
-      });
+    const formData = new FormData();
+  
+    Object.keys(this.form.value).forEach(key => {
+      const value = this.form.value[key];
+      formData.append(key, value);
+    });
+
+    if (this.selectedFile) {
+      formData.append('image', this.selectedFile); 
+    }
+
+    this.http.post(`${environment.apiUrl}/agents`, formData, { 
+      headers: this.getAuthHeaders() 
+    })
+    .subscribe({
+      next: () => {
+        this.openNotify('Agente creado exitosamente', true);
+        this.dialogRef.close(true);
+      },
+      error: (err) => {
+        console.error(err);
+        this.openNotify('Error al crear agente', false);
+        this.loading = false;
+      }
+    });
   }
 
   close() {

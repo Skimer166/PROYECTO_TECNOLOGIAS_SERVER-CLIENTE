@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { uploadMiddleware } from '../storage/s3';
 import {
   getAllAgents,
   searchAgent,
@@ -95,7 +96,7 @@ router.get('', verifyToken, getAllAgents);
  *       403:
  *         description: Solo administradores
  */
-router.post('', verifyToken, verifyAdmin, createAgent);
+router.post('/', verifyToken, verifyAdmin, uploadMiddleware.single('image'), createAgent);
 
 /**
  * NOTE: Las rutas con paths literales (search, my-rentals, :id/rent, :id/release, etc.)
