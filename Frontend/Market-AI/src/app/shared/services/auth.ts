@@ -58,7 +58,7 @@ export class AuthService {
         id: payload.id || payload.sub,
         name: payload.name, 
         email: payload.email,
-        image: payload.image || payload.picture,
+        image: payload.avatar || payload.image || payload.picture,
         credits: payload.credits || 0,
         role: payload.role
       };

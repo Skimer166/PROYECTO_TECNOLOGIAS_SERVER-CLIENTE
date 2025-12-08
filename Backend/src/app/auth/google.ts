@@ -57,11 +57,9 @@ passport.use(
             avatar, 
           });
 
-          try {
-            await sendWelcomeEmail(email, cleanName);
-          } catch (welcomeError) {
+          sendWelcomeEmail(email, cleanName).catch(welcomeError => {
             console.error('[Google Auth] Error enviando correo de bienvenida:', welcomeError);
-          }
+          });
         } else {
             //actualizamos datos si cambia algo en el perfil del usuario
           let updated = false;
