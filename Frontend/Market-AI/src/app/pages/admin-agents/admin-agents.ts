@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog'; 
 
@@ -34,6 +35,7 @@ interface AdminAgent {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatIconModule
   ],
   templateUrl: './admin-agents.html',
@@ -51,7 +53,16 @@ export class AdminAgentsComponent implements OnInit {
   editingAgentId: string | null = null;
   editName = '';
   editDescription = '';
+  editCategory = 'otros';
   deletingAgentId: string | null = null;
+
+  readonly categories = [
+    { key: 'marketing', label: 'Marketing' },
+    { key: 'salud', label: 'Salud' },
+    { key: 'educacion', label: 'Educación' },
+    { key: 'asistente', label: 'Asistente' },
+    { key: 'otros', label: 'Otros' }
+  ];
 
   ngOnInit(): void {
     this.loadAgents();
@@ -104,6 +115,7 @@ export class AdminAgentsComponent implements OnInit {
     this.editingAgentId = agent._id;
     this.editName = agent.name;
     this.editDescription = agent.description || '';
+    this.editCategory = agent.category || 'otros';
   }
 
   cancelEdit(): void {
@@ -116,6 +128,7 @@ export class AdminAgentsComponent implements OnInit {
     const body = {
       name: this.editName,
       description: this.editDescription,
+      category: this.editCategory,
     };
 
     this.http.put<AdminAgent>(`${environment.apiUrl}/agents/${agent._id}`, body, {
@@ -125,6 +138,7 @@ export class AdminAgentsComponent implements OnInit {
         next: (updated) => {
           agent.name = updated.name;
           agent.description = updated.description;
+          agent.category = updated.category;
           this.editingAgentId = null;
           this.openNotifyDialog('Agente actualizado.', true);
           this.cdr.detectChanges();
@@ -170,5 +184,10 @@ export class AdminAgentsComponent implements OnInit {
       position: { top: '80px' },
     });
     setTimeout(() => ref.close(), 3000);
+  }
+
+  getCategoryLabel(category?: string): string {
+    const found = this.categories.find((c) => c.key === category);
+    return found ? found.label : 'Otros';
   }
 }

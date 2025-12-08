@@ -34,6 +34,7 @@
       
       <div class="list-header-row">
         <div class="col col-name">Nombre</div>
+        <div class="col col-category">Categoría</div>
         <div class="col col-desc">Descripción</div>
         <div class="col col-actions">Acciones</div>
       </div>
@@ -44,6 +45,19 @@
           <span *ngIf="editingAgentId !== agent._id" class="text-display">{{ agent.name }}</span>
           <mat-form-field *ngIf="editingAgentId === agent._id" appearance="outline" class="dense-field">
             <input matInput [(ngModel)]="editName" placeholder="Nombre" />
+          </mat-form-field>
+        </div>
+
+        <div class="col col-category">
+          <span *ngIf="editingAgentId !== agent._id" class="text-display">
+            {{ getCategoryLabel(agent.category) }}
+          </span>
+          <mat-form-field *ngIf="editingAgentId === agent._id" appearance="outline" class="dense-field">
+            <mat-select [(ngModel)]="editCategory">
+              <mat-option *ngFor="let cat of categories" [value]="cat.key">
+                {{ cat.label }}
+              </mat-option>
+            </mat-select>
           </mat-form-field>
         </div>
 
@@ -79,7 +93,7 @@
           <ng-container *ngIf="deletingAgentId === agent._id">
             <span class="confirm-label">¿Seguro?</span>
             <button mat-button color="primary" (click)="cancelDelete()">No</button>
-            <button mat-flat-button color="warn" (click)="confirmDelete(agent)">Si</button>
+            <button mat-flat-button color="warn" (click)="confirmDelete(agent)">Sí</button>
           </ng-container>
 
         </div>

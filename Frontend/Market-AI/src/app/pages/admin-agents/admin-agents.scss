@@ -51,7 +51,7 @@
 
 .list-header-row {
   display: grid;
-  grid-template-columns: 2fr 3fr 1.5fr;
+  grid-template-columns: 2fr 1.5fr 3fr 1.5fr;
   padding: 1rem;
   background: rgba(99, 102, 241, 0.2);
   font-weight: 700;
@@ -61,7 +61,7 @@
 
 .list-row {
   display: grid;
-  grid-template-columns: 2fr 3fr 1.5fr;
+  grid-template-columns: 2fr 1.5fr 3fr 1.5fr;
   padding: 1rem;
   align-items: center;
   border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -102,6 +102,14 @@
           }
           .mat-mdc-form-field-input-control::placeholder {
             color: rgba(255, 255, 255, 0.5);
+          }
+
+          /* Texto del select de categoría en blanco */
+          .mat-mdc-select-trigger,
+          .mat-mdc-select-value-text,
+          .mat-mdc-select-placeholder,
+          .mat-mdc-select-min-line {
+            color: #ffffff !important;
           }
         }
       }
