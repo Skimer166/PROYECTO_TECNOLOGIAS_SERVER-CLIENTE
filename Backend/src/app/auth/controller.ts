@@ -20,48 +20,41 @@ export function signup(req: Request, res: Response) {
 
 export async function forgotPassword(req: Request, res: Response) {
   try {
+    console.log('1. [forgotPassword] Petición recibida.'); // <--- NUEVO LOG
     const { email } = req.body || {};
+    console.log('2. [forgotPassword] Email recibido:', email); // <--- NUEVO LOG
 
     if (!email) {
+      console.log('3. [forgotPassword] Falta el email.'); // <--- NUEVO LOG
       return res.status(400).json({ message: 'Email requerido' });
     }
-
+    const token = req.body || {};
     const user = await UserModel.findOne({ email });
 
-    // Para no filtrar si el correo existe o no, devolvemos siempre 200
     if (!user) {
-      console.log('[forgotPassword] Solicitud para correo no registrado:', email);
-      return res.status(200).json({
-        message:
-          'Si el correo está registrado, se enviará un enlace para restablecer la contraseña.',
-      });
+      console.log('4. [forgotPassword] Usuario no encontrado en BD:', email);
+      // ... respuesta 200 ...
+      return res.status(200).json({ message: '...' });
     }
 
-    const token = jwt.sign(
-      { sub: String(user._id), type: 'password-reset' },
-      JWT_KEY,
-      { expiresIn: '1h' },
-    );
+    console.log('5. [forgotPassword] Usuario encontrado. Generando token...'); // <--- NUEVO LOG
 
-    user.resetPasswordToken = token;
-    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000);
-    await user.save();
-
-    const frontendUrl = FRONTEND_URL || 'http://localhost:4200';
-    const resetLink = `${frontendUrl}/reset-password?token=${encodeURIComponent(token)}`;
+    // ... código de generación de token ...
+    
+    const resetLink = `${FRONTEND_URL}/reset-password?token=${encodeURIComponent(token)}`;
+    console.log('6. [forgotPassword] Intentando enviar correo a:', user.email); // <--- NUEVO LOG
 
     try {
       await sendPasswordResetEmail(user.email, user.name, resetLink);
+      console.log('7. [forgotPassword] ¡Correo enviado con éxito!'); // <--- SI LLEGA AQUÍ, TODO FUNCIONÓ
     } catch (mailError) {
-      console.error('Error enviando correo de recuperación:', mailError);
+      console.error('X. [forgotPassword] Error al enviar el correo:', mailError); // <--- AQUÍ VERÁS EL ERROR DE TIMEOUT
     }
 
-    return res.status(200).json({
-      message:
-        'Si el correo está registrado, se enviará un enlace para restablecer la contraseña.',
-    });
+    return res.status(200).json({ message: '...' });
+
   } catch (err) {
-    console.error('Error en forgotPassword:', err);
+    console.error('Z. [forgotPassword] Error CRÍTICO en el controlador:', err);
     return res.status(500).json({ message: 'Error interno del servidor' });
   }
 }
