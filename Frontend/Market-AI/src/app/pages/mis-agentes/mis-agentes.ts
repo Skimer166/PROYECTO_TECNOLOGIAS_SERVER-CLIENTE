@@ -127,7 +127,7 @@ export class MyAgents implements OnInit, OnDestroy {
     ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
 
-      this.http.post(`http://localhost:3001/agents/${agent._id}/release`,{},{ headers: this.getAuthHeaders() })
+        this.http.post(`${environment.apiUrl}/agents/${agent._id}/release`,{},{ headers: this.getAuthHeaders() })        
         .subscribe({
           next: () => {
             // Filtrar la lista localmente para que desaparezca sin recargar

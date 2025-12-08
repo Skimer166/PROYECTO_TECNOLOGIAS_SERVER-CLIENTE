@@ -17,6 +17,7 @@ import { User as UserService } from '../../shared/services/user';
 import { Header } from '../../layouts/header/header';
 import { Footer } from '../../layouts/footer/footer';
 import { NotificationDialogComponent } from '../login/popup-login';
+import { environment } from '../../shared/config';
 
 @Component({
   selector: 'app-my-profile',
@@ -128,7 +129,7 @@ export class MyProfile implements OnInit {
       Authorization: `Bearer ${token}`
     });
 
-    this.http.get<any>('http://localhost:3001/agents/my-rentals', { headers }).subscribe({
+      this.http.get<any>(`${environment.apiUrl}/agents/my-rentals`, { headers }).subscribe({      
       next: (res) => {
         const agents = res?.agents || [];
         this.rentedAgentsCount = agents.length;
@@ -158,7 +159,7 @@ export class MyProfile implements OnInit {
       
       this.userService.uploadAvatar(file).subscribe({
         next: (res: any) => {
-          const backendUrl = 'http://localhost:3001'; 
+          const backendUrl = environment.apiUrl;
           // Ajusta según lo que retorne tu backend (res.id es lo esperado)
           const newAvatarUrl = `${backendUrl}/files/${res.id}/download`; 
           

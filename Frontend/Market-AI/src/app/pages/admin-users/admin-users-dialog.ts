@@ -14,6 +14,8 @@ import { EditCreditsDialogComponent } from './edit-credits-dialog';
 import { ConfirmDeleteUserDialogComponent } from './confirm-delete-user-dialog';
 import { AuthService } from '../../shared/services/auth';
 
+import { environment } from '../../shared/config';
+
 interface AdminUser {
   id: string;
   name: string;
@@ -431,8 +433,7 @@ export class AdminUsers implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.http
-      .get<{ users: AdminUser[] }>('http://localhost:3001/users', {
+    this.http.get<{ users: AdminUser[] }>(`${environment.apiUrl}/users`, {
         headers: this.getAuthHeaders(),
       })
       .subscribe({
@@ -472,9 +473,8 @@ export class AdminUsers implements OnInit {
 
     this.updatingRoleId = user.id;
 
-    this.http
-      .put<{ id: string; role: AdminUser['role'] }>(
-        `http://localhost:3001/users/${user.id}/role`,
+    this.http.put<{ id: string; role: AdminUser['role'] }>(
+        `${environment.apiUrl}/users/${user.id}/role`,
         { role: newRole },
         { headers: this.getAuthHeaders() }
       )
@@ -574,9 +574,8 @@ export class AdminUsers implements OnInit {
     const silent = options?.silent ?? false;
     const previousStatus = user.status;
 
-    this.http
-      .put<{ id: string; status: AdminUser['status'] }>(
-        `http://localhost:3001/users/${user.id}/status`,
+      this.http.put<{ id: string; status: AdminUser['status'] }>(
+        `${environment.apiUrl}/users/${user.id}/status`,
         { status: newStatus },
         { headers: this.getAuthHeaders() }
       )
@@ -623,8 +622,7 @@ export class AdminUsers implements OnInit {
     ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
 
-      this.http
-        .delete<void>(`http://localhost:3001/users/${user.id}`, {
+        this.http.delete<void>(`${environment.apiUrl}/users/${user.id}`, {
           headers: this.getAuthHeaders(),
         })
         .subscribe({
@@ -656,9 +654,8 @@ export class AdminUsers implements OnInit {
   }
 
   private addCredits(user: AdminUser, amount: number): void {
-    this.http
-      .put<{ id: string; credits: number }>(
-        `http://localhost:3001/users/${user.id}/credits`,
+      this.http.put<{ id: string; credits: number }>(
+        `${environment.apiUrl}/users/${user.id}/credits`,
         { amount },
         { headers: this.getAuthHeaders() }
       )
