@@ -9,13 +9,13 @@ const mailUser = process.env.EMAIL_USER;
 const mailPass = process.env.EMAIL_PASSWORD;
 
 if (!mailUser || !mailPass) {
-  console.warn('⚠️ [MAILER] Faltan variables EMAIL_USER o EMAIL_PASSWORD. El correo no funcionará.');
+  console.warn('[MAILER] Faltan variables EMAIL_USER o EMAIL_PASSWORD. El correo no funcionará.');
 }
 
 export const mailer = nodemailer.createTransport({
   host: mailHost,
   port: mailPort,
-  secure: mailPort === 465, 
+  secure: mailPort === 587, 
   auth: {
     user: mailUser,
     pass: mailPass,
