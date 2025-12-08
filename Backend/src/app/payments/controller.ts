@@ -34,7 +34,7 @@ export async function createCheckoutSession(req: Request, res: Response) {
       ],
       mode: 'payment',
       success_url: `${FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${FRONTEND_URL}/payment/cancel`,
+      cancel_url: `${FRONTEND_URL}/home-page`,
       metadata: {
         userId: userId,
         creditsAmount: amount.toString()
