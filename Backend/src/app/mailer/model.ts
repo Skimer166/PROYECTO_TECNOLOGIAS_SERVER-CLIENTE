@@ -8,14 +8,13 @@ const mailPort = Number(process.env.EMAIL_PORT) || 587;
 const mailUser = process.env.EMAIL_USER;
 const mailPass = process.env.EMAIL_PASSWORD;
 
-if (!mailUser || !mailPass) {
-  console.warn('[MAILER] Faltan variables EMAIL_USER o EMAIL_PASSWORD. El correo no funcionará.');
-}
-
 export const mailer = nodemailer.createTransport({
   host: mailHost,
   port: mailPort,
-  secure: false, 
+  // CORRECCIÓN CRÍTICA:
+  // Si el puerto es 587 (STARTTLS), secure debe ser FALSE.
+  // Si el puerto es 465 (SSL), secure debe ser TRUE.
+  secure: mailPort === 465, 
   auth: {
     user: mailUser,
     pass: mailPass,
