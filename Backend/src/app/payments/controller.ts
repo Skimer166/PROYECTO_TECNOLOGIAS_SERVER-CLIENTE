@@ -8,13 +8,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 
-// 1. Crear Sesión de Checkout
 export async function createCheckoutSession(req: Request, res: Response) {
   try {
     const { amount } = req.body;
     const userId = (req.user as any).id;
 
-    if (!amount || amount < 10) { // Mínimo 10 pesos por ejemplo
+    if (!amount || amount < 10) { 
       return res.status(400).json({ message: 'El monto mínimo es $10' });
     }
 
@@ -28,7 +27,7 @@ export async function createCheckoutSession(req: Request, res: Response) {
               name: 'Créditos Market-AI',
               description: `Recarga de ${amount} créditos`,
             },
-            unit_amount: amount * 100, // Stripe usa centavos (100 = $1.00)
+            unit_amount: amount * 100, 
           },
           quantity: 1,
         },
@@ -37,7 +36,7 @@ export async function createCheckoutSession(req: Request, res: Response) {
       success_url: `${FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${FRONTEND_URL}/payment/cancel`,
       metadata: {
-        userId: userId, // Guardamos el ID del usuario para saber a quién darle los créditos
+        userId: userId,
         creditsAmount: amount.toString()
       }
     });
@@ -50,7 +49,6 @@ export async function createCheckoutSession(req: Request, res: Response) {
   }
 }
 
-// 2. Verificar Pago
 export async function verifyPaymentSuccess(req: Request, res: Response) {
   try {
     const { session_id } = req.body;

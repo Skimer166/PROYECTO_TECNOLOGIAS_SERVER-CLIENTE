@@ -45,13 +45,20 @@ export class AuthService {
     }
     
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      const payload = JSON.parse(jsonPayload);
       
       const user: User = {
         id: payload.id || payload.sub,
-        name: payload.name,
+        name: payload.name, 
         email: payload.email,
-        image: payload.avatar || payload.image || payload.picture, 
+        image: payload.image || payload.picture,
         credits: payload.credits || 0,
         role: payload.role
       };
