@@ -27,7 +27,7 @@ export class User {
   }
 
   registerUser(data: any): Observable<any> {
-    return this.httpClient.post(`${this.baseUrl}/auth/register`, data);
+    return this.httpClient.post(`${this.baseUrl}/auth/signup`, data);  
   }
 
   private getHeaders(): HttpHeaders {
