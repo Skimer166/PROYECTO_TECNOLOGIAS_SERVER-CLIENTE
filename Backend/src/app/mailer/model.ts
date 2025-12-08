@@ -15,7 +15,7 @@ if (!mailUser || !mailPass) {
 export const mailer = nodemailer.createTransport({
   host: mailHost,
   port: mailPort,
-  secure: mailPort === 587, 
+  secure: mailPort === 465, 
   auth: {
     user: mailUser,
     pass: mailPass,
