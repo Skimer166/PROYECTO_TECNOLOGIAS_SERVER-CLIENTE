@@ -59,6 +59,16 @@ export async function getAgentById(req: Request, res: Response) {
 //Crear un agente 
 export const createAgent = async (req: Request, res: Response) => {
   try {
+    const authUser = getAuthUser(req);
+
+    if (!authUser.id) {
+        return res.status(401).json({ message: 'No autorizado' });
+    }
+
+    if (authUser.role !== 'admin') {
+        return res.status(403).json({ message: 'Se requieren permisos de administrador' });
+    }
+
     const { name, description, category, pricePerHour, language, modelVersion, instructions } = req.body;
     
     const imageUrl = (req.file as any)?.location || ''; 
@@ -67,17 +77,18 @@ export const createAgent = async (req: Request, res: Response) => {
       name,
       description,
       category,
-      pricePerHour: Number(pricePerHour), 
+      pricePerHour: Number(pricePerHour),
       language,
       modelVersion,
       instructions,
-      imageUrl, 
-      availability: true
+      imageUrl,
+      availability: true,
+      createdBy: authUser.id 
     });
 
     res.status(201).json(newAgent);
   } catch (error) {
-    console.error(error);
+    console.error(error); 
     res.status(500).json({ message: 'Error creando agente' });
   }
 };

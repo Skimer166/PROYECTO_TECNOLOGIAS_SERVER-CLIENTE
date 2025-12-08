@@ -85,10 +85,21 @@
 
           <div class="carousel-grid">
             <mat-card class="agent-card" *ngFor="let agent of visibleAgents; trackBy: trackByAgentId">
-              <div class="agent-card__image">
-                <img *ngIf="agent.imageUrl" loading="lazy" [src]="agent.imageUrl" [alt]="agent.name" />
-                <div *ngIf="!agent.imageUrl" loading="lazy" class="placeholder-img">
-                  <mat-icon>smart_toy</mat-icon>
+  
+              <div class="card-image-container">
+                <img 
+                  *ngIf="agent.imageUrl" 
+                  [src]="agent.imageUrl" 
+                  alt="{{ agent.name }}" 
+                  loading="lazy"
+                  class="agent-img"
+                >
+                
+                <div *ngIf="!agent.imageUrl" class="placeholder-img">
+                  <mat-icon>smart_toy</mat-icon> </div>
+
+                <div class="price-tag">
+                  {{ agent.pricePerHour | currency }} / hr
                 </div>
               </div>
 
@@ -98,21 +109,20 @@
               </mat-card-header>
 
               <mat-card-content>
-                <p class="desc">{{ agent.description }}</p>
-                <div class="meta">
-                  <span class="price">${{ agent.pricePerHour }} / hr</span>
-                  <div class="rating">
-                    <mat-icon>star</mat-icon>
-                    <span>{{ agent.ratings?.average || 0 | number:'1.1-1' }}</span>
-                  </div>
+                <p class="description">{{ agent.description | slice:0:100 }}{{ agent.description.length > 100 ? '...' : '' }}</p>
+                <div class="chips">
+                    <mat-chip-set>
+                        <mat-chip>{{ agent.modelVersion }}</mat-chip>
+                        <mat-chip>{{ agent.language }}</mat-chip>
+                    </mat-chip-set>
                 </div>
               </mat-card-content>
 
-              <mat-card-actions>
-                <button mat-flat-button color="primary" class="full-width" (click)="rentAgent(agent)">
-                  Rentar
-                </button>
+              <mat-card-actions align="end">
+                <button mat-button color="primary">Ver Detalle</button>
+                <button mat-flat-button color="accent" (click)="rentAgent(agent)">Rentar</button>
               </mat-card-actions>
+
             </mat-card>
           </div>
 
