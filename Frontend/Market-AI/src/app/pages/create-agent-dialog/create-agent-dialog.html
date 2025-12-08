@@ -51,6 +51,20 @@
       <mat-hint>Estas son las reglas internas que seguirá la IA.</mat-hint>
     </mat-form-field>
 
+    <div class="image-upload-container">
+      <div class="preview-box" [style.backgroundImage]="previewUrl ? 'url(' + previewUrl + ')' : ''">
+        <mat-icon *ngIf="!previewUrl">image</mat-icon>
+      </div>
+      
+      <div class="upload-actions">
+        <button mat-stroked-button type="button" (click)="fileInput.click()">
+          <mat-icon>upload</mat-icon> Seleccionar Foto
+        </button>
+        <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+        <span class="file-name" *ngIf="selectedFile">{{ selectedFile.name }}</span>
+      </div>
+    </div>
+
   </form>
 </mat-dialog-content>
 

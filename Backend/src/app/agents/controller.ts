@@ -56,59 +56,31 @@ export async function getAgentById(req: Request, res: Response) {
   }
 }
 
-//Crear un agente | solo si es rol = admin
-export async function createAgent(req: Request, res: Response) {
+//Crear un agente 
+export const createAgent = async (req: Request, res: Response) => {
   try {
-    const authUser = getAuthUser(req);
+    const { name, description, category, pricePerHour, language, modelVersion, instructions } = req.body;
+    
+    const imageUrl = (req.file as any)?.location || ''; 
 
-    if (!authUser.id) {
-      return res.status(401).json({ message: 'No autorizado' });
-    }
-
-    if (authUser.role !== 'admin') {
-      return res.status(403).json({ message: 'Solo los administradores pueden crear agentes' });
-    }
-
-    const {
+    const newAgent = await AgentModel.create({
       name,
       description,
-      instructions, 
       category,
+      pricePerHour: Number(pricePerHour), 
       language,
       modelVersion,
-      imageUrl,
-      pricePerHour
-    } = req.body;
-
-    if (!instructions) {
-      return res.status(400).json({ message: 'El campo instructions es obligatorio' });
-    }
-
-    const agent = new AgentModel({
-      name,
-      description,
-      instructions, 
-      category,
-      language,
-      modelVersion,
-      imageUrl,
-      pricePerHour,
-      createdBy: authUser.id
+      instructions,
+      imageUrl, 
+      availability: true
     });
 
-    const saved = await agent.save();
-    res.status(201).json(saved);
-
-  } catch (err: any) {
-    console.error('Error al crear agente:', err);
-
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Datos inválidos', error: err.message });
-    }
-
-    res.status(500).json({ message: 'Error al crear el agente' });
+    res.status(201).json(newAgent);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error creando agente' });
   }
-}
+};
 
 //Actualizar un agente
 export async function updateAgent(req: Request, res: Response) {

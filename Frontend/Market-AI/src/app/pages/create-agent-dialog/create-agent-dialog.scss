@@ -20,3 +20,9 @@ mat-form-field {
     gap: 0; 
   }
 }
+.image-upload-container { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; }
+    .preview-box { 
+      width: 60px; height: 60px; border-radius: 8px; background: rgba(255,255,255,0.1); 
+      display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center;
+    }
+    .file-name { font-size: 0.8rem; color: #cbd5e1; margin-left: 10px;}
