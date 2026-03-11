@@ -1,36 +1,41 @@
-# name: Jest Tests
+name: Jest Tests
 
-# on:
-#   pull_request:
-#     branches:
-#       - '**'
+on:
+  pull_request:
+    branches:
+      - '**'
 
-# jobs:
-#   test:
-#     name: Run Jest Test Suite
-#     runs-on: ubuntu-latest
+jobs:
+  test:
+    name: Run Jest Test Suite
+    runs-on: ubuntu-latest
+    
+    # Especificamos que se ejecute en la carpeta del backend
+    defaults:
+      run:
+        working-directory: ./Backend
 
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: '20'
-#           cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './Backend/package-lock.json' 
 
-#       - name: Install dependencies
-#         run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-#       - name: Run Jest tests
-#         run: npx jest --ci --coverage --passWithNoTests
+      - name: Run Jest tests
+        run: npx jest --ci --coverage --passWithNoTests
 
-#       - name: Upload coverage report
-#         uses: actions/upload-artifact@v4
-#         if: always()
-#         with:
-#           name: coverage-report
-#           path: coverage/
-#           retention-days: 7
-          
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: Backend/coverage/
+          retention-days: 7
