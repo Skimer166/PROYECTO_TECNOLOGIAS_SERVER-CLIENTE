@@ -9,7 +9,7 @@ jobs:
   test:
     name: Run Jest Test Suite
     runs-on: ubuntu-latest
-    
+
     # Especificamos que se ejecute en la carpeta del backend
     defaults:
       run:
@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: './Backend/package-lock.json' 
+          cache-dependency-path: './Backend/package.json'
 
       - name: Install dependencies
         run: npm ci
