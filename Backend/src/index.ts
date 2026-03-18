@@ -86,7 +86,7 @@ io.on('connection', (socket) => {
     if (!activeSessions[currentUser.id]) {
       activeSessions[currentUser.id] = {
         userId: currentUser.id,
-        userName: currentUser.name,
+        userName: currentUser.name ?? '',
         messages: [],
         active: true
       };
@@ -117,7 +117,7 @@ io.on('connection', (socket) => {
     const targetId = (currentUser.role === 'admin' && data.targetUserId) ? data.targetUserId : currentUser.id;
     const roomId = `support-${targetId}`;
 
-    const msg = { sender: currentUser.name, text: data.text, time: new Date(), isSystem: false };
+    const msg = { sender: currentUser.name ?? '', text: data.text, time: new Date(), isSystem: false };
     
     if (activeSessions[targetId]) {
       activeSessions[targetId].messages.push(msg);
