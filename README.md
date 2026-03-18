@@ -4,6 +4,18 @@
 
 **Market AI** es un marketplace de Agentes de Inteligencia Artificial desarrollado como un proyecto full-stack. La aplicación permite a los usuarios rentar agentes de IA por tiempo limitado utilizando un sistema de créditos, integra pagos reales mediante Stripe, y ofrece una experiencia de usuario fluida con una arquitectura de Componentes Standalone de Angular.
 
+### ✨ Características Principales
+
+* **Autenticación Completa:** Login local, Registro y autenticación mediante Google (OAuth).
+* **Gestión de Roles:** Diferenciación entre usuarios (`user`) y administradores (`admin`).
+* **Marketplace de Agentes:** CRUD completo para administradores.
+* **Sistema de Renta:** Renta de agentes por hora, con cálculo y consumo de créditos.
+* **Sistema de Pagos:** Recarga de créditos mediante Stripe Checkout.
+* **Chat de Soporte:** Comunicación en tiempo real (Socket.IO) para asistencia.
+* **SSR (Server-Side Rendering):** Configuración inicial para un mejor SEO.
+
+---
+
 ### ⚙️ Stack Tecnológico
 
 | Componente | Tecnología | Notas |
@@ -17,15 +29,20 @@
 | **Despliegue** | Vercel (Frontend) & Render (Backend) | Plataformas de producción. |
 | **Pruebas** | Jest y Eslint | Framework de pruebas unitarias y análisis estático de código. |
 
-### ✨ Características Principales
 
-* **Autenticación Completa:** Login local, Registro y autenticación mediante Google (OAuth).
-* **Gestión de Roles:** Diferenciación entre usuarios (`user`) y administradores (`admin`).
-* **Marketplace de Agentes:** CRUD completo para administradores.
-* **Sistema de Renta:** Renta de agentes por hora, con cálculo y consumo de créditos.
-* **Sistema de Pagos:** Recarga de créditos mediante Stripe Checkout.
-* **Chat de Soporte:** Comunicación en tiempo real (Socket.IO) para asistencia.
-* **SSR (Server-Side Rendering):** Configuración inicial para un mejor SEO.
+## Dependencias más importantes
+
+- **Express** – servidor HTTP principal
+- **TypeScript** – tipado del proyecto
+- **Mongoose** – modelo de datos en MongoDB
+- **jsonwebtoken** – autenticación vía JWT
+- **bcryptjs** – hash de contraseñas
+- **socket.io** – chat de soporte en tiempo real
+- **multer / multer-s3 / aws-sdk** – subida de archivos a S3
+- **nodemailer** – envío de correos
+- **openai** – integración con modelos de IA
+- **stripe** (módulo `payments`) – pagos y checkout
+- **local-ssl-proxy** – soporte HTTPS en entorno local
 
 ---
 
@@ -247,22 +264,6 @@ Integración con **Stripe** (modo test):
 
 ---
 
-## Dependencias más importantes
-
-- **Express** – servidor HTTP principal
-- **TypeScript** – tipado del proyecto
-- **Mongoose** – modelo de datos en MongoDB
-- **jsonwebtoken** – autenticación vía JWT
-- **bcryptjs** – hash de contraseñas
-- **socket.io** – chat de soporte en tiempo real
-- **multer / multer-s3 / aws-sdk** – subida de archivos a S3
-- **nodemailer** – envío de correos
-- **openai** – integración con modelos de IA
-- **stripe** (módulo `payments`) – pagos y checkout
-- **local-ssl-proxy** – soporte HTTPS en entorno local
-
----
-
 # Guia de Contribucion
 
 ## Requisitos previos
@@ -347,55 +348,6 @@ git push origin nombre-de-tu-rama
 - Una vez aprobado, se hace merge a `main`
 
 ---
-
-## Pruebas unitarias
-
-Antes de abrir un PR, **debes escribir pruebas unitarias para el codigo que agregaste o modificaste**.
-
-### Backend (Jest)
-
-Los archivos de prueba van en `Backend/src/test/` con el nombre `<modulo>.test.ts`.
-
-```bash
-cd Backend
-npm test
-```
-
-### Frontend (Cypress)
-
-Las pruebas E2E van en `Frontend/Market-AI/cypress/e2e/`.
-
-```bash
-cd Frontend/Market-AI
-npx cypress run
-```
-
-### Reglas
-
-- Todo nuevo endpoint o funcionalidad debe tener al menos una prueba.
-- Las pruebas deben pasar al 100% antes de hacer push.
-- No se aceptaran PRs con pruebas fallando.
-
----
-
-## Buenas practicas
-
-- **Una rama = una funcionalidad o fix.** No mezcles cambios no relacionados en la misma rama.
-- **Sincroniza tu rama con main** antes de abrir un PR para evitar conflictos:
-  ```bash
-  git fetch origin
-  git rebase origin/main
-  ```
-- **No hagas push directo a `main`.**
-- Corre las pruebas antes de subir tus cambios:
-  ```bash
-  # Backend
-  cd Backend && npm test
-
-  # Frontend E2E
-  cd Frontend/Market-AI && npx cypress run
-  ```
-
 
 ## Estructura
 
@@ -580,6 +532,55 @@ PROYECTO_TECNOLOGIAS_SERVER-CLIENTE/
             └── tsconfig.json
 ```
 
+## Pruebas unitarias
+
+Antes de abrir un PR, **debes escribir pruebas unitarias para el codigo que agregaste o modificaste**.
+
+### Backend (Jest)
+
+Los archivos de prueba van en `Backend/src/test/` con el nombre `<modulo>.test.ts`.
+
+```bash
+cd Backend
+npm test
+```
+
+### Frontend (Cypress)
+
+Las pruebas E2E van en `Frontend/Market-AI/cypress/e2e/`.
+
+```bash
+cd Frontend/Market-AI
+npx cypress run
+```
+
+### Reglas
+
+- Todo nuevo endpoint o funcionalidad debe tener al menos una prueba.
+- Las pruebas deben pasar al 100% antes de hacer push.
+- No se aceptaran PRs con pruebas fallando.
+
+---
+
+## Buenas practicas
+
+- **Una rama = una funcionalidad o fix.** No mezcles cambios no relacionados en la misma rama.
+- **Sincroniza tu rama con main** antes de abrir un PR para evitar conflictos:
+  ```bash
+  git fetch origin
+  git rebase origin/main
+  ```
+- **No hagas push directo a `main`.**
+- Corre las pruebas antes de subir tus cambios:
+  ```bash
+  # Backend
+  cd Backend && npm test
+
+  # Frontend E2E
+  cd Frontend/Market-AI && npx cypress run
+  ```
+
+
 ## Pruebas rápidas
 
 1. **Levantar MongoDB** (local o Atlas) y asegurarte de que `MONGO_URL` apunta a una base válida.
@@ -597,3 +598,8 @@ PROYECTO_TECNOLOGIAS_SERVER-CLIENTE/
    - Probar rutas protegidas (`/agents`, `/users`, `/payments`, etc.).
 
 Con esto tienes una guía básica para levantar el backend, ver la documentación y probar los endpoints más importantes del proyecto. 
+
+## Mockups de la aplicación
+
+https://docs.google.com/document/d/1Mhebb97YuDDc18YMeti8nJtNwfwt7NyUcVa0UZodXKA/edit?usp=sharing
+
