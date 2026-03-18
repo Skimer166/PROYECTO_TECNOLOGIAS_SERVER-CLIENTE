@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { UserModel } from '../users/model';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-11-17.clover', 
+  apiVersion: '2026-02-25.clover',
 });
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
@@ -36,7 +36,7 @@ export async function createCheckoutSession(req: Request, res: Response) {
       success_url: `${FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${FRONTEND_URL}/home-page`,
       metadata: {
-        userId: userId,
+        userId: userId ?? null,
         creditsAmount: amount.toString()
       }
     });

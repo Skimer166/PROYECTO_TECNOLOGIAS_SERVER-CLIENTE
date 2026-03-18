@@ -47,26 +47,27 @@ const activeSessions: Record<string, SupportSession> = {};
 
 io.on('connection', (socket) => {
   const token = socket.handshake.auth?.token as string | undefined;
-  interface SocketUser { id?: string; name?: string; role?: string; }
+  interface SocketUser { id: string; name?: string; role?: string; }
   let currentUser: SocketUser | null = null;
 
   if (token) {
     try {
       const clean = token.replace('Bearer ', '');
       const decoded = jwt.verify(clean, JWT_SECRET) as { sub?: string; id?: string; name?: string; role?: string };
-      
-      currentUser = {
-        id: decoded.sub || decoded.id,
-        name: decoded.name,
-        role: decoded.role
-      };
 
-      if (currentUser.id) {
-        socket.join(String(currentUser.id));
+      const userId = decoded.sub || decoded.id;
+      if (userId) {
+        currentUser = {
+          id: userId,
+          name: decoded.name,
+          role: decoded.role
+        };
 
-        if (currentUser.role === 'admin') {
-            socket.join('admins');
-            socket.emit('support:active-sessions', Object.values(activeSessions));
+        socket.join(userId);
+
+        if (decoded.role === 'admin') {
+          socket.join('admins');
+          socket.emit('support:active-sessions', Object.values(activeSessions));
         }
       }
     } catch (err) {

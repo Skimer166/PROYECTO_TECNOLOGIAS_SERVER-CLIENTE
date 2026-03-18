@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Types } from 'mongoose';
 import { AgentModel } from './model';
 import { UserModel } from '../users/model';
 import { io } from '../../index';
@@ -250,7 +251,7 @@ export async function rentAgent(req: Request, res: Response) {
     const now = new Date();
     const expirationTime = new Date(now.getTime() + (totalHours * 60 * 60 * 1000)); 
 
-    agent.rentedBy = userId;
+    agent.rentedBy = new Types.ObjectId(userId);
     agent.rentedUntil = expirationTime;
     
     if (!agent.instructions) agent.instructions = "Asistente útil.";
