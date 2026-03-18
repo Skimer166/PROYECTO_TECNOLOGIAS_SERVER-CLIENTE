@@ -6,8 +6,15 @@ import { FileModel } from './model';
 export const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 export const upload = createImageUpload(MAX_SIZE_BYTES);
 
+interface MulterS3File extends Express.Multer.File {
+  location?: string;
+  key?: string;
+  bucket?: string;
+  contentType?: string;
+}
+
 function getAuthUserId(req: Request): string | null {
-  const user: any = (req as any).user;
+  const user = req.user;
   return user?.id || user?.sub || null;
 }
 
@@ -19,7 +26,7 @@ export async function uploadFile(req: Request, res: Response) {
       return res.status(401).json({ message: 'No autorizado' });
     }
 
-    const file = (req as any).file as any;
+    const file = req.file as MulterS3File | undefined;
     if (!file) {
       return res.status(400).json({ message: 'No se envió archivo' });
     }
@@ -94,7 +101,7 @@ export async function downloadFile(req: Request, res: Response) {
 
     try {
       const obj = await getObject(file.key);
-      const bodyStream = obj.Body as any;
+      const bodyStream = obj.Body as NodeJS.ReadableStream;
 
       res.setHeader('Content-Type', obj.ContentType || file.contentType || 'application/octet-stream');
       if (obj.ContentLength != null) {

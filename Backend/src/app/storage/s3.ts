@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import multer from 'multer';
 import multerS3 from 'multer-s3';
+import { Request } from 'express';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -85,7 +86,7 @@ export function createImageUpload(maxBytes = 5 * 1024 * 1024) {
       bucket: bucketName,
       contentType: multerS3.AUTO_CONTENT_TYPE,
       metadata: (req, file, cb) => cb(null, { originalName: file.originalname }),
-      key: (req: any, file, cb) => {
+      key: (req: Request, file, cb) => {
         const userId = req.user?.id || req.user?.sub || 'anonymous';
         const ext = (file.originalname.split('.').pop() || '').toLowerCase();
         cb(null, `documents/${userId}/${Date.now()}.${ext}`);

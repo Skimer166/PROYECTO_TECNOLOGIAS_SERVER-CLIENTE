@@ -11,7 +11,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 export async function createCheckoutSession(req: Request, res: Response) {
   try {
     const { amount } = req.body;
-    const userId = (req.user as any).id;
+    const userId = req.user?.id;
 
     if (!amount || amount < 10) { 
       return res.status(400).json({ message: 'El monto mínimo es $10' });

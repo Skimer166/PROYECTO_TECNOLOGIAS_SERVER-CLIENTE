@@ -1,8 +1,6 @@
 import passport from 'passport';
 import {
   Strategy as GoogleStrategy,
-  Profile,
-  VerifyCallback,
 } from 'passport-google-oauth20';
 import { UserModel } from '../users/model'; 
 import { sendWelcomeEmail } from '../mailer/controller';
@@ -83,7 +81,7 @@ passport.use(
 
         return done(null, user, { isNewUser });
       } catch (err) {
-        return done(err as any, undefined);
+        return done(err instanceof Error ? err : new Error(String(err)), undefined);
       }
     }
   )

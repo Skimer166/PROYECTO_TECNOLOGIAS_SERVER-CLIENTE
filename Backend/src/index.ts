@@ -43,16 +43,17 @@ app.use(routes);
 
 const JWT_SECRET = process.env.SECRET_KEY ?? process.env.JWT_KEY ?? 'dev-secret';
 
-let activeSessions: Record<string, SupportSession> = {};
+const activeSessions: Record<string, SupportSession> = {};
 
 io.on('connection', (socket) => {
   const token = socket.handshake.auth?.token as string | undefined;
-  let currentUser: any = null;
+  interface SocketUser { id?: string; name?: string; role?: string; }
+  let currentUser: SocketUser | null = null;
 
   if (token) {
     try {
       const clean = token.replace('Bearer ', '');
-      const decoded: any = jwt.verify(clean, JWT_SECRET);
+      const decoded = jwt.verify(clean, JWT_SECRET) as { sub?: string; id?: string; name?: string; role?: string };
       
       currentUser = {
         id: decoded.sub || decoded.id,

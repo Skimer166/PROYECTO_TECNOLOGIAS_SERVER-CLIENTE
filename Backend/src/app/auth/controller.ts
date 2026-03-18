@@ -67,10 +67,14 @@ export async function resetPassword(req: Request, res: Response) {
       return res.status(400).json({ message: 'Token y nueva contraseña requeridos' });
     }
 
-    let payload: any;
+    interface ResetPayload {
+      type?: string;
+      sub?: string;
+    }
+    let payload: ResetPayload;
     try {
-      payload = jwt.verify(token, JWT_KEY) as any;
-    } catch (err) {
+      payload = jwt.verify(token, JWT_KEY) as ResetPayload;
+    } catch {
       return res.status(400).json({ message: 'Token inválido o expirado' });
     }
 
@@ -124,7 +128,7 @@ export const googleCallbackController = (
   passport.authenticate(
     'google',
     { session: false },
-    async (err: any, googleUser: any, info?: any) => {
+    async (err: Error | null, googleUser: Express.User | false | null, info?: { isNewUser?: boolean }) => {
       if (err || !googleUser) {
         console.error('Error en Google Auth:', err);
         return res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
@@ -132,7 +136,7 @@ export const googleCallbackController = (
 
       try {
         const mode = (req.query.state as string) === 'register' ? 'register' : 'login';
-        const isNewUser = info && (info as any).isNewUser;
+        const isNewUser = info && info.isNewUser;
 
         // Si viene desde "Registrarse con Google" y el usuario YA existía,
         // redirigimos al REGISTRO con error de email en uso.

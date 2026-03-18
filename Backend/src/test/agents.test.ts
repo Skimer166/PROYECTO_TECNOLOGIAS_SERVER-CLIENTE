@@ -49,7 +49,7 @@ describe('Agent Controller Unit Tests', () => {
         name: 'Agente Malicioso',
         instructions: 'Hacker',
       }
-    } as any;
+    } as unknown as Request;
 
     await createAgent(req as Request, res as Response);
 
@@ -63,7 +63,7 @@ describe('Agent Controller Unit Tests', () => {
       params: { id: 'agent123' },
       body: { amount: 1, unit: 'hours' },
       user: { id: 'user123' }
-    } as any;
+    } as unknown as Request;
 
     // Mockear usuario con 0 creditos
     const mockUser = { _id: 'user123', credits: 0, save: jest.fn() };
