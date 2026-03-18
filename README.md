@@ -1,10 +1,10 @@
 # PROYECTO TECNOLOGÍAS SERVER-CLIENTE: MARKET AI
 
-## 🚀 Visión General del Proyecto
+## 🚀 Descripcion
 
 **Market AI** es un marketplace de Agentes de Inteligencia Artificial desarrollado como un proyecto full-stack. La aplicación permite a los usuarios rentar agentes de IA por tiempo limitado utilizando un sistema de créditos, integra pagos reales mediante Stripe, y ofrece una experiencia de usuario fluida con una arquitectura de Componentes Standalone de Angular.
 
-### ✨ Características Principales
+### ✨ Requerimientos
 
 * **Autenticación Completa:** Login local, Registro y autenticación mediante Google (OAuth).
 * **Gestión de Roles:** Diferenciación entre usuarios (`user`) y administradores (`admin`).
@@ -183,84 +183,6 @@ npx local-ssl-proxy --source 3443 --target 3001
 ```
 
 Con esto podrás acceder al backend también en `https://localhost:3443`.
-
----
-
-## Documentación de la API (Swagger)
-
-Swagger permite visualizar y probar todos los endpoints desde el navegador.
-
-- **URL:** `http://localhost:3001/swagger`
-- **Config:** `swagger.config.ts`
-
-Los comentarios `@swagger` están distribuidos en los archivos de rutas de cada módulo (`src/app/**/routes.ts`).
-
----
-
-## Módulos y rutas principales
-
-### 1. Autenticación (`/auth`)
-
-- `POST /auth/login` → login con email/contraseña (devuelve JWT)
-- `POST /auth/signup` → registro de usuario
-- `POST /auth/forgot-password` → envía correo de recuperación
-- `POST /auth/reset-password` → cambia contraseña usando token de recuperación
-- `GET  /auth/google` → inicio de login con Google
-- `GET  /auth/google/callback` → callback de Google OAuth
-
-Todas las rutas protegidas usan el middleware `verifyToken`, que valida el JWT y bloquea usuarios con estado `blocked`.
-
-### 2. Usuarios (`/users`)
-
-- `GET    /users` → listar usuarios (solo autenticado)
-- `GET    /users/:id` → detalle de usuario
-- `POST   /users` o `/users/register` → crear usuario
-- `PUT    /users/:id` → actualizar datos de usuario
-- `DELETE /users/:id` → eliminar usuario (**solo admin**)
-- `GET    /users/favorites` → lista de agentes favoritos (demo)
-- `PUT    /users/:id/role` → cambiar rol (`user`/`admin`) (**solo admin**)
-- `PUT    /users/:id/status` → cambiar estado (`active`/`blocked`) (**solo admin**)
-- `PUT    /users/:id/credits` → agregar créditos a un usuario (**solo admin**)
-
-El panel de administración consume estas rutas para gestionar usuarios, roles, estado y créditos.
-
-### 3. Agentes (`/agents`)
-
-- `GET    /agents` → listar agentes (filtros `category`, `available=true`)
-- `GET    /agents/search?search=texto` → buscar por nombre/descripcion
-- `POST   /agents` → crear agente (**solo admin**)
-- `GET    /agents/:id` → detalle de un agente
-- `PUT    /agents/:id` → actualizar agente (**admin/owner**)
-- `DELETE /agents/:id` → eliminar agente (**admin/owner**)
-- `POST   /agents/:id/rent` → rentar un agente
-- `POST   /agents/:id/release` → liberar agente rentado
-- `GET    /agents/my-rentals` → agentes rentados por el usuario actual
-
-### 4. Archivos (`/files`)
-
-Maneja subida y administración de archivos del usuario (por ejemplo documentos para los agentes).  
-Usa **Multer** y **AWS S3**.
-
-### 5. Chat (`/chat`)
-
-Endpoints para conversar con un agente de IA, apoyados en OpenAI:
-
-- `POST /chat` → envía mensaje a un agente y devuelve la respuesta.
-
-Además, se usa **Socket.IO** (`src/index.ts`) para el chat de soporte en tiempo real entre usuarios y administradores.
-
-### 6. Mailer (`/mailer`)
-
-Rutas para envío de correos (bienvenida, recuperación de contraseña, etc.) usando `nodemailer` y SMTP.
-
-### 7. Pagos (`/payments`)
-
-Integración con **Stripe** (modo test):
-
-- `POST /payments/create-checkout-session` → crea sesión de checkout para Stripe.
-- `POST /payments/verify-success` → verifica el resultado de un pago.
-
-> Nota: para webhooks de Stripe necesitarás exponer una ruta HTTPS pública (por ejemplo usando `stripe-cli` o `ngrok`) o el proxy HTTPS local que ya se está usando.
 
 ---
 
