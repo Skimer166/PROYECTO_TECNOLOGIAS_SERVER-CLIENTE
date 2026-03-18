@@ -9,4 +9,9 @@ export default {
   resetMocks: true,
   restoreMocks: true,
   setupFiles: ['dotenv/config'],
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
+    },
+  },
 };
