@@ -10,6 +10,7 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
 const GOOGLE_CALLBACK_URL =
   process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/auth/google/callback';
 
+// normalize
 function normalizeUtf8(str: string) {
   return Buffer.from(str, 'utf8').toString();
 }
