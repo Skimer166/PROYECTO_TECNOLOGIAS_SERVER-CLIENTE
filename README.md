@@ -262,6 +262,189 @@ Integración con **Stripe** (modo test):
 
 ---
 
+## Estructure
+
+```
+PROYECTO_TECNOLOGIAS_SERVER-CLIENTE/
+│
+├── .gitignore
+├── README.md
+├── estructure.md
+│
+├── Backend/                              # Servidor Node.js + Express + TypeScript
+│   ├── .gitignore
+│   ├── package.json                      # Dependencias: Express, TypeScript, Jest
+│   ├── jest.config.ts                    # Configuracion de pruebas Jest
+│   ├── tsconfig.json                     # Configuracion de TypeScript
+│   │
+│   └── src/
+│       ├── index.ts                      # Punto de entrada del servidor
+│       ├── index.html                    # HTML para documentacion Swagger
+│       ├── swagger.config.ts             # Configuracion de documentacion API
+│       │
+│       ├── database/
+│       │   └── index.ts                  # Conexion a la base de datos
+│       │
+│       └── app/
+│           ├── routes.ts                 # Configuracion central de rutas
+│           │
+│           ├── agents/                   # Modulo de agentes IA
+│           │   ├── controller.ts         # Logica de negocio de agentes
+│           │   ├── model.ts              # Modelo de datos del agente
+│           │   └── routes.ts             # Endpoints de agentes
+│           │
+│           ├── auth/                     # Modulo de autenticacion
+│           │   ├── controller.ts         # Logica de autenticacion
+│           │   ├── routes.ts             # Endpoints de auth
+│           │   └── google.ts             # Integracion OAuth con Google
+│           │
+│           ├── chat/                     # Modulo de chat en tiempo real
+│           │   ├── controller.ts
+│           │   └── routes.ts
+│           │
+│           ├── documents/                # Modulo de gestion de documentos
+│           │   ├── controller.ts
+│           │   ├── model.ts
+│           │   └── routes.ts
+│           │
+│           ├── users/                    # Modulo de usuarios
+│           │   ├── controller.ts
+│           │   ├── model.ts
+│           │   └── routes.ts
+│           │
+│           ├── mailer/                   # Servicio de correo electronico
+│           │   ├── controller.ts
+│           │   ├── model.ts
+│           │   └── routes.ts
+│           │
+│           ├── payments/                 # Modulo de pagos
+│           │   ├── controller.ts
+│           │   └── routes.ts
+│           │
+│           ├── storage/                  # Almacenamiento en la nube
+│           │   └── s3.ts                 # Integracion con AWS S3
+│           │
+│           ├── middlewares/              # Middlewares de Express
+│           │   └── auth.ts               # Middleware de autenticacion
+│           │
+│           ├── interfaces/               # Definiciones de tipos TypeScript
+│           │   ├── agent.ts
+│           │   ├── user.ts
+│           │   └── support.ts
+│           │
+│           └── test/                     # Pruebas unitarias (Jest)
+│               ├── agents.test.ts
+│               └── users.test.ts
+│
+└── Frontend/                             # Aplicacion Angular
+    ├── .gitignore
+    ├── package.json
+    ├── tsconfig.json
+    │
+    └── Market-AI/                        # Proyecto Angular principal
+        ├── .editorconfig
+        ├── .gitignore
+        ├── angular.json                  # Configuracion del workspace Angular
+        ├── package.json
+        ├── tsconfig.json
+        ├── tsconfig.app.json
+        ├── tsconfig.spec.json
+        ├── cypress.config.ts             # Configuracion de pruebas E2E
+        │
+        ├── .vscode/                      # Configuracion de VS Code
+        │   ├── extensions.json
+        │   ├── launch.json
+        │   └── tasks.json
+        │
+        ├── public/                       # Recursos estaticos publicos
+        │   ├── favicon.ico
+        │   └── assets/
+        │       └── logo.jpeg
+        │
+        ├── src/
+        │   ├── index.html                # HTML principal
+        │   ├── main.ts                   # Bootstrap del cliente
+        │   ├── main.server.ts            # Bootstrap del servidor (SSR)
+        │   ├── server.ts                 # Configuracion del servidor SSR
+        │   ├── styles.scss               # Estilos globales
+        │   │
+        │   ├── assets/                   # Recursos de la aplicacion
+        │   │   ├── get-pip.py
+        │   │   └── google-logo.svg
+        │   │
+        │   └── app/                      # Modulo raiz de Angular
+        │       ├── app.html              # Plantilla del layout principal
+        │       ├── app.scss              # Estilos del componente raiz
+        │       ├── app.ts                # Componente principal
+        │       ├── app.spec.ts           # Prueba del componente principal
+        │       ├── app.config.ts         # Configuracion Angular (cliente)
+        │       ├── app.config.server.ts  # Configuracion Angular (servidor)
+        │       ├── app.routes.ts         # Rutas del cliente
+        │       ├── app.routes.server.ts  # Rutas del servidor
+        │       │
+        │       ├── layouts/              # Componentes de layout
+        │       │   ├── header/
+        │       │   │   ├── header.ts
+        │       │   │   ├── header.html
+        │       │   │   ├── header.scss
+        │       │   │   └── header.spec.ts
+        │       │   └── footer/
+        │       │       ├── footer.ts
+        │       │       ├── footer.html
+        │       │       ├── footer.scss
+        │       │       └── footer.spec.ts
+        │       │
+        │       ├── pages/                # Paginas / vistas principales
+        │       │   ├── landing-page/     # Pagina publica de inicio
+        │       │   ├── login/            # Inicio de sesion
+        │       │   ├── register/         # Registro de usuario
+        │       │   ├── login-success/    # Confirmacion de login exitoso
+        │       │   ├── reset-password/   # Restablecimiento de contrasena
+        │       │   ├── home-page/        # Dashboard principal
+        │       │   ├── payment-success/  # Confirmacion de pago exitoso
+        │       │   │
+        │       │   ├── mis-agentes/      # Lista de agentes del usuario
+        │       │   │   ├── mis-agentes.ts
+        │       │   │   ├── mis-agentes.html
+        │       │   │   ├── mis-agentes.scss
+        │       │   │   ├── mis-agentes.spec.ts
+        │       │   │   └── cuadro-de-confirmacion.ts  # Dialogo de confirmacion
+        │       │   │
+        │       │   ├── create-agent-dialog/  # Dialogo: crear nuevo agente
+        │       │   ├── rent-dialog/          # Dialogo: rentar un agente
+        │       │   ├── add-credits-dialog/   # Dialogo: agregar creditos
+        │       │   │
+        │       │   ├── mi-perfil/            # Perfil del usuario
+        │       │   ├── admin-agents/         # Admin: gestion de agentes
+        │       │   ├── admin-users/          # Admin: gestion de usuarios
+        │       │   │   ├── admin-users-dialog.ts
+        │       │   │   ├── confirm-delete-user-dialog.ts
+        │       │   │   └── edit-credits-dialog.ts
+        │       │   ├── admin-support/        # Admin: tickets de soporte
+        │       │   └── support-widget/       # Widget de soporte al usuario
+        │       │
+        │       └── shared/               # Utilidades compartidas
+        │           ├── config.ts         # Configuracion global
+        │           ├── guards/
+        │           │   └── auth-guard-guard.ts  # Guard de autenticacion
+        │           ├── services/
+        │           │   ├── auth.ts       # Servicio de autenticacion
+        │           │   ├── user.ts       # Servicio de usuario
+        │           │   └── socket.ts     # Servicio WebSocket (Socket.io)
+        │           └── types/
+        │               └── user.ts       # Tipos TypeScript del usuario
+        │
+        └── cypress/                      # Pruebas E2E (Cypress)
+            ├── e2e/
+            │   └── auth.cy.ts            # Pruebas de autenticacion
+            ├── fixtures/
+            │   └── example.json
+            ├── support/
+            │   ├── commands.ts
+            │   └── e2e.ts
+            └── tsconfig.json
+```
+
 ## Pruebas rápidas
 
 1. **Levantar MongoDB** (local o Atlas) y asegurarte de que `MONGO_URL` apunta a una base válida.
