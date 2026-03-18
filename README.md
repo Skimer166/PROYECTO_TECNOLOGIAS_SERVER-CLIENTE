@@ -262,7 +262,141 @@ Integración con **Stripe** (modo test):
 
 ---
 
-## Estructure
+# Guia de Contribucion
+
+## Requisitos previos
+
+- Tener Git instalado
+- Tener acceso al repositorio
+- Node.js instalado (para correr el proyecto localmente)
+
+---
+
+## Flujo de trabajo
+
+### 1. Clonar el repositorio
+
+```bash
+git clone <url-del-repositorio>
+cd PROYECTO_TECNOLOGIAS_SERVER-CLIENTE
+```
+
+### 2. Crear una rama nueva
+
+Nunca trabajes directamente en `main`. Crea una rama con un nombre descriptivo:
+
+```bash
+git checkout -b nombre-de-tu-rama
+```
+
+Ejemplos de nombres de ramas:
+- `feature/login-google`
+- `fix/error-en-pagos`
+- `refactor/modulo-usuarios`
+
+### 3. Hacer tus cambios
+
+Trabaja en tu rama normalmente. Una vez listos los cambios, agrega y haz commit:
+
+```bash
+git add .
+git commit -m "tipo/descripcion-breve"
+```
+
+Usa **Conventional Commits** para los mensajes. El formato es:
+
+```
+tipo/descripcion-breve-en-minusculas
+```
+
+| Tipo       | Cuando usarlo                                      |
+|------------|----------------------------------------------------|
+| `feature`  | Nueva funcionalidad                                |
+| `fix`      | Correccion de un bug                               |
+| `refactor` | Cambio de codigo que no agrega ni corrige nada     |
+| `test`     | Agregar o modificar pruebas                        |
+| `docs`     | Cambios en documentacion                           |
+| `chore`    | Tareas de mantenimiento (dependencias, configs)    |
+
+Ejemplos:
+- `git commit -m "feature/validacion-email-en-registro"`
+- `git commit -m "fix/error-en-endpoint-de-agentes"`
+- `git commit -m "refactor/modulo-usuarios"`
+- `git commit -m "test/pruebas-unitarias-auth"`
+- `git commit -m "docs/actualizar-readme"`
+
+### 4. Subir tu rama al repositorio remoto
+
+```bash
+git push origin nombre-de-tu-rama
+```
+
+### 5. Crear un Pull Request (PR)
+
+1. Ve al repositorio en GitHub
+2. Haz clic en **"Compare & pull request"** (aparece automaticamente al subir una rama)
+3. Asegurate de que el PR apunte de tu rama hacia `main`
+4. Escribe un titulo claro y una descripcion de los cambios
+5. Haz clic en **"Create pull request"**
+
+### 6. Revision y merge
+
+- Espera a que alguien revise tu PR
+- Si hay comentarios, haz los cambios en tu rama local, haz commit y push; el PR se actualiza automaticamente
+- Una vez aprobado, se hace merge a `main`
+
+---
+
+## Pruebas unitarias
+
+Antes de abrir un PR, **debes escribir pruebas unitarias para el codigo que agregaste o modificaste**.
+
+### Backend (Jest)
+
+Los archivos de prueba van en `Backend/src/test/` con el nombre `<modulo>.test.ts`.
+
+```bash
+cd Backend
+npm test
+```
+
+### Frontend (Cypress)
+
+Las pruebas E2E van en `Frontend/Market-AI/cypress/e2e/`.
+
+```bash
+cd Frontend/Market-AI
+npx cypress run
+```
+
+### Reglas
+
+- Todo nuevo endpoint o funcionalidad debe tener al menos una prueba.
+- Las pruebas deben pasar al 100% antes de hacer push.
+- No se aceptaran PRs con pruebas fallando.
+
+---
+
+## Buenas practicas
+
+- **Una rama = una funcionalidad o fix.** No mezcles cambios no relacionados en la misma rama.
+- **Sincroniza tu rama con main** antes de abrir un PR para evitar conflictos:
+  ```bash
+  git fetch origin
+  git rebase origin/main
+  ```
+- **No hagas push directo a `main`.**
+- Corre las pruebas antes de subir tus cambios:
+  ```bash
+  # Backend
+  cd Backend && npm test
+
+  # Frontend E2E
+  cd Frontend/Market-AI && npx cypress run
+  ```
+
+
+## Estructura
 
 ```
 PROYECTO_TECNOLOGIAS_SERVER-CLIENTE/
