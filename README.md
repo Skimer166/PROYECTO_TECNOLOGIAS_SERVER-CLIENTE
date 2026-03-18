@@ -15,6 +15,7 @@
 | **Tiempo Real** | Socket.IO | Implementado para el Chat de Soporte. |
 | **Almacenamiento** | AWS S3 | Almacenamiento de imágenes de perfil y documentos. |
 | **Despliegue** | Vercel (Frontend) & Render (Backend) | Plataformas de producción. |
+| **Pruebas** | Jest y Eslint | Framework de pruebas unitarias y análisis estático de código. |
 
 ### ✨ Características Principales
 
