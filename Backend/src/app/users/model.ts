@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { IUser } from '../interfaces/user';
 
 const userSchema = new Schema<IUser>(
@@ -14,7 +14,7 @@ const userSchema = new Schema<IUser>(
 
     passwordHash: {
       type: String,
-      required: function (this: any) {
+      required: function (this: IUser) {
         return !this.googleId;
       },
     },

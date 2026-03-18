@@ -47,7 +47,7 @@ export async function chatWithAgent(req: Request, res: Response) {
       usage: completion.usage 
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error en chat OpenAI:', error);
     return res.status(500).json({ message: 'Error al procesar el mensaje con la IA' });
   }

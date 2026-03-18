@@ -3,9 +3,12 @@ import { createAgent, getAllAgents, rentAgent } from '../app/agents/controller';
 import { AgentModel } from '../app/agents/model';
 import { UserModel } from '../app/users/model';
 
-// Mock de Modelos
+// Mock de Modelos y del servidor
 jest.mock('../app/agents/model');
 jest.mock('../app/users/model');
+jest.mock('../index', () => ({
+  io: { to: jest.fn().mockReturnValue({ emit: jest.fn() }) },
+}));
 
 describe('Agent Controller Unit Tests', () => {
   let req: Partial<Request>;
@@ -49,12 +52,12 @@ describe('Agent Controller Unit Tests', () => {
         name: 'Agente Malicioso',
         instructions: 'Hacker',
       }
-    } as any;
+    } as unknown as Request;
 
     await createAgent(req as Request, res as Response);
 
     expect(statusMock).toHaveBeenCalledWith(403);
-    expect(jsonMock).toHaveBeenCalledWith({ message: 'Solo los administradores pueden crear agentes' });
+    expect(jsonMock).toHaveBeenCalledWith({ message: 'Se requieren permisos de administrador' });
   });
 
   // PRUEBA 6: Renta con creditos insuficientes
@@ -63,7 +66,7 @@ describe('Agent Controller Unit Tests', () => {
       params: { id: 'agent123' },
       body: { amount: 1, unit: 'hours' },
       user: { id: 'user123' }
-    } as any;
+    } as unknown as Request;
 
     // Mockear usuario con 0 creditos
     const mockUser = { _id: 'user123', credits: 0, save: jest.fn() };

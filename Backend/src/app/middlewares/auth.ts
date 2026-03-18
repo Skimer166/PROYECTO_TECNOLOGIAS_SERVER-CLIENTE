@@ -3,10 +3,14 @@ import { IUser } from "../interfaces/user"
 import jwt from 'jsonwebtoken';
 import { UserModel } from '../users/model';
 
-declare global {
-    namespace Express {
-      interface User extends IUser {}
-    }
+interface JwtUserPayload {
+  sub?: string;
+  id?: string;
+  email?: string;
+  name?: string;
+  role?: 'user' | 'admin';
+  iat?: number;
+  exp?: number;
 }
 
 const JWT_SECRET = process.env.SECRET_KEY ?? process.env.JWT_KEY;
@@ -32,7 +36,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   }
 
   try {
-    const payload = jwt.verify(token, JWT_SECRET as string) as any;
+    const payload = jwt.verify(token, JWT_SECRET as string) as JwtUserPayload;
     req.user = {
       name: payload?.name,
       email: payload?.email,
@@ -43,9 +47,9 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   }
 }
 
-//Middlewares 
+//Middlewares
 export interface AuthRequest extends Request {
-  user?: any;
+  user?: Express.User;
 }
 
 export const verifyToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -56,7 +60,7 @@ export const verifyToken = async (req: AuthRequest, res: Response, next: NextFun
   if (!token) return res.status(401).json({ message: 'Required token' });
   
   try {
-    const decoded = jwt.verify(token, JWT_SECRET as string) as any;
+    const decoded = jwt.verify(token, JWT_SECRET as string) as JwtUserPayload;
 
     const userId = decoded.sub || decoded.id;
     if (!userId) {
@@ -68,7 +72,7 @@ export const verifyToken = async (req: AuthRequest, res: Response, next: NextFun
       return res.status(401).json({ message: 'Usuario no encontrado' });
     }
 
-    if ((dbUser as any).status === 'blocked') {
+    if (dbUser.status === 'blocked') {
       return res.status(403).json({ message: 'Tu cuenta está bloqueada. Contacta al administrador.' });
     }
 
@@ -80,8 +84,8 @@ export const verifyToken = async (req: AuthRequest, res: Response, next: NextFun
     };
 
     next();
-  } catch (err: any) {
-    if (err.name === 'TokenExpiredError') {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'TokenExpiredError') {
       return res.status(401).json({ message: 'Token expirado, inicia sesión de nuevo' });
     }
     return res.status(401).json({ message: 'Invalid token' });
@@ -91,7 +95,7 @@ export const verifyToken = async (req: AuthRequest, res: Response, next: NextFun
 //middleware admin
 export const verifyAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
   if (!req.user) return res.status(401).json({ message: 'Required token' });
-  if ((req.user as any).role !== 'admin') {
+  if (req.user?.role !== 'admin') {
     return res.status(403).json({ message: 'Admin access required' });
   }
   next();

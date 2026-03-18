@@ -43,29 +43,31 @@ app.use(routes);
 
 const JWT_SECRET = process.env.SECRET_KEY ?? process.env.JWT_KEY ?? 'dev-secret';
 
-let activeSessions: Record<string, SupportSession> = {};
+const activeSessions: Record<string, SupportSession> = {};
 
 io.on('connection', (socket) => {
   const token = socket.handshake.auth?.token as string | undefined;
-  let currentUser: any = null;
+  interface SocketUser { id: string; name?: string; role?: string; }
+  let currentUser: SocketUser | null = null;
 
   if (token) {
     try {
       const clean = token.replace('Bearer ', '');
-      const decoded: any = jwt.verify(clean, JWT_SECRET);
-      
-      currentUser = {
-        id: decoded.sub || decoded.id,
-        name: decoded.name,
-        role: decoded.role
-      };
+      const decoded = jwt.verify(clean, JWT_SECRET) as { sub?: string; id?: string; name?: string; role?: string };
 
-      if (currentUser.id) {
-        socket.join(String(currentUser.id));
+      const userId = decoded.sub || decoded.id;
+      if (userId) {
+        currentUser = {
+          id: userId,
+          name: decoded.name,
+          role: decoded.role
+        };
 
-        if (currentUser.role === 'admin') {
-            socket.join('admins');
-            socket.emit('support:active-sessions', Object.values(activeSessions));
+        socket.join(userId);
+
+        if (decoded.role === 'admin') {
+          socket.join('admins');
+          socket.emit('support:active-sessions', Object.values(activeSessions));
         }
       }
     } catch (err) {
@@ -84,7 +86,7 @@ io.on('connection', (socket) => {
     if (!activeSessions[currentUser.id]) {
       activeSessions[currentUser.id] = {
         userId: currentUser.id,
-        userName: currentUser.name,
+        userName: currentUser.name ?? '',
         messages: [],
         active: true
       };
@@ -115,7 +117,7 @@ io.on('connection', (socket) => {
     const targetId = (currentUser.role === 'admin' && data.targetUserId) ? data.targetUserId : currentUser.id;
     const roomId = `support-${targetId}`;
 
-    const msg = { sender: currentUser.name, text: data.text, time: new Date(), isSystem: false };
+    const msg = { sender: currentUser.name ?? '', text: data.text, time: new Date(), isSystem: false };
     
     if (activeSessions[targetId]) {
       activeSessions[targetId].messages.push(msg);

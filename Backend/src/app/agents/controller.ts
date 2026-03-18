@@ -1,11 +1,16 @@
 import { Request, Response } from 'express';
+import { Types } from 'mongoose';
 import { AgentModel } from './model';
 import { UserModel } from '../users/model';
 import { io } from '../../index';
 
 //extraer el userId desde req.user
+interface MulterS3File extends Express.Multer.File {
+  location?: string;
+}
+
 function getAuthUser(req: Request): { id?: string; role?: string } {
-  const user = (req as any).user;
+  const user = req.user;
   if (!user) return {};
   return {
     id: user.id,
@@ -21,7 +26,7 @@ export async function getAllAgents(req: Request, res: Response) {
       available?: string;
     };
 
-    const filter: any = {};
+    const filter: Record<string, unknown> = {};
 
     if (category) {
       filter.category = category;
@@ -71,7 +76,7 @@ export const createAgent = async (req: Request, res: Response) => {
 
     const { name, description, category, pricePerHour, language, modelVersion, instructions } = req.body;
     
-    const imageUrl = (req.file as any)?.location || ''; 
+    const imageUrl = (req.file as MulterS3File)?.location || '';
 
     const newAgent = await AgentModel.create({
       name,
@@ -140,9 +145,9 @@ export async function updateAgent(req: Request, res: Response) {
 
     const updated = await agent.save();
     res.json(updated);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error al actualizar agente:', err);
-    if (err.name === 'ValidationError') {
+    if (err instanceof Error && err.name === 'ValidationError') {
       return res.status(400).json({ message: 'Datos inválidos', error: err.message });
     }
     res.status(500).json({ message: 'Error al actualizar el agente' });
@@ -209,8 +214,7 @@ export async function rentAgent(req: Request, res: Response) {
     // recibimos cantidad y unidad del body
     const { amount = 1, unit = 'hours' } = req.body; 
 
-    const userToken = req.user as any;
-    const userId = userToken?.id || userToken?.sub;
+    const userId = req.user?.id || req.user?.sub;
 
     if (!userId) return res.status(401).json({ message: 'No autorizado' });
 
@@ -247,7 +251,7 @@ export async function rentAgent(req: Request, res: Response) {
     const now = new Date();
     const expirationTime = new Date(now.getTime() + (totalHours * 60 * 60 * 1000)); 
 
-    agent.rentedBy = userId;
+    agent.rentedBy = new Types.ObjectId(userId);
     agent.rentedUntil = expirationTime;
     
     if (!agent.instructions) agent.instructions = "Asistente útil.";
@@ -290,7 +294,7 @@ export async function rentAgent(req: Request, res: Response) {
 // Listar los agentes que YO he rentado
 export async function getMyRentedAgents(req: Request, res: Response) {
   try {
-    const userId = (req.user as any).sub || (req.user as any).id;
+    const userId = req.user?.sub || req.user?.id;
     if (!userId) return res.status(401).json({ message: 'No autorizado' });
 
     const agents = await AgentModel.find({ rentedBy: userId }).lean().exec();
@@ -305,7 +309,7 @@ export async function getMyRentedAgents(req: Request, res: Response) {
 export async function releaseAgent(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const userId = (req.user as any).sub || (req.user as any).id;
+    const userId = req.user?.sub || req.user?.id;
 
     const agent = await AgentModel.findById(id).exec();
     if (!agent) return res.status(404).json({ message: 'Agente no encontrado' });

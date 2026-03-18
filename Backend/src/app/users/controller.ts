@@ -10,7 +10,7 @@ export async function getUsers(req: Request, res: Response) {
   try {
     const users = await UserModel.find({}, { name: 1, email: 1, role: 1, credits: 1, status: 1 }).lean();
     return res.json({
-      users: users.map((u) => ({id: String(u._id),name: u.name,email: u.email,role: (u as any).role || 'user',credits: (u as any).credits ?? 0,status: (u as any).status || 'active',})),
+      users: users.map((u) => ({id: String(u._id),name: u.name,email: u.email,role: u.role || 'user',credits: u.credits ?? 0,status: u.status || 'active',})),
     });
   } catch (err) {
     console.error("Error listando usuarios:", err);
@@ -58,7 +58,7 @@ export async function postUsers(req: Request, res: Response) {
       message: "Usuario creado correctamente",
       user: { id: String(user._id), name: user.name, email: user.email },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error creando usuario:", err);
     return res.status(500).json({ message: "Error del servidor" });
   }
@@ -73,7 +73,7 @@ export async function getUserById(req: Request, res: Response) {
     const user = await UserModel.findById(id, { name: 1, email: 1, avatar: 1, status: 1 }).lean();
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
 
-    return res.json({ id: String(user._id), name: user.name, email: user.email, avatar: user.avatar, status: (user as any).status || 'active' });
+    return res.json({ id: String(user._id), name: user.name, email: user.email, avatar: user.avatar, status: user.status || 'active' });
   } catch (err) {
     console.error("Error obteniendo usuario:", err);
     return res.status(500).json({ message: "Error del servidor" });
@@ -97,10 +97,10 @@ export async function updateUser(req: Request, res: Response) {
       if (exists) return res.status(409).json({ message: "Email ya registrado" });
     }
 
-    const update: any = {};
+    const update: { name?: string; email?: string; avatar?: string; passwordHash?: string } = {};
     if (name) update.name = name;
     if (email) update.email = email;
-    if (avatar) update.avatar = avatar; 
+    if (avatar) update.avatar = avatar;
     if (password) {
       update.passwordHash = await bcrypt.hash(password, 10);
     }
@@ -119,7 +119,7 @@ export async function updateUser(req: Request, res: Response) {
         email: updated.email,
         name: updated.name,
         role: updated.role || 'user',
-        status: (updated as any).status || 'active',
+        status: updated.status || 'active',
         avatar: updated.avatar,
       },
       JWT_SECRET,
@@ -193,7 +193,7 @@ const token = jwt.sign(
         role: user.role || 'user',
         avatar: user.avatar,
         credits: user.credits,
-        status: (user as any).status || 'active',
+        status: user.status || 'active',
       },
       JWT_SECRET,
       { expiresIn: '2h' }
@@ -266,7 +266,7 @@ export async function updateUserStatus(req: Request, res: Response) {
       id: String(updated._id),
       name: updated.name,
       email: updated.email,
-      status: (updated as any).status,
+      status: updated.status,
     });
   } catch (err) {
     console.error('Error actualizando estado:', err);
