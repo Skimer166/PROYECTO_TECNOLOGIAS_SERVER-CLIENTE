@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -21,39 +21,47 @@ import { CuadroDeConfirmacionComponent } from './cuadro-de-confirmacion';
 
 import { environment } from '../../shared/config';
 
+interface MyAgent {
+  _id: string;
+  name: string;
+  description: string;
+  rentedUntil?: string;
+  timeLeftDisplay?: string;
+  pricePerHour?: number;
+}
+
 @Component({
   selector: 'app-my-agents',
   standalone: true,
   imports: [
-    CommonModule, 
     FormsModule,
     RouterModule,
-    MatCardModule, 
-    MatButtonModule, 
+    MatCardModule,
+    MatButtonModule,
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatDialogModule,
-    Header, 
+    Header,
     Footer
-  ],
+],
   // Asegúrate de que estos nombres coincidan con tus archivos (my-agents vs mis-agentes)
   templateUrl: './mis-agentes.html', 
   styleUrl: './mis-agentes.scss'
 })
 export class MyAgents implements OnInit, OnDestroy {
   
-  agents: any[] = [];
+  agents: MyAgent[] = [];
   loading = false;
-  
+
   // Lógica del Chat
-  selectedAgent: any = null;
+  selectedAgent: MyAgent | null = null;
   messages: { role: 'user' | 'assistant', text: string }[] = [];
   userMessage = '';
   chatLoading = false;
   
   // Variable para el intervalo
-  private timerInterval: any;
+  private timerInterval: ReturnType<typeof setInterval> | null = null;
   private agentTimeEndedSub?: Subscription;
 
   // Inyecciones
@@ -63,7 +71,6 @@ export class MyAgents implements OnInit, OnDestroy {
   private socketService = inject(SocketService);
   private dialog = inject(MatDialog);
 
-  constructor() {}
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
@@ -76,8 +83,7 @@ export class MyAgents implements OnInit, OnDestroy {
 
       this.agentTimeEndedSub = this.socketService
         .onAgentTimeEnded()
-        .subscribe(({ agentId, name }) => {
-          //alert(`Tu tiempo con el agente "${name}" ha terminado`);
+        .subscribe(() => {
           this.loadMyAgents();
         });
     }
@@ -99,7 +105,7 @@ export class MyAgents implements OnInit, OnDestroy {
   loadMyAgents() {
     this.loading = true;
     // Ajusta el puerto (3000 o 3001) según tu backend
-    this.http.get<any>(`${environment.apiUrl}/agents/my-rentals`, { headers: this.getAuthHeaders() })
+    this.http.get<{ agents: MyAgent[] }>(`${environment.apiUrl}/agents/my-rentals`, { headers: this.getAuthHeaders() })
       .subscribe({
         next: (res) => {
           this.agents = res.agents || [];
@@ -115,7 +121,7 @@ export class MyAgents implements OnInit, OnDestroy {
       });
   }
 
-  releaseAgent(agent: any, event: Event) {
+  releaseAgent(agent: MyAgent, event: Event) {
     event.stopPropagation(); // Evita abrir el chat al hacer clic en eliminar
 
     const ref = this.dialog.open(CuadroDeConfirmacionComponent, {
@@ -151,7 +157,7 @@ export class MyAgents implements OnInit, OnDestroy {
 
   // --- CHAT LOGIC ---
 
-  openChat(agent: any) {
+  openChat(agent: MyAgent) {
     this.selectedAgent = agent;
     this.messages = []; 
     // Mensaje de bienvenida simulado
@@ -175,7 +181,7 @@ export class MyAgents implements OnInit, OnDestroy {
     setTimeout(() => this.scrollToBottom(), 100);
 
     // 2. Llamar al Backend (OpenAI)
-    this.http.post<any>(`${environment.apiUrl}/chat`, {
+    this.http.post<{ response: string }>(`${environment.apiUrl}/chat`, {
       agentId: this.selectedAgent._id,
       message: text
     }, { headers: this.getAuthHeaders() }).subscribe({

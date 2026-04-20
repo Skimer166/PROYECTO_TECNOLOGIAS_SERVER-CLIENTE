@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -29,7 +29,6 @@ interface AdminAgent {
   selector: 'app-admin-agents',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     RouterModule,
     MatButtonModule,
@@ -37,7 +36,7 @@ interface AdminAgent {
     MatInputModule,
     MatSelectModule,
     MatIconModule
-  ],
+],
   templateUrl: './admin-agents.html',
   styleUrl: './admin-agents.scss'
 })

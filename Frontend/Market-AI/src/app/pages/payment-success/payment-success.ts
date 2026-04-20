@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
+
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../shared/services/auth'; // Para actualizar creditos locales
@@ -10,7 +10,7 @@ import { environment } from '../../shared/config';
 @Component({
   selector: 'app-payment-success',
   standalone: true,
-  imports: [CommonModule, MatProgressSpinnerModule, MatButtonModule],
+  imports: [MatProgressSpinnerModule, MatButtonModule],
   templateUrl: `./payment-success.html`,
   styleUrls: [`./payment-success.scss`]
 })
@@ -40,15 +40,14 @@ export class PaymentSuccessComponent implements OnInit {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
-    this.http.post<any>(`${environment.apiUrl}/payments/verify-success`, { session_id: sessionId }, { headers })
+    this.http.post<{ newCredits: number }>(`${environment.apiUrl}/payments/verify-success`, { session_id: sessionId }, { headers })
       .subscribe({
         next: (res) => {
           this.verifying = false;
           this.success = true;
-          // Actualizar créditos en el servicio de Auth para que el header se actualice
-          this.auth.updateCredits(res.newCredits); 
+          this.auth.updateCredits(res.newCredits);
         },
-        error: (err) => {
+        error: () => {
           this.verifying = false;
           this.error = 'Hubo un error verificando el pago.';
         }

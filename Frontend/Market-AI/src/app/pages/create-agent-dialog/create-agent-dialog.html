@@ -1,13 +1,15 @@
 <h2 mat-dialog-title>Crear Nuevo Agente</h2>
-    
+
 <mat-dialog-content>
   <form [formGroup]="form" class="create-form">
-    
+
     <div class="form-row">
       <mat-form-field appearance="outline">
         <mat-label>Nombre del Agente</mat-label>
         <input matInput formControlName="name" placeholder="Ej. Experto Python">
-        <mat-error *ngIf="form.get('name')?.hasError('required')">Requerido</mat-error>
+        @if (form.get('name')?.hasError('required')) {
+          <mat-error>Requerido</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -53,15 +55,19 @@
 
     <div class="image-upload-container">
       <div class="preview-box" [style.backgroundImage]="previewUrl ? 'url(' + previewUrl + ')' : ''">
-        <mat-icon *ngIf="!previewUrl">image</mat-icon>
+        @if (!previewUrl) {
+          <mat-icon>image</mat-icon>
+        }
       </div>
-      
+
       <div class="upload-actions">
         <button mat-stroked-button type="button" (click)="fileInput.click()">
           <mat-icon>upload</mat-icon> Seleccionar Foto
         </button>
         <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
-        <span class="file-name" *ngIf="selectedFile">{{ selectedFile.name }}</span>
+        @if (selectedFile) {
+          <span class="file-name">{{ selectedFile.name }}</span>
+        }
       </div>
     </div>
 

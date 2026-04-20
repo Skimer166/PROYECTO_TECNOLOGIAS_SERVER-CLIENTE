@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -16,18 +16,18 @@ import { NotificationDialogComponent } from '../login/popup-login';
   styleUrl: './reset-password.scss',
 })
 export class ResetPassword {
+  private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private location = inject(Location);
+  private auth = inject(AuthService);
+  private dialog = inject(MatDialog);
+
   form: FormGroup;
   loading = false;
   token: string | null;
 
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private location: Location,
-    private auth: AuthService,
-    private dialog: MatDialog,
-  ) {
+  constructor() {
     this.token = this.route.snapshot.queryParamMap.get('token');
 
     this.form = this.fb.group(

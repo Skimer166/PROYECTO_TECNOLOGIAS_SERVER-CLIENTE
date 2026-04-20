@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { AuthService } from '../../shared/services/auth';
 import { MatDialog } from '@angular/material/dialog';
 import { NotificationDialogComponent } from '../login/popup-login';
@@ -8,7 +8,7 @@ import { NotificationDialogComponent } from '../login/popup-login';
 @Component({
   selector: 'app-login-success',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="login-success">
       <p>Procesando inicio de sesión con Google...</p>
@@ -38,8 +38,6 @@ export class LoginSuccess implements OnInit {
 
       this.authService.setTokenFromOAuth(token);
       this.openDialog('Inicio de sesion exitoso', 'success');
-
-      const stored = sessionStorage.getItem('token') || localStorage.getItem('token');
       this.router.navigate(['/home-page']);
     });
   }

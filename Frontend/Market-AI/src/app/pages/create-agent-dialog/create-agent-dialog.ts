@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatDialogRef, MatDialogModule, MatDialog } from '@angular/material/dialog';
@@ -15,7 +15,6 @@ import { environment } from '../../shared/config';
   selector: 'app-create-agent-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatButtonModule,
@@ -23,7 +22,7 @@ import { environment } from '../../shared/config';
     MatInputModule,
     MatSelectModule,
     MatIconModule
-  ],
+],
   templateUrl: './create-agent-dialog.html',
   styleUrl: './create-agent-dialog.scss'
 })
@@ -59,8 +58,8 @@ export class CreateAgentDialogComponent {
     });
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
+  onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
       this.selectedFile = file;
       

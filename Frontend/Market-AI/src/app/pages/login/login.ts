@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -16,11 +16,17 @@ import { NotificationDialogComponent } from './popup-login';
   styleUrl: './login.scss'
 })
 export class Login {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  private location = inject(Location);
+  private dialog = inject(MatDialog);
+
 
   form: FormGroup;
   loading = false;
 
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router, private location: Location, private dialog: MatDialog) {
+  constructor() {
     this.form = this.fb.group({
       Correo: ['', [Validators.required, Validators.email]],
       Contrasena: ['', [Validators.required, Validators.minLength(8)]]

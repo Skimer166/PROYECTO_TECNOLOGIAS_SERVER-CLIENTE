@@ -1,36 +1,44 @@
-<button *ngIf="isLoggedIn && !isOpen" 
-    mat-fab color="primary" 
-    class="support-fab" 
+@if (isLoggedIn && !isOpen) {
+  <button
+    mat-fab color="primary"
+    class="support-fab"
     (click)="toggleChat()">
     <mat-icon>support_agent</mat-icon>
-</button>
+  </button>
+}
 
-<div class="support-chat-window" *ngIf="isOpen">
+@if (isOpen) {
+  <div class="support-chat-window">
     <div class="chat-header">
-    <span>Soporte Técnico</span>
-    <button mat-icon-button (click)="toggleChat()">
+      <span>Soporte Técnico</span>
+      <button mat-icon-button (click)="toggleChat()">
         <mat-icon>close</mat-icon>
-    </button>
+      </button>
     </div>
-
     <div class="chat-body" #scrollContainer>
-    <div *ngFor="let msg of messages" 
-            class="message-row"
-            [ngClass]="{'system': msg.isSystem, 'me': msg.sender === userName, 'other': msg.sender !== userName && !msg.isSystem}">
-        
-        <span *ngIf="msg.isSystem" class="system-msg">{{ msg.text }}</span>
-        
-        <div *ngIf="!msg.isSystem" class="bubble">
-        <small *ngIf="msg.sender !== userName" class="sender-name">{{ msg.sender }}</small>
-        <p>{{ msg.text }}</p>
+      @for (msg of messages; track msg) {
+        <div
+          class="message-row"
+          [ngClass]="{'system': msg.isSystem, 'me': msg.sender === userName, 'other': msg.sender !== userName && !msg.isSystem}">
+          @if (msg.isSystem) {
+            <span class="system-msg">{{ msg.text }}</span>
+          }
+          @if (!msg.isSystem) {
+            <div class="bubble">
+              @if (msg.sender !== userName) {
+                <small class="sender-name">{{ msg.sender }}</small>
+              }
+              <p>{{ msg.text }}</p>
+            </div>
+          }
         </div>
+      }
     </div>
-    </div>
-
     <div class="chat-footer">
-    <input [(ngModel)]="newMessage" (keyup.enter)="sendMessage()" placeholder="Escribe tu duda..." />
-    <button mat-mini-fab color="accent" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+      <input [(ngModel)]="newMessage" (keyup.enter)="sendMessage()" placeholder="Escribe tu duda..." />
+      <button mat-mini-fab color="accent" (click)="sendMessage()" [disabled]="!newMessage.trim()">
         <mat-icon>send</mat-icon>
-    </button>
+      </button>
     </div>
-</div>
+  </div>
+}

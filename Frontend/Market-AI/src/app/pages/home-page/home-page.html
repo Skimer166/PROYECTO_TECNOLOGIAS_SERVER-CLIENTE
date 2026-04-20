@@ -1,7 +1,7 @@
 <app-header></app-header>
 <div class="home-container-card">
   <div class="home-page">
-    
+
     <section class="hero">
       <div class="hero__content">
         <h1>Bienvenido a Market-AI</h1>
@@ -22,20 +22,22 @@
       </div>
     </section>
 
-    <section class="admin-panel" *ngIf="isAdmin">
-      <h2>Panel de administración</h2>
-      <div class="admin-panel__buttons">
-        <button mat-raised-button color="accent" routerLink="/admin/agents">
-          <mat-icon>smart_toy</mat-icon> Panel de agentes
-        </button>
-        <button mat-stroked-button color="accent" (click)="goToUserPanel()">
-          <mat-icon>group</mat-icon> Panel de usuarios
-        </button>
-        <button mat-flat-button color="warn" routerLink="/admin/support">
+    @if (isAdmin) {
+      <section class="admin-panel">
+        <h2>Panel de administración</h2>
+        <div class="admin-panel__buttons">
+          <button mat-raised-button color="accent" routerLink="/admin/agents">
+            <mat-icon>smart_toy</mat-icon> Panel de agentes
+          </button>
+          <button mat-stroked-button color="accent" (click)="goToUserPanel()">
+            <mat-icon>group</mat-icon> Panel de usuarios
+          </button>
+          <button mat-flat-button color="warn" routerLink="/admin/support">
             <mat-icon>support_agent</mat-icon> Chats de Soporte
-        </button>
-      </div>
-    </section>
+          </button>
+        </div>
+      </section>
+    }
 
     <section class="search-section">
       <div class="search-section__header">
@@ -44,94 +46,100 @@
       <div class="search-section__controls">
         <mat-form-field appearance="outline" class="search-section__search-input">
           <mat-label>Buscar agente</mat-label>
-          <input matInput placeholder="Ej. python..." [value]="searchTerm" 
-                 (input)="onSearchTermChange($any($event.target).value)" />
-          <button *ngIf="searchTerm" mat-icon-button matSuffix (click)="onSearchTermChange('')">
-            <mat-icon>close</mat-icon>
-          </button>
-        </mat-form-field>
-        <div class="search-section__chips">
-          <mat-chip-listbox aria-label="Filtros">
-            <mat-chip-option [selected]="selectedCategory === 'all'" (click)="onCategoryClick('all')">Todos</mat-chip-option>
-            <mat-chip-option *ngFor="let cat of categories" [selected]="selectedCategory === cat.key" (click)="onCategoryClick(cat.key)">
-              {{ cat.label }}
-            </mat-chip-option>
-          </mat-chip-listbox>
-        </div>
-      </div>
-    </section>
-
-    <section class="carousel-section" id="agents-section">
-      <div *ngIf="isLoading" class="state-message">
-        <mat-icon>hourglass_empty</mat-icon><span>Cargando agentes...</span>
-      </div>
-
-      <div *ngIf="error" class="state-message state-message--error">
-        <mat-icon>error_outline</mat-icon><span>{{ error }}</span>
-      </div>
-
-      <ng-container *ngIf="!isLoading && !error">
-        <div *ngIf="!hasAgents" class="state-message">
-          <mat-icon>search_off</mat-icon><span>No encontramos agentes con esos filtros.</span>
-        </div>
-
-        <div *ngIf="hasAgents" class="carousel-container" 
-             (mouseenter)="stopAutoSlide()" 
-             (mouseleave)="startAutoSlide()">
-          
-          <button mat-icon-button class="carousel-nav prev" (click)="prev()">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-
-          <div class="carousel-grid">
-            <mat-card class="agent-card" *ngFor="let agent of visibleAgents; trackBy: trackByAgentId">
-  
-              <div class="card-image-container">
-                <img 
-                  *ngIf="agent.imageUrl" 
-                  [src]="agent.imageUrl" 
-                  alt="{{ agent.name }}" 
-                  loading="lazy"
-                  class="agent-img"
-                >
-                
-                <div *ngIf="!agent.imageUrl" class="placeholder-img">
-                  <mat-icon>smart_toy</mat-icon> </div>
-
-                <div class="price-tag">
-                  {{ agent.pricePerHour | currency }} / hr
-                </div>
-              </div>
-
-              <mat-card-header>
-                <mat-card-title>{{ agent.name }}</mat-card-title>
-                <mat-card-subtitle>{{ agent.category | titlecase }}</mat-card-subtitle>
-              </mat-card-header>
-
-              <mat-card-content>
-                <p class="description">{{ agent.description | slice:0:100 }}{{ agent.description.length > 100 ? '...' : '' }}</p>
-                <div class="chips">
-                    <mat-chip-set>
-                        <mat-chip>{{ agent.modelVersion }}</mat-chip>
-                        <mat-chip>{{ agent.language }}</mat-chip>
-                    </mat-chip-set>
-                </div>
-              </mat-card-content>
-
-              <mat-card-actions align="end">
-                <button mat-flat-button color="accent" (click)="rentAgent(agent)">Rentar</button>
-              </mat-card-actions>
-
-            </mat-card>
+          <input matInput placeholder="Ej. python..." [value]="searchTerm"
+            (input)="onSearchTermChange($any($event.target).value)" />
+            @if (searchTerm) {
+              <button mat-icon-button matSuffix (click)="onSearchTermChange('')">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+          <div class="search-section__chips">
+            <mat-chip-listbox aria-label="Filtros">
+              <mat-chip-option [selected]="selectedCategory === 'all'" (click)="onCategoryClick('all')">Todos</mat-chip-option>
+              @for (cat of categories; track cat) {
+                <mat-chip-option [selected]="selectedCategory === cat.key" (click)="onCategoryClick(cat.key)">
+                  {{ cat.label }}
+                </mat-chip-option>
+              }
+            </mat-chip-listbox>
           </div>
-
-          <button mat-icon-button class="carousel-nav next" (click)="next()">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
         </div>
-      </ng-container>
-    </section>
+      </section>
 
-  </div>
-</div>
-<app-footer></app-footer>
+      <section class="carousel-section" id="agents-section">
+        @if (isLoading) {
+          <div class="state-message">
+            <mat-icon>hourglass_empty</mat-icon><span>Cargando agentes...</span>
+          </div>
+        }
+
+        @if (error) {
+          <div class="state-message state-message--error">
+            <mat-icon>error_outline</mat-icon><span>{{ error }}</span>
+          </div>
+        }
+
+        @if (!isLoading && !error) {
+          @if (!hasAgents) {
+            <div class="state-message">
+              <mat-icon>search_off</mat-icon><span>No encontramos agentes con esos filtros.</span>
+            </div>
+          }
+          @if (hasAgents) {
+            <div class="carousel-container"
+              (mouseenter)="stopAutoSlide()"
+              (mouseleave)="startAutoSlide()">
+              <button mat-icon-button class="carousel-nav prev" (click)="prev()">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <div class="carousel-grid">
+                @for (agent of visibleAgents; track trackByAgentId($index, agent)) {
+                  <mat-card class="agent-card">
+                    <div class="card-image-container">
+                      @if (agent.imageUrl) {
+                        <img
+                          [src]="agent.imageUrl"
+                          alt="{{ agent.name }}"
+                          loading="lazy"
+                          class="agent-img"
+                          >
+                      }
+                      @if (!agent.imageUrl) {
+                        <div class="placeholder-img">
+                          <mat-icon>smart_toy</mat-icon> </div>
+                        }
+                        <div class="price-tag">
+                          {{ agent.pricePerHour | currency }} / hr
+                        </div>
+                      </div>
+                      <mat-card-header>
+                        <mat-card-title>{{ agent.name }}</mat-card-title>
+                        <mat-card-subtitle>{{ agent.category | titlecase }}</mat-card-subtitle>
+                      </mat-card-header>
+                      <mat-card-content>
+                        <p class="description">{{ agent.description | slice:0:100 }}{{ agent.description.length > 100 ? '...' : '' }}</p>
+                        <div class="chips">
+                          <mat-chip-set>
+                            <mat-chip>{{ agent.modelVersion }}</mat-chip>
+                            <mat-chip>{{ agent.language }}</mat-chip>
+                          </mat-chip-set>
+                        </div>
+                      </mat-card-content>
+                      <mat-card-actions align="end">
+                        <button mat-flat-button color="accent" (click)="rentAgent(agent)">Rentar</button>
+                      </mat-card-actions>
+                    </mat-card>
+                  }
+                </div>
+                <button mat-icon-button class="carousel-nav next" (click)="next()">
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+              </div>
+            }
+          }
+        </section>
+
+      </div>
+    </div>
+    <app-footer></app-footer>

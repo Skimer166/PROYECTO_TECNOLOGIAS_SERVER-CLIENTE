@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -48,10 +48,9 @@ export interface ConfirmDeleteUserData {
   ],
 })
 export class ConfirmDeleteUserDialogComponent {
-  constructor(
-    private dialogRef: MatDialogRef<ConfirmDeleteUserDialogComponent, boolean>,
-    @Inject(MAT_DIALOG_DATA) public data: ConfirmDeleteUserData
-  ) {}
+  private dialogRef = inject<MatDialogRef<ConfirmDeleteUserDialogComponent, boolean>>(MatDialogRef);
+  data = inject<ConfirmDeleteUserData>(MAT_DIALOG_DATA);
+
 
   close(result: boolean) {
     this.dialogRef.close(result);

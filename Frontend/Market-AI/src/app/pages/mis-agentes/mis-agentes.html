@@ -1,7 +1,7 @@
 <app-header></app-header>
 
 <div class="container-agents">
-  
+
   @if (!selectedAgent) {
     <div class="list-view">
       <header>
@@ -26,20 +26,22 @@
           @for (agent of agents; track agent._id) {
             <mat-card class="agent-card" (click)="openChat(agent)">
               <div class="card-image">
-                 @if (agent.imageUrl) {
-                   <img [src]="agent.imageUrl" alt="Agent">
-                 } @else {
-                   <mat-icon>smart_toy</mat-icon>
-                 }
+                @if (agent.imageUrl) {
+                  <img [src]="agent.imageUrl" alt="Agent">
+                } @else {
+                  <mat-icon>smart_toy</mat-icon>
+                }
               </div>
               <div class="card-info">
                 <h3>{{ agent.name }}</h3>
                 <span class="badge">{{ agent.category }}</span>
 
-                <div class="countdown" *ngIf="agent.timeLeftDisplay">
+                @if (agent.timeLeftDisplay) {
+                  <div class="countdown">
                     <mat-icon>timer</mat-icon>
                     <span>{{ agent.timeLeftDisplay }}</span>
-                </div>
+                  </div>
+                }
               </div>
               <div class="card-actions">
                 <button mat-icon-button color="warn" (click)="releaseAgent(agent, $event)" title="Devolver agente">
@@ -89,20 +91,20 @@
       </div>
 
       <div class="chat-input">
-        <input 
-          type="text" 
-          [(ngModel)]="userMessage" 
+        <input
+          type="text"
+          [(ngModel)]="userMessage"
           (keyup.enter)="sendMessage()"
-          placeholder="Escribe tu mensaje aquí..." 
+          placeholder="Escribe tu mensaje aquí..."
           [disabled]="chatLoading">
-        
-        <button mat-icon-button color="primary" (click)="sendMessage()" [disabled]="!userMessage.trim() || chatLoading">
-          <mat-icon>send</mat-icon>
-        </button>
+
+          <button mat-icon-button color="primary" (click)="sendMessage()" [disabled]="!userMessage.trim() || chatLoading">
+            <mat-icon>send</mat-icon>
+          </button>
+        </div>
       </div>
-    </div>
-  }
+    }
 
-</div>
+  </div>
 
-<app-footer></app-footer>
+  <app-footer></app-footer>

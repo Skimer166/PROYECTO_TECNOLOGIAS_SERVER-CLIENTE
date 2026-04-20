@@ -6,7 +6,7 @@
     <h2>Mi Perfil</h2>
     
     <div class="avatar-section">
-      <div class="avatar-wrapper" (click)="triggerFileInput()">
+      <div class="avatar-wrapper" tabindex="0" (click)="triggerFileInput()" (keydown.enter)="triggerFileInput()">
         @if (currentAvatar) {
           <img [src]="currentAvatar" alt="Foto de perfil">
         } @else {

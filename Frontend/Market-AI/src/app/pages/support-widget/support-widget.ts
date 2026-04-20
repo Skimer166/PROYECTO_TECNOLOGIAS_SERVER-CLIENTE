@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { SocketService } from '../../shared/services/socket';
+import { SocketService, SupportMessage } from '../../shared/services/socket';
 import { AuthService } from '../../shared/services/auth';
 
 @Component({
@@ -17,7 +17,7 @@ import { AuthService } from '../../shared/services/auth';
 export class SupportWidgetComponent implements OnInit {
   isOpen = false;
   isLoggedIn = false;
-  messages: any[] = [];
+  messages: SupportMessage[] = [];
   newMessage = '';
   userName = ''; 
 
@@ -46,7 +46,9 @@ export class SupportWidgetComponent implements OnInit {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             this.userName = payload.name;
-        } catch {}
+        } catch {
+            // token malformed — skip name extraction
+        }
     }
   }
 

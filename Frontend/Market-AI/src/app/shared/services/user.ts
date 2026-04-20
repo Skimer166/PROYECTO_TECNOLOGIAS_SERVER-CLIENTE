@@ -1,22 +1,38 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { User as IUser } from '../types/user';
 import { environment } from '../config';
 
+export interface UserProfile {
+  name: string;
+  email: string;
+  avatar?: string;
+  credits?: number;
+}
+
+export interface UpdateUserResponse {
+  token?: string;
+  message?: string;
+}
+
+export interface UploadAvatarResponse {
+  id: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class User {
+  private httpClient = inject(HttpClient);
+
 
   private baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient){}
+  private logueado = false
 
-  private logueado: boolean = false
-
-  cuentaObservable: BehaviorSubject<number> = new BehaviorSubject(0);
-  authStatus: BehaviorSubject<boolean> = new BehaviorSubject(false)
+  cuentaObservable = new BehaviorSubject<number>(0);
+  authStatus = new BehaviorSubject<boolean>(false)
 
   getCleanUser(): IUser {
     return {
@@ -26,31 +42,31 @@ export class User {
     }
   }
 
-  registerUser(data: any): Observable<any> {
-    return this.httpClient.post(`${this.baseUrl}/auth/signup`, data);  
+  registerUser(data: Record<string, unknown>): Observable<unknown> {
+    return this.httpClient.post(`${this.baseUrl}/auth/signup`, data);
   }
 
   private getHeaders(): HttpHeaders {
     if (typeof localStorage === 'undefined') return new HttpHeaders();
-    
+
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     return new HttpHeaders({
       'Authorization': token ? `Bearer ${token.replace('Bearer ', '')}` : ''
     });
   }
 
-  getUserById(id: string): Observable<any> {
-    return this.httpClient.get(`${this.baseUrl}/users/${id}`, { headers: this.getHeaders() });
+  getUserById(id: string): Observable<UserProfile> {
+    return this.httpClient.get<UserProfile>(`${this.baseUrl}/users/${id}`, { headers: this.getHeaders() });
   }
 
-  updateUser(id: string, data: any): Observable<any> {
-    return this.httpClient.put(`${this.baseUrl}/users/${id}`, data, { headers: this.getHeaders() });
+  updateUser(id: string, data: Record<string, unknown>): Observable<UpdateUserResponse> {
+    return this.httpClient.put<UpdateUserResponse>(`${this.baseUrl}/users/${id}`, data, { headers: this.getHeaders() });
   }
 
-  uploadAvatar(file: File): Observable<any> {
+  uploadAvatar(file: File): Observable<UploadAvatarResponse> {
     const formData = new FormData();
     formData.append('file', file);
-    
-    return this.httpClient.post(`${this.baseUrl}/files/upload`, formData, { headers: this.getHeaders() });
+
+    return this.httpClient.post<UploadAvatarResponse>(`${this.baseUrl}/files/upload`, formData, { headers: this.getHeaders() });
   }
 }

@@ -1,50 +1,60 @@
 <div class="admin-dashboard">
-    <div class="user-list">
-        
-        <div class="list-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
-            <button mat-icon-button routerLink="/home-page" title="Volver al inicio">
-                <mat-icon>arrow_back</mat-icon>
-            </button>
-            <h3 style="margin: 0;">Chats Activos</h3>
-        </div>
-        <mat-list>
-            <mat-list-item *ngFor="let session of sessions" 
-                            (click)="selectSession(session)"
-                            [class.selected]="selectedSession?.userId === session.userId">
-            <mat-icon matListItemIcon>person</mat-icon>
-            <div matListItemTitle>{{ session.userName }}</div>
-            <div matListItemLine>ID: {{ session.userId }}</div>
-            </mat-list-item>
-            
-            <p *ngIf="sessions.length === 0" style="opacity: 0.7; margin-top: 1rem;">
-                No hay solicitudes de soporte.
-            </p>
-        </mat-list>
+  <div class="user-list">
+
+    <div class="list-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+      <button mat-icon-button routerLink="/home-page" title="Volver al inicio">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h3 style="margin: 0;">Chats Activos</h3>
     </div>
+    <mat-list>
+      @for (session of sessions; track session) {
+        <mat-list-item
+          (click)="selectSession(session)"
+          [class.selected]="selectedSession?.userId === session.userId">
+          <mat-icon matListItemIcon>person</mat-icon>
+          <div matListItemTitle>{{ session.userName }}</div>
+          <div matListItemLine>ID: {{ session.userId }}</div>
+        </mat-list-item>
+      }
 
-    <div class="chat-area" *ngIf="selectedSession">
-        <div class="chat-header">
-            <mat-icon style="margin-right: 8px;">support_agent</mat-icon>
-            Atendiendo a: <strong>{{ selectedSession.userName }}</strong>
-        </div>
+      @if (sessions.length === 0) {
+        <p style="opacity: 0.7; margin-top: 1rem;">
+          No hay solicitudes de soporte.
+        </p>
+      }
+    </mat-list>
+  </div>
 
-        <div class="messages">
-            <div *ngFor="let msg of chatHistory" 
-                    [class.system]="msg.isSystem"
-                    class="msg-row">
-                <strong *ngIf="!msg.isSystem">{{ msg.sender }}:</strong> {{ msg.text }}
+  @if (selectedSession) {
+    <div class="chat-area">
+      <div class="chat-header">
+        <mat-icon style="margin-right: 8px;">support_agent</mat-icon>
+        Atendiendo a: <strong>{{ selectedSession.userName }}</strong>
+      </div>
+      <div class="messages">
+        @for (msg of chatHistory; track msg) {
+          <div
+            [class.system]="msg.isSystem"
+            class="msg-row">
+            @if (!msg.isSystem) {
+              <strong>{{ msg.sender }}:</strong>
+              } {{ msg.text }}
             </div>
+          }
         </div>
-
         <div class="input-area">
-            <input [(ngModel)]="adminReply" (keyup.enter)="sendReply()" placeholder="Escribe una respuesta...">
-            <button mat-flat-button color="primary" (click)="sendReply()" [disabled]="!adminReply.trim()">
-                Enviar <mat-icon iconPositionEnd>send</mat-icon>
-            </button>
+          <input [(ngModel)]="adminReply" (keyup.enter)="sendReply()" placeholder="Escribe una respuesta...">
+          <button mat-flat-button color="primary" (click)="sendReply()" [disabled]="!adminReply.trim()">
+            Enviar <mat-icon iconPositionEnd>send</mat-icon>
+          </button>
         </div>
-    </div>
-    
-    <div class="chat-area empty" *ngIf="!selectedSession" style="display: flex; align-items: center; justify-content: center; opacity: 0.5;">
+      </div>
+    }
+
+    @if (!selectedSession) {
+      <div class="chat-area empty" style="display: flex; align-items: center; justify-content: center; opacity: 0.5;">
         <p>Selecciona un usuario de la lista para comenzar a chatear</p>
-    </div>
-</div>
+      </div>
+    }
+  </div>

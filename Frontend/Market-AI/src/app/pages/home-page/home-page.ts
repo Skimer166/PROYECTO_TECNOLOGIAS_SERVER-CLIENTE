@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy, PLATFORM_ID, ChangeDetectorRef, ChangeDetectionStrategy, NgZone } from '@angular/core'; 
+import { Component, OnInit, OnDestroy, PLATFORM_ID, ChangeDetectorRef, ChangeDetectionStrategy, NgZone, inject } from '@angular/core'; 
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
@@ -61,6 +61,14 @@ interface Agent {
   changeDetection: ChangeDetectionStrategy.OnPush 
 })
 export class HomePage implements OnInit, OnDestroy {
+  private http = inject(HttpClient);
+  private cdr = inject(ChangeDetectorRef);
+  private dialog = inject(MatDialog);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private ngZone = inject(NgZone);
+  private platformId = inject(PLATFORM_ID);
+
   agents: Agent[] = [];
   filteredAgents: Agent[] = [];
   visibleAgents: Agent[] = []; 
@@ -69,13 +77,13 @@ export class HomePage implements OnInit, OnDestroy {
   error: string | null = null;
 
   searchTerm = '';
-  selectedCategory: string = 'all';
+  selectedCategory = 'all';
   
   private searchSubject = new Subject<string>();
   private searchSubscription: Subscription | undefined;
 
   currentIndex = 0;
-  private autoSlideInterval: any;
+  private autoSlideInterval: ReturnType<typeof setInterval> | null = null;
   itemsPerView = 3; 
 
   isAdmin = false;
@@ -87,16 +95,6 @@ export class HomePage implements OnInit, OnDestroy {
     { key: 'asistente', label: 'Asistentes' },
     { key: 'otros', label: 'Otros' }
   ];
-
-  constructor(
-    private http: HttpClient,
-    private cdr: ChangeDetectorRef,
-    private dialog: MatDialog,
-    private authService: AuthService,
-    private router: Router,
-    private ngZone: NgZone, 
-    @Inject(PLATFORM_ID) private platformId: object
-  ) {}
 
   private get isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
@@ -278,7 +276,7 @@ export class HomePage implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = null;
 
-    this.http.get<any>(`${environment.apiUrl}/agents?available=true`, {
+    this.http.get<Agent[] | { agents: Agent[] }>(`${environment.apiUrl}/agents?available=true`, {
       headers: this.getAuthHeaders()
     }).subscribe({
       next: (res) => {
@@ -326,7 +324,7 @@ export class HomePage implements OnInit, OnDestroy {
     }, {
       headers: this.getAuthHeaders()
     }).subscribe({
-        next: (res: any) => {
+        next: (res: { remainingCredits: number }) => {
           this.openRentDialog(
             `¡Renta exitosa! Te quedan ${res.remainingCredits} créditos.`,
             true

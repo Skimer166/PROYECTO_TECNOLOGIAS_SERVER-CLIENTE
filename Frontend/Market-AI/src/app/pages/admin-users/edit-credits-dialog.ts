@@ -1,5 +1,5 @@
-import { Component, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
@@ -18,13 +18,12 @@ export interface EditCreditsDialogData {
   selector: 'app-edit-credits-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule,
-  ],
+    MatButtonModule
+],
   template: `
     <h2 mat-dialog-title>Agregar créditos</h2>
     <mat-dialog-content>
@@ -61,12 +60,10 @@ export interface EditCreditsDialogData {
   ],
 })
 export class EditCreditsDialogComponent {
-  amount = 0;
+  private dialogRef = inject<MatDialogRef<EditCreditsDialogComponent, number>>(MatDialogRef);
+  data = inject<EditCreditsDialogData>(MAT_DIALOG_DATA);
 
-  constructor(
-    private dialogRef: MatDialogRef<EditCreditsDialogComponent, number>,
-    @Inject(MAT_DIALOG_DATA) public data: EditCreditsDialogData
-  ) {}
+  amount = 0;
 
   cancel(): void {
     this.dialogRef.close();

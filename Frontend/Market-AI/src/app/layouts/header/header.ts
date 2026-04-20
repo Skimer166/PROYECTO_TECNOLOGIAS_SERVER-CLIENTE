@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
@@ -19,15 +19,14 @@ import { AddCreditsDialogComponent } from '../../pages/add-credits-dialog/add-cr
   selector: 'app-header',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
-    MatToolbarModule, 
-    MatButtonModule, 
+    RouterModule,
+    MatToolbarModule,
+    MatButtonModule,
     MatIconModule,
-    MatMenuModule, 
+    MatMenuModule,
     MatDialogModule,
     MatDividerModule
-  ],
+],
   templateUrl: './header.html',
   styleUrl: './header.scss'
 })
@@ -36,7 +35,7 @@ export class Header implements OnInit {
   isLandingPage = false;
   userName: string | null = null;
   userPhoto: string | null = null;
-  userCredits: number = 0;
+  userCredits = 0;
 
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -46,7 +45,7 @@ export class Header implements OnInit {
     // Detectar si es Landing Page
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
+    ).subscribe((event: NavigationEnd) => {
       this.isLandingPage = event.url === '/' || event.url === '/landing-page' || event.url.includes('#');
     });
 

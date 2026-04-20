@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -48,10 +48,9 @@ export interface CuadroDeConfirmacionData {
   ],
 })
 export class CuadroDeConfirmacionComponent {
-  constructor(
-    private dialogRef: MatDialogRef<CuadroDeConfirmacionComponent, boolean>,
-    @Inject(MAT_DIALOG_DATA) public data: CuadroDeConfirmacionData
-  ) {}
+  private dialogRef = inject<MatDialogRef<CuadroDeConfirmacionComponent, boolean>>(MatDialogRef);
+  data = inject<CuadroDeConfirmacionData>(MAT_DIALOG_DATA);
+
 
   close(result: boolean) {
     this.dialogRef.close(result);
