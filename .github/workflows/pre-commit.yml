@@ -51,7 +51,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run Angular ESLint
         run: npx ng lint
