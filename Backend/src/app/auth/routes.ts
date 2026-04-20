@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { googleAuthController, googleCallbackController, login, forgotPassword, resetPassword } from "./controller";
-import { postUsers } from "../users/controller";
+import { googleAuthController, googleCallbackController, login, forgotPassword, resetPassword, signup } from "./controller";
+import { sign } from "crypto";
 
 const router = Router();
 
@@ -53,7 +53,7 @@ router.post('/login', login);    //se pone solamente login porque creamos la fun
  *       201:
  *         description: Usuario registrado
  */
-router.post('/signup', postUsers);
+router.post('/signup', signup);
 
 /**
  * @swagger
@@ -108,4 +108,4 @@ router.post('/reset-password', resetPassword);
 router.get('/google', googleAuthController);
 router.get('/google/callback', googleCallbackController);
 
-export default router; 
+export default router;
