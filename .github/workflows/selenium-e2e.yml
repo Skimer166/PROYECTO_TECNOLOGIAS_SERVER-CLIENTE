@@ -12,7 +12,7 @@ on:
 jobs:
   e2e-selenium:
     name: Selenium E2E Frontend
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     defaults:
       run:
@@ -31,13 +31,25 @@ jobs:
         run: npm install
 
       - name: Start Angular dev server en background
-        run: npx ng serve --host 0.0.0.0 &
+        run: Start-Process -NoNewWindow npx -ArgumentList "ng serve --host 0.0.0.0"
+        shell: pwsh
 
       - name: Esperar a que Angular esté listo en el puerto 4200
         run: |
-          echo "Esperando Angular en http://localhost:4200..."
-          timeout 90 bash -c 'until curl -s http://localhost:4200 > /dev/null; do sleep 3; done'
-          echo "Angular listo"
+          $timeout = 90
+          $elapsed = 0
+          Write-Host "Esperando Angular en http://localhost:4200..."
+          while ($elapsed -lt $timeout) {
+            try {
+              Invoke-WebRequest -Uri "http://localhost:4200" -UseBasicParsing -ErrorAction Stop | Out-Null
+              Write-Host "Angular listo"
+              break
+            } catch {
+              Start-Sleep -Seconds 3
+              $elapsed += 3
+            }
+          }
+        shell: pwsh
 
       - name: Ejecutar pruebas Selenium
         run: npm run selenium

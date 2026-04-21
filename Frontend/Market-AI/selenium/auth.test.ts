@@ -1,8 +1,8 @@
 import { Builder, By, until, WebDriver } from 'selenium-webdriver';
-import { Options, ServiceBuilder } from 'selenium-webdriver/chrome';
+import { Options, ServiceBuilder } from 'selenium-webdriver/edge';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const chromedriverPath: string = require('chromedriver').path;
+const edgedriverPath: string = require('msedgedriver').path;
 
 const BASE_URL = 'http://localhost:4200';
 const BACKEND_URL = process.env['BACKEND_URL'] ?? 'https://market-ai-api.onrender.com';
@@ -31,18 +31,18 @@ describe('Módulo de Autenticación - E2E', () => {
       console.log(`\n✅ Backend disponible en ${BACKEND_URL}\n`);
     }
 
-    // Iniciar Chrome usando el chromedriver del proyecto
+    // Iniciar Edge usando el msedgedriver del proyecto
     const options = new Options();
     options.addArguments('--headless', '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu');
 
-    const service = new ServiceBuilder(chromedriverPath);
+    const service = new ServiceBuilder(edgedriverPath);
 
     driver = await new Builder()
-      .forBrowser('chrome')
-      .setChromeOptions(options)
-      .setChromeService(service)
+      .forBrowser('MicrosoftEdge')
+      .setEdgeOptions(options)
+      .setEdgeService(service)
       .build();
-  }, 60000); // 60s de timeout para iniciar Chrome
+  }, 60000);
 
   afterAll(async () => {
     if (driver) await driver.quit();
