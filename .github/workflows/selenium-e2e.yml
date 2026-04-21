@@ -40,7 +40,7 @@ jobs:
           echo "Angular listo"
 
       - name: Ejecutar pruebas Selenium
-        run: npm run e2e
+        run: npm run selenium
         env:
           BACKEND_URL: https://market-ai-api.onrender.com
 

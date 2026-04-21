@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:Market-AI": "node dist/Market-AI/server/server.mjs",
-    "e2e": "jest --config jest.e2e.config.ts",
+    "selenium": "jest --config jest.e2e.config.ts",
     "lint": "ng lint",
     "prepare": "cd ../.. && git config core.hooksPath Frontend/Market-AI/.husky"
   },
