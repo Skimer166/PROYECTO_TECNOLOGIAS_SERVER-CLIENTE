@@ -26,7 +26,10 @@ function findBinary(paths: string[]): string | null {
 // Selenium Manager (incluido en selenium-webdriver 4.6+) descarga
 // automáticamente el driver correcto para el navegador detectado.
 export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: string }> {
-  const headlessArgs = ['--headless', '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'];
+  const isHeadless = process.env['HEADLESS'] !== 'false';
+  const headlessArgs = isHeadless
+    ? ['--headless', '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+    : ['--no-sandbox', '--disable-dev-shm-usage'];
 
   // 1. Intentar Brave (usa ChromeDriver)
   const bravePath = findBinary(BRAVE_PATHS);
