@@ -8,6 +8,10 @@ const config: Config = {
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: { esModuleInterop: true } }],
   },
+  reporters: [
+    'default',
+    ['jest-junit', { outputDirectory: 'selenium-results', outputName: 'results.xml' }],
+  ],
 };
 
 export default config;

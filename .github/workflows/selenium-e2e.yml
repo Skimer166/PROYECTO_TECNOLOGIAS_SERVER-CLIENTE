@@ -1,0 +1,51 @@
+name: Selenium E2E Tests
+
+on:
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'Frontend/Market-AI/selenium/**'
+      - 'Frontend/Market-AI/jest.e2e.config.ts'
+      - 'Frontend/Market-AI/src/**'
+
+jobs:
+  e2e-selenium:
+    name: Selenium E2E Frontend
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./Frontend/Market-AI
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start Angular dev server en background
+        run: npx ng serve --host 0.0.0.0 &
+
+      - name: Esperar a que Angular esté listo en el puerto 4200
+        run: |
+          echo "Esperando Angular en http://localhost:4200..."
+          timeout 90 bash -c 'until curl -s http://localhost:4200 > /dev/null; do sleep 3; done'
+          echo "Angular listo"
+
+      - name: Ejecutar pruebas Selenium
+        run: npm run e2e
+
+      - name: Subir reporte de resultados
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selenium-results
+          path: Frontend/Market-AI/selenium-results/
+          retention-days: 7
