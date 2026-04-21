@@ -51,7 +51,7 @@ describe('Módulo de Autenticación - E2E', () => {
       .sendKeys('rubenfalso@gmail.com');
     await driver!.findElement(By.css('input[formControlName="Contrasena"]'))
       .sendKeys('contraseñaincorrecta');
-    await driver!.findElement(By.xpath('//button[contains(text(),"Enviar")]'))
+    await driver!.findElement(By.xpath('//button[contains(.,"Enviar")]'))
       .click();
 
     const errorMsg = await driver!.wait(
@@ -66,7 +66,7 @@ describe('Módulo de Autenticación - E2E', () => {
     await driver!.get(`${BASE_URL}/login`);
 
     const submitButton = await driver!.findElement(
-      By.xpath('//button[contains(text(),"Enviar")]')
+      By.xpath('//button[contains(.,"Enviar")]')
     );
     expect(await submitButton.isEnabled()).toBe(false);
   });
@@ -88,7 +88,7 @@ describe('Módulo de Autenticación - E2E', () => {
     await checkbox.click();
 
     const submitButton = await driver!.findElement(
-      By.xpath('//button[contains(text(),"Enviar")]')
+      By.xpath('//button[contains(.,"Enviar")]')
     );
     expect(await submitButton.isEnabled()).toBe(false);
   });
