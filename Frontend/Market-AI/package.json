@@ -54,6 +54,7 @@
     "@types/node": "^20.17.19",
     "@types/selenium-webdriver": "^4.35.5",
     "angular-eslint": "21.0.1",
+    "chromedriver": "^136.0.0",
     "msedgedriver": "^4.0.0",
     "eslint": "^9.39.1",
     "husky": "^9.1.7",
