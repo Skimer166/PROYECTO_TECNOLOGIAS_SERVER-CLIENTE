@@ -41,6 +41,8 @@ jobs:
 
       - name: Ejecutar pruebas Selenium
         run: npm run e2e
+        env:
+          BACKEND_URL: https://market-ai-api.onrender.com
 
       - name: Subir reporte de resultados
         uses: actions/upload-artifact@v4
