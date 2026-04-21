@@ -1,12 +1,7 @@
 import { Builder, WebDriver } from 'selenium-webdriver';
-import { Options as ChromeOptions, ServiceBuilder as ChromeService } from 'selenium-webdriver/chrome';
-import { Options as EdgeOptions, ServiceBuilder as EdgeService } from 'selenium-webdriver/edge';
+import { Options as ChromeOptions } from 'selenium-webdriver/chrome';
+import { Options as EdgeOptions } from 'selenium-webdriver/edge';
 import * as fs from 'fs';
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const chromedriverPath: string = require('chromedriver').path;
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const edgedriverPath: string = require('msedgedriver').path;
 
 // Rutas donde puede estar instalado cada navegador en Windows
 const BRAVE_PATHS = [
@@ -28,6 +23,8 @@ function findBinary(paths: string[]): string | null {
   return paths.find(p => fs.existsSync(p)) ?? null;
 }
 
+// Selenium Manager (incluido en selenium-webdriver 4.6+) descarga
+// automáticamente el driver correcto para el navegador detectado.
 export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: string }> {
   const headlessArgs = ['--headless', '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'];
 
@@ -41,7 +38,6 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
       const driver = await new Builder()
         .forBrowser('chrome')
         .setChromeOptions(options)
-        .setChromeService(new ChromeService(chromedriverPath))
         .build();
       return { driver, browserUsed: 'Brave' };
     } catch { /* intentar siguiente */ }
@@ -56,7 +52,6 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
       const driver = await new Builder()
         .forBrowser('chrome')
         .setChromeOptions(options)
-        .setChromeService(new ChromeService(chromedriverPath))
         .build();
       return { driver, browserUsed: 'Chrome' };
     } catch { /* intentar siguiente */ }
@@ -71,7 +66,6 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
       const driver = await new Builder()
         .forBrowser('MicrosoftEdge')
         .setEdgeOptions(options)
-        .setEdgeService(new EdgeService(edgedriverPath))
         .build();
       return { driver, browserUsed: 'Microsoft Edge' };
     } catch { /* intentar siguiente */ }
