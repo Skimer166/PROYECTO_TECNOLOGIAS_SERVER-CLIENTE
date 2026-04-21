@@ -6,7 +6,7 @@ on:
       - '**'
     paths:
       - 'Frontend/Market-AI/selenium/**'
-      - 'Frontend/Market-AI/jest.e2e.config.ts'
+      - 'Frontend/Market-AI/jest.e2e.config.js'
       - 'Frontend/Market-AI/src/**'
 
 jobs:
