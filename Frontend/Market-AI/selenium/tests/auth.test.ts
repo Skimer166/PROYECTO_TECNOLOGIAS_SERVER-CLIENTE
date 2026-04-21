@@ -1,5 +1,5 @@
 import { By, until, WebDriver } from 'selenium-webdriver';
-import { createDriver } from './browser-factory';
+import { createDriver } from '../browser-factory';
 
 const BASE_URL = 'http://localhost:4200';
 const BACKEND_URL = process.env['BACKEND_URL'] ?? 'https://market-ai-api.onrender.com';
