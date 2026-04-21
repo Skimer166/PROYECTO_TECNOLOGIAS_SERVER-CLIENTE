@@ -55,7 +55,7 @@
     "@types/selenium-webdriver": "^4.35.5",
     "angular-eslint": "21.0.1",
     "chromedriver": "^136.0.0",
-    "msedgedriver": "^4.0.0",
+    "msedgedriver": "*",
     "eslint": "^9.39.1",
     "husky": "^9.1.7",
     "jasmine-core": "~5.9.0",
