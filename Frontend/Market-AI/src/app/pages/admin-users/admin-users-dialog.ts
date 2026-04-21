@@ -444,7 +444,7 @@ export class AdminUsers implements OnInit {
           this.users = (res.users || []).map((u) => ({
             ...u,
             credits: u.credits ?? 0,
-            status: (u as { status?: string }).status ?? 'active',
+            status: ((u as { status?: string }).status ?? 'active') as 'active' | 'blocked',
           }));
           this.originalRoles.clear();
           this.originalStatuses.clear();
