@@ -25,6 +25,8 @@ interface MyAgent {
   _id: string;
   name: string;
   description: string;
+  category?: string;
+  imageUrl?: string;
   rentedUntil?: string;
   timeLeftDisplay?: string;
   pricePerHour?: number;

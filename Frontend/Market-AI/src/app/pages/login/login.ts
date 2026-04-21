@@ -50,7 +50,7 @@ export class Login {
     this.loading = true;
     this.auth.login({ email, password }).subscribe({
       next: (res) => {
-        localStorage.setItem('token', res.token);
+        if (res.token) localStorage.setItem('token', res.token);
         this.openDialog('Inicio de sesion exitoso', 'success');
         this.router.navigate(['/home-page']);
       },

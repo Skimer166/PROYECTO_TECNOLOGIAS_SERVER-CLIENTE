@@ -318,13 +318,13 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   private processRent(agent: Agent, amount: number, unit: string) {
-    this.http.post(`${environment.apiUrl}/agents/${agent._id}/rent`, {
-      amount, 
+    this.http.post<{ remainingCredits: number }>(`${environment.apiUrl}/agents/${agent._id}/rent`, {
+      amount,
       unit
     }, {
       headers: this.getAuthHeaders()
     }).subscribe({
-        next: (res: { remainingCredits: number }) => {
+        next: (res) => {
           this.openRentDialog(
             `¡Renta exitosa! Te quedan ${res.remainingCredits} créditos.`,
             true
