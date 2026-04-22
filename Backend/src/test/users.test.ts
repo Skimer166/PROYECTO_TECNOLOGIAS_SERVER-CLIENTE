@@ -153,11 +153,7 @@ describe('User Controller Unit Tests', () => {
     });
   });
 
-  // =========================================================================
-  // PRUEBAS DE USUARIOS (CRUD Básico)
-  // Requiere importar: getUsers, getUserById, updateUser, deleteUser
-  // Requiere mockear isValidObjectId de mongoose y jwt
-  // =========================================================================
+  // PRUEBAS DE USUARIOS
 
   describe('Operaciones CRUD', () => {
 
@@ -208,10 +204,7 @@ describe('User Controller Unit Tests', () => {
     });
   });
 
-  // =========================================================================
-  // PRUEBAS DE ADMINISTRADOR (Roles, Estados, Créditos)
-  // Requiere importar: updateUserRole, updateUserStatus, addUserCredits
-  // =========================================================================
+  // PRUEBAS DE ADMINISTRADOR
 
   describe('Operaciones de Administrador', () => {
     it('Debe actualizar el rol correctamente a admin (updateUserRole)', async () => {
