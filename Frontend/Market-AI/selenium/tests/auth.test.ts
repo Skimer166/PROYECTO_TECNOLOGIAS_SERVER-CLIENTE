@@ -22,16 +22,16 @@ describe('Módulo de Autenticación - E2E', () => {
     }
 
     if (!backendAvailable) {
-      console.warn(`\n⚠️  Backend no disponible en ${BACKEND_URL}.`);
-      console.warn('   Las pruebas que requieren backend serán omitidas.\n');
+      console.warn(`\nBackend no disponible en ${BACKEND_URL}.`);
+      console.warn('   Las pruebas que requieren backend seran omitidas.\n');
     } else {
-      console.log(`\n✅ Backend disponible en ${BACKEND_URL}\n`);
+      console.log(`\nBackend disponible en ${BACKEND_URL}\n`);
     }
 
     // Detectar y usar el primer navegador disponible
     const { driver: d, browserUsed } = await createDriver();
     driver = d;
-    console.log(`🌐 Navegador detectado: ${browserUsed}\n`);
+    console.log(`Navegador detectado: ${browserUsed}\n`);
   }, 60000);
 
   afterAll(async () => {
@@ -41,7 +41,7 @@ describe('Módulo de Autenticación - E2E', () => {
   // PRUEBA 1: Requiere backend — se omite si no está disponible
   it('Debe mostrar error con credenciales incorrectas', async () => {
     if (!backendAvailable) {
-      console.warn('  ⚠️  Prueba omitida: backend no disponible.');
+      console.warn('  Prueba omitida: backend no disponible.');
       return;
     }
 
