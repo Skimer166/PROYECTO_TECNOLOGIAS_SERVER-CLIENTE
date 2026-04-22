@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import passport from './google';
-import { loginUser } from '../users/controller';
 import { UserModel } from '../users/model';
 import bcrypt from 'bcryptjs';
 import { sendPasswordResetEmail, sendWelcomeEmail } from '../mailer/controller';

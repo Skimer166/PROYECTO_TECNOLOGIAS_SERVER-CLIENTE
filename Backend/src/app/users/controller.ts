@@ -5,6 +5,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendWelcomeEmail } from "../mailer/controller";
 
+const JWT_SECRET = process.env.JWT_KEY ?? 'dev-secret';
+
 //GET/users-CRUD: Read (listar usuarios)
 export async function getUsers(req: Request, res: Response) {
   try {
