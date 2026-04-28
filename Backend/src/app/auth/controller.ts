@@ -115,7 +115,6 @@ export async function forgotPassword(req: Request, res: Response) {
       console.log('3. [forgotPassword] Falta el email.'); // <--- NUEVO LOG
       return res.status(400).json({ message: 'Email requerido' });
     }
-    const token = req.body || {};
     const user = await UserModel.findOne({ email });
 
     if (!user) {
@@ -124,11 +123,18 @@ export async function forgotPassword(req: Request, res: Response) {
       return res.status(200).json({ message: '...' });
     }
 
-    console.log('5. [forgotPassword] Usuario encontrado. Generando token...'); // <--- NUEVO LOG
+    console.log('5. [forgotPassword] Usuario encontrado. Generando token...');
 
-    // ... código de generación de token ...
+    const resetToken = jwt.sign(
+      { type: 'password-reset', sub: String(user._id) },
+      JWT_KEY,
+      { expiresIn: '1h' }
+    );
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000);
+    await user.save();
 
-    const resetLink = `${FRONTEND_URL}/reset-password?token=${encodeURIComponent(token)}`;
+    const resetLink = `${FRONTEND_URL}/reset-password?token=${encodeURIComponent(resetToken)}`;
     console.log('6. [forgotPassword] Intentando enviar correo a:', user.email); // <--- NUEVO LOG
 
     try {
