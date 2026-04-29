@@ -7,7 +7,8 @@
     "target": "esnext",
     "strict": true,
     "moduleResolution": "nodenext",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["jest", "node"]
   },
   "exclude": [          
     "node_modules",
