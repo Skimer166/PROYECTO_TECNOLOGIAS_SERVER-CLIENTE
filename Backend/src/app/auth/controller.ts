@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import passport from './google';
 import { UserModel } from '../users/model';
+import { IUser } from '../interfaces/user';
 import bcrypt from 'bcryptjs';
 import { sendPasswordResetEmail, sendWelcomeEmail } from '../mailer/controller';
 
@@ -221,7 +222,7 @@ export const googleCallbackController = (
   passport.authenticate(
     'google',
     { session: false },
-    async (err: Error | null, googleUser: Express.User | false | null, info?: { isNewUser?: boolean }) => {
+    async (err: Error | null, googleUser: IUser | false | null, info?: { isNewUser?: boolean }) => {
       if (err || !googleUser) {
         console.error('Error en Google Auth:', err);
         return res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
