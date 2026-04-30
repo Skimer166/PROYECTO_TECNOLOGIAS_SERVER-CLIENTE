@@ -96,7 +96,7 @@ export class MyProfile implements OnInit {
               email: user.email,
               avatar: user.avatar
             });
-            this.currentAvatar = user.avatar;
+            this.currentAvatar = user.avatar ?? null;
             this.loading = false;
             
             // 3. ACTUALIZAR VISTA MANUALMENTE
