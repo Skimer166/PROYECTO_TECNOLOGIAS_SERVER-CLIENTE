@@ -8,11 +8,13 @@
     "strict": true,
     "moduleResolution": "nodenext",
     "resolveJsonModule": true,
-    "types": ["jest", "node"]
+    "types": ["jest", "node", "passport"]
   },
-  "exclude": [          
+  "files": ["./src/types/express.d.ts"],
+  "include": ["src/**/*"],
+  "exclude": [
     "node_modules",
     "jest.config.ts",
-    "eslint.config.mts" 
+    "eslint.config.mts"
   ]
 }
