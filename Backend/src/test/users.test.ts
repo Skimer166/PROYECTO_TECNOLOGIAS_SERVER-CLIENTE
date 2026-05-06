@@ -135,6 +135,20 @@ describe('User Controller Unit Tests', () => {
     expect(jsonMock).toHaveBeenCalledWith({ message: "Email ya registrado" });
   });
 
+  it('Debe retornar 409 si el nombre de usuario ya está registrado', async () => {
+    req = { body: { name: 'NombreOcupado', email: 'libre@test.com', password: '123' } };
+
+    // Primera llamada (email check) → null; segunda (name check) → usuario encontrado
+    (UserModel.findOne as jest.Mock)
+      .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue(null) })
+      .mockReturnValueOnce({ lean: jest.fn().mockResolvedValue({ name: 'NombreOcupado' }) });
+
+    await signup(req as Request, res as Response);
+
+    expect(statusMock).toHaveBeenCalledWith(409);
+    expect(jsonMock).toHaveBeenCalledWith({ message: 'Nombre de usuario ya registrado' });
+  });
+
   it('Debe retornar 400 en login si la cuenta fue creada con Google (sin passwordHash)', async () => {
     req = { body: { email: 'google@test.com', password: '123' } };
 
@@ -161,7 +175,7 @@ describe('User Controller Unit Tests', () => {
 
     it('Debe listar usuarios correctamente (getUsers)', async () => {
       const mockUsers = [{ _id: '1', name: 'User 1' }, { _id: '2', name: 'User 2' }];
-      
+
       (UserModel.find as jest.Mock).mockReturnValue({
         lean: jest.fn().mockResolvedValue(mockUsers)
       });
@@ -170,6 +184,17 @@ describe('User Controller Unit Tests', () => {
 
       expect(statusMock).not.toHaveBeenCalledWith(500); // Porque retorna directo res.json
       expect(jsonMock).toHaveBeenCalledWith(expect.objectContaining({ users: expect.any(Array) }));
+    });
+
+    it('Debe retornar 500 si falla la BD en getUsers', async () => {
+      (UserModel.find as jest.Mock).mockReturnValue({
+        lean: jest.fn().mockRejectedValue(new Error('DB error')),
+      });
+
+      await getUsers(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'Error del servidor' });
     });
 
     it('Debe retornar 404 si el usuario no existe por ID (getUserById)', async () => {
@@ -189,11 +214,11 @@ describe('User Controller Unit Tests', () => {
     });
 
     it('Debe retornar 400 si no se envían datos para actualizar (updateUser)', async () => {
-      req = { 
+      req = {
         params: { id: '5f8d0d55b54764421b7156d9' },
-        body: {} 
+        body: {}
       };
-      
+
       const mongoose = require('mongoose');
       mongoose.isValidObjectId = jest.fn().mockReturnValue(true);
 
@@ -201,6 +226,20 @@ describe('User Controller Unit Tests', () => {
 
       expect(statusMock).toHaveBeenCalledWith(400);
       expect(jsonMock).toHaveBeenCalledWith({ message: "Nada para actualizar" });
+    });
+
+    it('Debe retornar 500 si falla la BD en getUserById', async () => {
+      req = { params: { id: '5f8d0d55b54764421b7156d9' } };
+      const mongoose = require('mongoose');
+      mongoose.isValidObjectId = jest.fn().mockReturnValue(true);
+      (UserModel.findById as jest.Mock).mockReturnValue({
+        lean: jest.fn().mockRejectedValue(new Error('DB error')),
+      });
+
+      await getUserById(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'Error del servidor' });
     });
   });
 
@@ -284,7 +323,7 @@ describe('User Controller Unit Tests', () => {
     });
   });
 
-  // ─── deleteUser ───────────────────────────────────────────────────────────────
+  // ─── deleteUser ──────────────────────────────────────────────────────────────
 
   describe('deleteUser()', () => {
     it('Debe retornar 400 si el ID es inválido', async () => {
@@ -326,6 +365,20 @@ describe('User Controller Unit Tests', () => {
       await deleteUser(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(204);
+    });
+
+    it('Debe retornar 500 si falla la BD en deleteUser', async () => {
+      req = { params: { id: '5f8d0d55b54764421b7156d9' } } as unknown as Request;
+      const mongoose = require('mongoose');
+      mongoose.isValidObjectId = jest.fn().mockReturnValue(true);
+      (UserModel.findByIdAndDelete as jest.Mock).mockReturnValue({
+        lean: jest.fn().mockRejectedValue(new Error('DB error')),
+      });
+
+      await deleteUser(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'Error del servidor' });
     });
   });
 
@@ -421,6 +474,35 @@ describe('User Controller Unit Tests', () => {
         token: expect.any(String),
       }));
     });
+
+    it('Debe retornar 404 si el usuario no existe al actualizar', async () => {
+      req = { params: { id: '5f8d0d55b54764421b7156d9' }, body: { name: 'Nuevo' } } as unknown as Request;
+      const mongoose = require('mongoose');
+      mongoose.isValidObjectId = jest.fn().mockReturnValue(true);
+      (UserModel.findOne as jest.Mock).mockReturnValue({ lean: jest.fn().mockResolvedValue(null) });
+      (UserModel.findByIdAndUpdate as jest.Mock).mockReturnValue({
+        lean: jest.fn().mockResolvedValue(null),
+      });
+
+      await updateUser(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'Usuario no encontrado' });
+    });
+
+    it('Debe retornar 500 si falla la BD en updateUser', async () => {
+      req = { params: { id: '5f8d0d55b54764421b7156d9' }, body: { name: 'Nuevo' } } as unknown as Request;
+      const mongoose = require('mongoose');
+      mongoose.isValidObjectId = jest.fn().mockReturnValue(true);
+      (UserModel.findByIdAndUpdate as jest.Mock).mockReturnValue({
+        lean: jest.fn().mockRejectedValue(new Error('DB error')),
+      });
+
+      await updateUser(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'Error del servidor' });
+    });
   });
 
   // ─── updateUserRole (casos adicionales) ──────────────────────────────────────
@@ -460,6 +542,20 @@ describe('User Controller Unit Tests', () => {
 
       expect(statusMock).toHaveBeenCalledWith(404);
       expect(jsonMock).toHaveBeenCalledWith({ message: 'Usuario no encontrado' });
+    });
+
+    it('Debe retornar 500 si falla la BD en updateUserRole', async () => {
+      req = { params: { id: '5f8d0d55b54764421b7156d9' }, body: { role: 'admin' } } as unknown as Request;
+      const mongoose = require('mongoose');
+      mongoose.isValidObjectId = jest.fn().mockReturnValue(true);
+      (UserModel.findByIdAndUpdate as jest.Mock).mockReturnValue({
+        lean: jest.fn().mockRejectedValue(new Error('DB error')),
+      });
+
+      await updateUserRole(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'Error del servidor' });
     });
   });
 
@@ -503,6 +599,20 @@ describe('User Controller Unit Tests', () => {
       await updateUserStatus(req as Request, res as Response);
 
       expect(jsonMock).toHaveBeenCalledWith(expect.objectContaining({ status: 'blocked' }));
+    });
+
+    it('Debe retornar 500 si falla la BD en updateUserStatus', async () => {
+      req = { params: { id: '5f8d0d55b54764421b7156d9' }, body: { status: 'active' } } as unknown as Request;
+      const mongoose = require('mongoose');
+      mongoose.isValidObjectId = jest.fn().mockReturnValue(true);
+      (UserModel.findByIdAndUpdate as jest.Mock).mockReturnValue({
+        lean: jest.fn().mockRejectedValue(new Error('DB error')),
+      });
+
+      await updateUserStatus(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'Error del servidor' });
     });
   });
 
@@ -548,6 +658,20 @@ describe('User Controller Unit Tests', () => {
       expect(mockUser.credits).toBe(700);
       expect(mockUser.save).toHaveBeenCalled();
       expect(jsonMock).toHaveBeenCalledWith({ id: expect.any(String), credits: 700 });
+    });
+
+    it('Debe retornar 500 si falla la BD en addUserCredits', async () => {
+      req = { params: { id: '5f8d0d55b54764421b7156d9' }, body: { amount: 100 } } as unknown as Request;
+      const mongoose = require('mongoose');
+      mongoose.isValidObjectId = jest.fn().mockReturnValue(true);
+      (UserModel.findById as jest.Mock).mockReturnValue({
+        exec: jest.fn().mockRejectedValue(new Error('DB error')),
+      });
+
+      await addUserCredits(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'Error del servidor' });
     });
   });
 });

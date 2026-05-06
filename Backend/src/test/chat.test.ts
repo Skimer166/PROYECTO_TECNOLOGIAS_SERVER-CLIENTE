@@ -164,5 +164,26 @@ describe('Chat Controller Unit Tests', () => {
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(jsonMock).toHaveBeenCalledWith({ message: 'Error al procesar el mensaje con la IA' });
     });
+
+    it('Debe retornar 500 si OpenAI devuelve choices vacío (sin mensaje)', async () => {
+      req = { body: { agentId: '123', message: 'Hola' } };
+      const mockAgent = {
+        _id: '123',
+        name: 'Agente Test',
+        availability: true,
+        modelVersion: 'gpt-4',
+        instructions: 'Eres un asistente.',
+      };
+      (AgentModel.findById as jest.Mock).mockReturnValue({
+        lean: jest.fn().mockResolvedValue(mockAgent),
+      });
+      // choices[0] is undefined → completion.choices[0].message.content throws TypeError
+      mockCreate.mockResolvedValue({ choices: [], usage: {} });
+
+      await chatWithAgent(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'Error al procesar el mensaje con la IA' });
+    });
   });
 });

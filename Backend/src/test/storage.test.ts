@@ -147,4 +147,47 @@ describe('Storage (S3) Unit Tests', () => {
       expect(s3Module.s3).toBe(s3Module.s3Client);
     });
   });
+
+  // ─── createImageUpload ────────────────────────────────────────────────────────
+
+  describe('createImageUpload()', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const multerMock = require('multer') as jest.Mock;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const multerS3Mock = require('multer-s3') as jest.Mock;
+
+    beforeEach(() => {
+      // resetMocks/restoreMocks clear implementations; re-apply so multer() returns a usable object
+      multerMock.mockReturnValue({ single: jest.fn() });
+      multerS3Mock.mockReturnValue({});
+      multerS3Mock.AUTO_CONTENT_TYPE = jest.fn();
+    });
+
+    it('Debe retornar un middleware de multer (objeto definido)', () => {
+      const upload = s3Module.createImageUpload();
+      expect(upload).toBeDefined();
+    });
+
+    it('Debe usar el límite por defecto de 5 MB si no se pasa argumento', () => {
+      s3Module.createImageUpload();
+      expect(multerMock).toHaveBeenCalledWith(
+        expect.objectContaining({ limits: { fileSize: 5 * 1024 * 1024 } })
+      );
+    });
+
+    it('Debe usar el límite especificado cuando se pasa como argumento', () => {
+      const twoMB = 2 * 1024 * 1024;
+      s3Module.createImageUpload(twoMB);
+      expect(multerMock).toHaveBeenCalledWith(
+        expect.objectContaining({ limits: { fileSize: twoMB } })
+      );
+    });
+
+    it('Debe configurar multerS3 con AUTO_CONTENT_TYPE', () => {
+      s3Module.createImageUpload();
+      expect(multerS3Mock).toHaveBeenCalledWith(
+        expect.objectContaining({ contentType: multerS3Mock.AUTO_CONTENT_TYPE })
+      );
+    });
+  });
 });
