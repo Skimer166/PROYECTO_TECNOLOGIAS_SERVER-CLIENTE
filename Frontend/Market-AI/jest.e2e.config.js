@@ -3,6 +3,7 @@ const config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ['**/selenium/tests/**/*.test.ts'],
+  passWithNoTests: true,
   testTimeout: 30000,
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: { esModuleInterop: true } }],
