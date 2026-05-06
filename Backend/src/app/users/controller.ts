@@ -5,6 +5,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendWelcomeEmail } from "../mailer/controller";
 
+const JWT_SECRET = process.env.JWT_KEY ?? 'dev-secret';
+
 //GET/users-CRUD: Read (listar usuarios)
 export async function getUsers(req: Request, res: Response) {
   try {
@@ -18,51 +20,8 @@ export async function getUsers(req: Request, res: Response) {
   }
 }
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 //POST/users-CRUD: Create (crear usuario)
-export async function postUsers(req: Request, res: Response) {
-  try {
-    const { name, email, password } = req.body;
 
-    if (!name || !email || !password)
-      return res.status(400).json({ message: "Rellena todos los campos" });
-
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Formato de correo inválido" });
-    }
-      
-    const emailExists = await UserModel.findOne({ email }).lean();
-    if (emailExists) {
-      return res.status(409).json({ message: "Email ya registrado" });
-    }
-
-    const nameExists = await UserModel.findOne({ name }).lean();
-    if (nameExists) {
-      return res.status(409).json({ message: "Nombre de usuario ya registrado" });
-    }
-
-    const exists = await UserModel.findOne({ email }).lean();
-    if (exists) return res.status(409).json({ message: "Email ya registrado" });
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = await UserModel.create({ name, email, passwordHash });
-
-    //Enviar correo de bienvenida 
-    try {
-      await sendWelcomeEmail(email, name);
-    } catch (emailError) {
-      console.error("Error enviando correo de bienvenida:", emailError);
-    }
-
-    return res.status(201).json({
-      message: "Usuario creado correctamente",
-      user: { id: String(user._id), name: user.name, email: user.email },
-    });
-  } catch (err: unknown) {
-    console.error("Error creando usuario:", err);
-    return res.status(500).json({ message: "Error del servidor" });
-  }
-}
 
 //GET/users/:id-CRUD: Read (obtener usuario por id)
 export async function getUserById(req: Request, res: Response) {
@@ -87,7 +46,7 @@ export async function updateUser(req: Request, res: Response) {
     if (!isValidObjectId(id)) return res.status(400).json({ message: "ID inválido" });
 
     const { name, email, password, avatar } = req.body || {};
-    
+
     if (!name && !email && !password && !avatar) {
       return res.status(400).json({ message: "Nada para actualizar" });
     }
@@ -106,8 +65,8 @@ export async function updateUser(req: Request, res: Response) {
     }
 
     const updated = await UserModel.findByIdAndUpdate(
-      id, 
-      update, 
+      id,
+      update,
       { new: true, projection: { name: 1, email: 1, role: 1, avatar: 1, status: 1 } }
     ).lean();
 
@@ -127,9 +86,9 @@ export async function updateUser(req: Request, res: Response) {
     );
 
     // devolvemos el usuario Y el nuevo token
-    return res.json({ 
+    return res.json({
       user: { id: String(updated._id), name: updated.name, email: updated.email, avatar: updated.avatar },
-      token: token 
+      token: token
     });
 
   } catch (err) {
@@ -160,58 +119,6 @@ export function getFavoriteAgents(req: Request, res: Response){
     { id: 2, name: "Agente especialista Cocinando", description: "Te ayudara en la cocina." }
   ];
   return res.json({ agents: favorites });
-}
-//login
-const JWT_SECRET = process.env.SECRET_KEY ?? process.env.JWT_KEY ?? 'dev-secret';
-export async function loginUser(req: Request, res: Response) {
-  try {
-    const { email, password } = req.body;
-
-    const user = await UserModel.findOne({ email });
-
-    if (!user) {
-      return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
-    }
-
-    if (!user.passwordHash) {
-      return res.status(400).json({
-        message: 'Esta cuenta fue creada con Google. Inicia sesión usando "Iniciar sesión con Google".',
-      });
-    }
-
-    const ok = await bcrypt.compare(password, user.passwordHash);
-
-    if (!ok) {
-      return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
-    }
-
-const token = jwt.sign(
-      {
-        sub: String(user._id),
-        email: user.email,
-        name: user.name,
-        role: user.role || 'user',
-        avatar: user.avatar,
-        credits: user.credits,
-        status: user.status || 'active',
-      },
-      JWT_SECRET,
-      { expiresIn: '2h' }
-    );
-
-    return res.json({
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
-    });
-  } catch (err) {
-    console.error('Error en loginUser:', err);
-    return res.status(500).json({ message: 'Error interno del servidor' });
-  }
 }
 
 // PUT /users/:id/role - Admin: actualizar rol de usuario
