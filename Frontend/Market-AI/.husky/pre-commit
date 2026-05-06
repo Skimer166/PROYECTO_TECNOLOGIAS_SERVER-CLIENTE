@@ -1,0 +1,8 @@
+#!/bin/sh
+echo "Ejecutando ESLint en el Frontend..."
+cd Frontend/Market-AI && npx ng lint
+if [ $? -ne 0 ]; then
+  echo "El commit fue bloqueado: corrige los errores de ESLint antes de commitear."
+  exit 1
+fi
+echo "ESLint paso sin errores."

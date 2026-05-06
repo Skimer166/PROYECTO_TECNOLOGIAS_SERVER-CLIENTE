@@ -1,23 +1,23 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { SocketService } from '../../shared/services/socket';
+import { SocketService, SupportSession, SupportMessage } from '../../shared/services/socket';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-admin-support',
   standalone: true,
-  imports: [CommonModule, MatListModule, MatButtonModule, MatIconModule, FormsModule, RouterModule],
+  imports: [MatListModule, MatButtonModule, MatIconModule, FormsModule, RouterModule],
   templateUrl: './admin-support.html',
   styleUrl: './admin-support.scss'
 })
 export class AdminSupport implements OnInit {
-  sessions: any[] = [];
-  selectedSession: any = null;
-  chatHistory: any[] = [];
+  sessions: SupportSession[] = [];
+  selectedSession: SupportSession | null = null;
+  chatHistory: SupportMessage[] = [];
   adminReply = '';
 
   private socket = inject(SocketService);
@@ -58,7 +58,7 @@ export class AdminSupport implements OnInit {
     });
   }
 
-  selectSession(session: any) {
+  selectSession(session: SupportSession) {
     this.selectedSession = session;
     this.chatHistory = session.messages || []; // si hay mensajes previos los cargamos
     this.socket.adminJoinChat(session.userId);

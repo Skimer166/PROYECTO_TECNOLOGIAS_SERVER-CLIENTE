@@ -43,20 +43,20 @@ describe('Login', () => {
     spyOn(window.localStorage, 'setItem');
     component.form.setValue({ Correo: 'test@mail.com', Contrasena: '12345678' });
     component.doOnSubmit();
-    expect((authMock.login as any)).toHaveBeenCalledOnceWith({
+    expect(authMock.login as unknown as jasmine.Spy).toHaveBeenCalledOnceWith({
       email: 'test@mail.com',
       password: '12345678'
     });
     await Promise.resolve();
     expect(window.localStorage.setItem).toHaveBeenCalledWith('token', 'Bearer1234');
-    expect((routerMock.navigate as any)).toHaveBeenCalledWith(['/home-page']);
+    expect(routerMock.navigate as unknown as jasmine.Spy).toHaveBeenCalledWith(['/home-page']);
   });
 
   it('should not call auth.login if form is invalid', () => {
-    (authMock.login as any).calls.reset();
+    (authMock.login as unknown as jasmine.Spy).calls.reset();
     component.form.setValue({ Correo: '', Contrasena: '' });
     component.doOnSubmit();
-    expect((authMock.login as any)).not.toHaveBeenCalled();
+    expect(authMock.login as unknown as jasmine.Spy).not.toHaveBeenCalled();
   });
 });
 

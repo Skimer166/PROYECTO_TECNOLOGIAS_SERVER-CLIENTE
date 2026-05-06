@@ -1,5 +1,5 @@
-import { Component, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,15 +12,14 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-rent-dialog',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    MatDialogModule, 
-    MatButtonModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
+    FormsModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
     MatSelectModule,
     MatIconModule
-  ],
+],
   template: `
     <h2 mat-dialog-title>Rentar {{ data.agent.name }}</h2>
     <mat-dialog-content>
@@ -65,13 +64,13 @@ import { MatIconModule } from '@angular/material/icon';
   `]
 })
 export class RentDialogComponent {
+  dialogRef = inject<MatDialogRef<RentDialogComponent>>(MatDialogRef);
+  data = inject<{
+    agent: { name: string; pricePerHour: number };
+}>(MAT_DIALOG_DATA);
+
   amount = 1;
   unit = 'hours';
-
-  constructor(
-    public dialogRef: MatDialogRef<RentDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { agent: any }
-  ) {}
 
   calculateTotal(): number {
     let multiplier = 1;

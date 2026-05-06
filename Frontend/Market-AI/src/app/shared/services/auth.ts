@@ -8,6 +8,8 @@ import { User } from '../types/user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private http = inject(HttpClient);
+
   private readonly baseUrl = environment.apiUrl; 
   private platformId = inject(PLATFORM_ID);
 
@@ -22,7 +24,7 @@ export class AuthService {
   
   private socketService = inject(SocketService);
 
-  constructor(private http: HttpClient) {
+  constructor() {
     if (this.hasToken()) {
       this.loadUserFromToken();
     }
@@ -73,8 +75,8 @@ export class AuthService {
     }
   }
 
-  login(payload: any) {
-    return this.http.post<any>(`${this.baseUrl}/auth/login`, payload).pipe(
+  login(payload: Record<string, unknown>) {
+    return this.http.post<{ token?: string }>(`${this.baseUrl}/auth/login`, payload).pipe(
       tap((res) => {
         if (res?.token) {
           this.saveToken(res.token);
@@ -109,7 +111,9 @@ export class AuthService {
     try {
       sessionStorage.setItem('token', token);
       localStorage.setItem('token', token);
-    } catch {}
+    } catch {
+      // storage may be unavailable in some environments
+    }
   }
 
   getToken(): string | null {

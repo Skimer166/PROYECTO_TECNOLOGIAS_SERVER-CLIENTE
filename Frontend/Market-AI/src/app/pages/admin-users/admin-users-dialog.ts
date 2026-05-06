@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -29,14 +29,13 @@ interface AdminUser {
   selector: 'app-admin-users',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     MatDialogModule,
     MatButtonModule,
     MatFormFieldModule,
     MatSelectModule,
     MatIconModule
-  ],
+],
   template: `
     <div class="admin-users-page">
       <div class="admin-users-card">
@@ -46,7 +45,7 @@ interface AdminUser {
               mat-icon-button
               routerLink="/home-page"
               title="Volver al inicio"
-            >
+              >
               <mat-icon>arrow_back</mat-icon>
             </button>
             <h1 class="admin-users-title">
@@ -54,108 +53,112 @@ interface AdminUser {
             </h1>
           </div>
         </div>
-
+    
         <div class="admin-users-content">
-          <div *ngIf="loading" class="state-message">
-            <mat-icon>hourglass_empty</mat-icon>
-            <span>Cargando usuarios...</span>
-          </div>
-
-          <div *ngIf="error" class="state-message state-message--error">
-            <mat-icon>error_outline</mat-icon>
-            <span>{{ error }}</span>
-          </div>
-
-          <div *ngIf="!loading && !error && !users.length" class="state-message">
-            <mat-icon>group_off</mat-icon>
-            <span>No hay usuarios registrados.</span>
-          </div>
-
-          <div *ngIf="!loading && !error && users.length" class="user-list-container">
-            <div class="user-row user-row--header">
-              <div class="user-col user-col--state">Estado</div>
-              <div class="user-col user-col--role">Rol</div>
-              <div class="user-col user-col--name">Nombre</div>
-              <div class="user-col user-col--email">Correo</div>
-              <div class="user-col user-col--credits">Créditos</div>
-              <div class="user-col user-col--actions">Acciones</div>
+          @if (loading) {
+            <div class="state-message">
+              <mat-icon>hourglass_empty</mat-icon>
+              <span>Cargando usuarios...</span>
             </div>
-
-            <div class="user-row" *ngFor="let user of users">
-              <div class="user-col user-col--state">
-                <button
-                  mat-stroked-button
-                  class="state-chip"
-                  [class.state-chip--active]="user.status === 'active'"
-                  [class.state-chip--blocked]="user.status === 'blocked'"
-                  (click)="toggleStatus(user)"
-                >
-                  {{ user.status === 'blocked' ? 'Bloqueado' : 'Activo' }}
-                </button>
+          }
+    
+          @if (error) {
+            <div class="state-message state-message--error">
+              <mat-icon>error_outline</mat-icon>
+              <span>{{ error }}</span>
+            </div>
+          }
+    
+          @if (!loading && !error && !users.length) {
+            <div class="state-message">
+              <mat-icon>group_off</mat-icon>
+              <span>No hay usuarios registrados.</span>
+            </div>
+          }
+    
+          @if (!loading && !error && users.length) {
+            <div class="user-list-container">
+              <div class="user-row user-row--header">
+                <div class="user-col user-col--state">Estado</div>
+                <div class="user-col user-col--role">Rol</div>
+                <div class="user-col user-col--name">Nombre</div>
+                <div class="user-col user-col--email">Correo</div>
+                <div class="user-col user-col--credits">Créditos</div>
+                <div class="user-col user-col--actions">Acciones</div>
               </div>
-
-              <div class="user-col user-col--role">
-                <mat-form-field
-                  appearance="outline"
-                  class="inline-field inline-field--small"
-                >
-                  <mat-select
-                    [value]="user.role"
-                    (selectionChange)="changeRole(user, $event.value)"
-                  >
-                    <mat-option value="user">Usuario</mat-option>
-                    <mat-option value="admin">Admin</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-
-              <div class="user-col user-col--name">
-                {{ user.name }}
-              </div>
-
-              <div class="user-col user-col--email">
-                {{ user.email }}
-              </div>
-
-              <div class="user-col user-col--credits">
-                <span class="credits-value">{{ user.credits }}</span>
-                <button
-                  mat-icon-button
-                  class="credits-edit-btn"
-                  (click)="openCreditsDialog(user)"
-                  title="Agregar créditos"
-                >
-                  <mat-icon>edit</mat-icon>
-                </button>
-              </div>
-
-              <div class="user-col user-col--actions">
-                <button
-                  mat-stroked-button
-                  class="user-btn user-btn-role"
+              @for (user of users; track user) {
+                <div class="user-row">
+                  <div class="user-col user-col--state">
+                    <button
+                      mat-stroked-button
+                      class="state-chip"
+                      [class.state-chip--active]="user.status === 'active'"
+                      [class.state-chip--blocked]="user.status === 'blocked'"
+                      (click)="toggleStatus(user)"
+                      >
+                      {{ user.status === 'blocked' ? 'Bloqueado' : 'Activo' }}
+                    </button>
+                  </div>
+                  <div class="user-col user-col--role">
+                    <mat-form-field
+                      appearance="outline"
+                      class="inline-field inline-field--small"
+                      >
+                      <mat-select
+                        [value]="user.role"
+                        (selectionChange)="changeRole(user, $event.value)"
+                        >
+                        <mat-option value="user">Usuario</mat-option>
+                        <mat-option value="admin">Admin</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <div class="user-col user-col--name">
+                    {{ user.name }}
+                  </div>
+                  <div class="user-col user-col--email">
+                    {{ user.email }}
+                  </div>
+                  <div class="user-col user-col--credits">
+                    <span class="credits-value">{{ user.credits }}</span>
+                    <button
+                      mat-icon-button
+                      class="credits-edit-btn"
+                      (click)="openCreditsDialog(user)"
+                      title="Agregar créditos"
+                      >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  </div>
+                  <div class="user-col user-col--actions">
+                    <button
+                      mat-stroked-button
+                      class="user-btn user-btn-role"
                   [disabled]="
                     updatingRoleId === user.id ||
                     revertingUserId === user.id ||
                     !hasChanges(user)
                   "
-                  (click)="resetRole(user)"
-                >
-                  Revertir
-                </button>
-                <button
-                  mat-stroked-button
-                  class="user-btn user-btn-delete"
-                  (click)="deleteUser(user)"
-                >
-                  Eliminar
-                </button>
-              </div>
+                      (click)="resetRole(user)"
+                      >
+                      Revertir
+                    </button>
+                    <button
+                      mat-stroked-button
+                      class="user-btn user-btn-delete"
+                      (click)="deleteUser(user)"
+                      >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              }
             </div>
-          </div>
+          }
         </div>
       </div>
     </div>
-  `,
+    `,
   styles: [
     `
       .admin-users-page {
@@ -441,7 +444,7 @@ export class AdminUsers implements OnInit {
           this.users = (res.users || []).map((u) => ({
             ...u,
             credits: u.credits ?? 0,
-            status: (u as any).status ?? 'active',
+            status: ((u as { status?: string }).status ?? 'active') as 'active' | 'blocked',
           }));
           this.originalRoles.clear();
           this.originalStatuses.clear();

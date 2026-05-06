@@ -1,5 +1,5 @@
 <mat-toolbar color="primary" class="header-toolbar">
-  
+
   <div class="left-section">
     <button mat-icon-button [matMenuTriggerFor]="mobileMenu" class="mobile-menu-btn">
       <mat-icon>menu</mat-icon>
@@ -8,7 +8,7 @@
     <button mat-icon-button [routerLink]="['/']" aria-label="Ir al inicio" class="logo-btn">
       <img src="assets/logo.jpeg" alt="Logo" class="app-logo">
     </button>
-    
+
     <span class="brand">Market AI</span>
   </div>
 
@@ -28,24 +28,26 @@
 
   <div class="right-section">
     @if (isLoggedIn) {
-      
+
       <button mat-stroked-button class="recharge-btn desktop-only" (click)="openRechargeDialog()">
         <mat-icon>add</mat-icon> Recargar
       </button>
-      
+
       <div class="credits-badge" title="Créditos">
         <mat-icon class="coin-icon">monetization_on</mat-icon>
         <span>{{ userCredits || 0 }}</span>
       </div>
 
-      <div class="user-badge" *ngIf="userName" routerLink="/mi-perfil">
-        @if (userPhoto) {
-          <img [src]="userPhoto" alt="Foto" class="mini-avatar" />
-        } @else {
-          <mat-icon>account_circle</mat-icon>
-        }
-        <span class="mini-name desktop-only">{{ userName }}</span>
-      </div>
+      @if (userName) {
+        <div class="user-badge" routerLink="/mi-perfil">
+          @if (userPhoto) {
+            <img [src]="userPhoto" alt="Foto" class="mini-avatar" />
+          } @else {
+            <mat-icon>account_circle</mat-icon>
+          }
+          <span class="mini-name desktop-only">{{ userName }}</span>
+        </div>
+      }
 
       <button mat-stroked-button color="accent" class="desktop-only logout-btn" (click)="logout()">
         Salir
@@ -70,9 +72,9 @@
     <button mat-menu-item routerLink="/mi-perfil">
       <mat-icon>person</mat-icon> Mi Perfil
     </button>
-    
+
     <mat-divider></mat-divider>
-    
+
     <button mat-menu-item (click)="openRechargeDialog()">
       <mat-icon class="text-gold">add_circle</mat-icon> Recargar Créditos
     </button>

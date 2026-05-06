@@ -6,8 +6,6 @@ import { SocketService } from './shared/services/socket';
 import { NotificationDialogComponent } from './pages/login/popup-login';
 import { AuthService } from './shared/services/auth';
 
-import { Header } from './layouts/header/header';
-import { Footer } from './layouts/footer/footer';
 import { SupportWidgetComponent } from './pages/support-widget/support-widget';
 @Component({
   selector: 'app-root',

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core'; // 1. IMPORTAR ChangeDetectorRef
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -23,18 +23,17 @@ import { environment } from '../../shared/config';
   selector: 'app-my-profile',
   standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    MatCardModule, 
-    MatButtonModule,    
-    MatInputModule, 
-    MatFormFieldModule, 
+    ReactiveFormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatDialogModule,
     Header,
     Footer
-  ],
+],
   templateUrl: './mi-perfil.html',
   styleUrl: './mi-perfil.scss'
 })
@@ -44,7 +43,7 @@ export class MyProfile implements OnInit {
   loading = false;
   userId: string | null = null;
   currentAvatar: string | null = null;
-  rentedAgentsCount: number = 0;
+  rentedAgentsCount = 0;
 
   
   private auth = inject(AuthService);
@@ -91,13 +90,13 @@ export class MyProfile implements OnInit {
       if(this.userId) {
         this.loading = true;
         this.userService.getUserById(this.userId).subscribe({
-          next: (user: any) => {
+          next: (user: { name: string; email: string; avatar?: string }) => {
             this.form.patchValue({
               name: user.name,
               email: user.email,
               avatar: user.avatar
             });
-            this.currentAvatar = user.avatar;
+            this.currentAvatar = user.avatar ?? null;
             this.loading = false;
             
             // 3. ACTUALIZAR VISTA MANUALMENTE
@@ -129,7 +128,7 @@ export class MyProfile implements OnInit {
       Authorization: `Bearer ${token}`
     });
 
-      this.http.get<any>(`${environment.apiUrl}/agents/my-rentals`, { headers }).subscribe({      
+      this.http.get<{ agents: unknown[] }>(`${environment.apiUrl}/agents/my-rentals`, { headers }).subscribe({
       next: (res) => {
         const agents = res?.agents || [];
         this.rentedAgentsCount = agents.length;
@@ -146,8 +145,8 @@ export class MyProfile implements OnInit {
     if(fileInput) fileInput.click();
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
+  onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
     
     if (file && this.userId) {
       if (file.size > 5 * 1024 * 1024) {
@@ -158,9 +157,8 @@ export class MyProfile implements OnInit {
       this.loading = true;
       
       this.userService.uploadAvatar(file).subscribe({
-        next: (res: any) => {
+        next: (res) => {
           const backendUrl = environment.apiUrl;
-          // Ajusta según lo que retorne tu backend (res.id es lo esperado)
           const newAvatarUrl = `${backendUrl}/files/${res.id}/download`; 
           
           console.log('Imagen subida. Nueva URL:', newAvatarUrl);
@@ -202,7 +200,7 @@ export class MyProfile implements OnInit {
     };
 
     this.userService.updateUser(this.userId, updateData).subscribe({
-      next: (res: any) => {
+      next: (res) => {
         if (res.token) {
           this.auth.setTokenFromOAuth(res.token);
         }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -18,11 +18,18 @@ import { NotificationDialogComponent } from '../login/popup-login';
   styleUrl: './register.scss'
 })
 export class Register implements OnInit {
+  private activatedRoute = inject(ActivatedRoute);
+  private fb = inject(FormBuilder);
+  private userService = inject(userService);
+  private location = inject(Location);
+  private auth = inject(AuthService);
+  private dialog = inject(MatDialog);
+
   form: FormGroup;
   private static emailUsedErrorHandled = false;
   private currentDialogRef?: MatDialogRef<NotificationDialogComponent>;
 
-  constructor(private activatedRoute: ActivatedRoute, private fb: FormBuilder, private userService: userService, private location: Location, private auth: AuthService, private dialog: MatDialog) {
+  constructor() {
     this.form = this.fb.group(
       {
       Nombre: ['', [Validators.required, Validators.minLength(2)]],

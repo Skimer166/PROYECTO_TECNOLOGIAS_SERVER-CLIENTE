@@ -29,7 +29,7 @@ describe('HomePage (Unitarias)', () => {
     component.agents = [
       { _id: '1', name: 'Agente Python', description: 'Code', category: 'programacion', language: 'es', modelVersion: 'v1', pricePerHour: 10, availability: true },
       { _id: '2', name: 'Agente Cocina', description: 'Food', category: 'otros', language: 'es', modelVersion: 'v1', pricePerHour: 10, availability: true }
-    ] as any;
+    ];
     
     fixture.detectChanges();
   });

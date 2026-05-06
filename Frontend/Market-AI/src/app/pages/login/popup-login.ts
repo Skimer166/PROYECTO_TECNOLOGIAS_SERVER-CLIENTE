@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -39,10 +39,9 @@ export interface NotificationDialogData {
   `]
 })
 export class NotificationDialogComponent {
-  constructor(
-    private dialogRef: MatDialogRef<NotificationDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: NotificationDialogData
-  ) {}
+  private dialogRef = inject<MatDialogRef<NotificationDialogComponent>>(MatDialogRef);
+  data = inject<NotificationDialogData>(MAT_DIALOG_DATA);
+
 
   close() {
     this.dialogRef.close();

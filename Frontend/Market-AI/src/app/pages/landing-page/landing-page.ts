@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Header } from '../../layouts/header/header';
 import { Footer } from '../../layouts/footer/footer';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,7 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-landing-page',
-  imports: [CommonModule, RouterLink, MatToolbarModule, MatButtonModule, MatIconModule, MatCardModule, Header, Footer],
+  imports: [RouterLink, MatToolbarModule, MatButtonModule, MatIconModule, MatCardModule, Header, Footer],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.scss'
 })
