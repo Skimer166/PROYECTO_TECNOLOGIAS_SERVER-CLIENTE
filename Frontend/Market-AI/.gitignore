@@ -44,3 +44,6 @@ Thumbs.db
 # Selenium test credentials (never commit)
 .env.selenium
 .env
+
+# Selenium test results
+/selenium-results
