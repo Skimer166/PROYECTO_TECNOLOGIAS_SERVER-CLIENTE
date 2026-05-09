@@ -1,4 +1,4 @@
-// Tests E2E — Guards & Routing (GR-01 a GR-07)
+// Tests E2E - Guards & Routing (GR-01 a GR-07)
 import { WebDriver, By } from 'selenium-webdriver';
 import { createDriver } from '../browser-factory';
 import {
@@ -49,7 +49,7 @@ describe('Guards & Routing (E2E)', () => {
   //           no requiere backend
   // Nota: guestOnlyGuard redirige a '/' que a su vez va a /landing-page
   // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir fuera de /login y /register al tener sesión activa', async () => {
+  it('Debe redirigir fuera de /login y /register al tener sesion activa', async () => {
     const guestRoutes = ['/login', '/register'];
 
     for (const route of guestRoutes) {
@@ -62,10 +62,10 @@ describe('Guards & Routing (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 3: Ruta raíz / redirige a /landing-page
+  // PRUEBA 3: Ruta raiz / redirige a /landing-page
   //           no requiere backend
   // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir de / a /landing-page automáticamente', async () => {
+  it('Debe redirigir de / a /landing-page automaticamente', async () => {
     await clearToken(driver);
     await driver.get(APP_URL + '/');
     await waitForUrl(driver, '/landing-page', NAV_TIMEOUT);
@@ -78,7 +78,7 @@ describe('Guards & Routing (E2E)', () => {
   //           no requiere backend
   // ──────────────────────────────────────────────────────────────
   it('Debe redirigir de /payment/cancel a /home-page', async () => {
-    // Navegar primero a landing-page para asegurar el dominio, luego poner token
+    // Navegar primero a landing-page para asegurar el dominio luego poner token
     await driver.get(APP_URL + '/landing-page');
     await setToken(driver, FAKE_USER_TOKEN);
     await driver.get(APP_URL + '/payment/cancel');
@@ -90,9 +90,9 @@ describe('Guards & Routing (E2E)', () => {
     }, NAV_TIMEOUT);
 
     const url = await driver.getCurrentUrl();
-    // El router redirige /payment/cancel → /home-page (redirectTo del router).
-    // Si el backend no está disponible el componente de home puede redirigir
-    // adicionalmente a /landing-page; ambos destinos son comportamiento válido.
+    // El router redirige /payment/cancel a /home-page (redirectTo del router)
+    // Si el backend no esta disponible el componente de home puede redirigir
+    // adicionalmente a /landing-page ambos destinos son comportamiento valido
     expect(url).not.toContain('/payment/cancel');
     expect(url.includes('/home-page') || url.includes('/landing-page')).toBe(true);
   });
@@ -100,10 +100,10 @@ describe('Guards & Routing (E2E)', () => {
   // ──────────────────────────────────────────────────────────────
   // PRUEBA 5: Ruta inexistente no provoca crash
   //           no requiere backend
-  // Nota: la app no define ruta comodín (**), Angular no redirige
-  // automáticamente; se verifica que la shell cargue sin error fatal
+  // Nota: la app no define ruta comodin (**) Angular no redirige
+  // automaticamente se verifica que la shell cargue sin error fatal
   // ──────────────────────────────────────────────────────────────
-  it('Debe manejar rutas inexistentes sin error fatal (404 o redirección)', async () => {
+  it('Debe manejar rutas inexistentes sin error fatal (404 o redireccion)', async () => {
     await clearToken(driver);
     await driver.get(APP_URL + '/ruta-inexistente-xyz');
     await sleep(1500);
@@ -121,20 +121,20 @@ describe('Guards & Routing (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 6: Token expirado — no requiere backend
-  // Nota: authActivateGuard solo verifica presencia del token,
-  // no valida la expiración del JWT. Este test documenta el
-  // comportamiento actual de la guarda de acceso.
+  // PRUEBA 6: Token expirado - no requiere backend
+  // Nota: authActivateGuard solo verifica presencia del token
+  // no valida la expiracion del JWT este test documenta el
+  // comportamiento actual de la guarda de acceso
   // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir a /login o permitir acceso con token expirado según implementación de guarda', async () => {
+  it('Debe redirigir a /login o permitir acceso con token expirado segun implementacion de guarda', async () => {
     await setToken(driver, EXPIRED_USER_TOKEN);
     await driver.get(APP_URL + '/home-page');
     await sleep(1500);
 
     const url = await driver.getCurrentUrl();
-    // Si la guarda valida expiración → redirige a /login (comportamiento esperado)
-    // Si la guarda solo verifica presencia → permanece en /home-page (comportamiento actual)
-    // Si AuthService detecta el token expirado y hace logout sin navegar → puede quedar en /landing-page
+    // Si la guarda valida expiracion redirige a /login (comportamiento esperado)
+    // Si la guarda solo verifica presencia permanece en /home-page (comportamiento actual)
+    // Si AuthService detecta el token expirado y hace logout sin navegar puede quedar en /landing-page
     expect(
       url.includes('/login') ||
       url.includes('/home-page') ||

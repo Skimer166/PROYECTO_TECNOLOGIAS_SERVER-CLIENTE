@@ -1,4 +1,4 @@
-// Tests E2E — Landing Page (LP-01 a LP-07)
+// Tests E2E - Landing Page (LP-01 a LP-07)
 import { WebDriver, By, until } from 'selenium-webdriver';
 import { createDriver } from '../browser-factory';
 import {
@@ -29,9 +29,9 @@ describe('Landing Page (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 1: La página carga correctamente — no requiere backend
+  // PRUEBA 1: La pagina carga correctamente - no requiere backend
   // ──────────────────────────────────────────────────────────────
-  it('Debe cargar la página y mostrar el hero con título y botones CTA', async () => {
+  it('Debe cargar la pagina y mostrar el hero con titulo y botones CTA', async () => {
     await clearToken(driver);
     await driver.get(APP_URL + '/landing-page');
 
@@ -49,9 +49,9 @@ describe('Landing Page (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 2: Botón "Entrar al panel" redirige — no requiere backend
+  // PRUEBA 2: Boton "Entrar al panel" redirige - no requiere backend
   // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir a /home-page al hacer clic en "Entrar al panel" con sesión activa', async () => {
+  it('Debe redirigir a /home-page al hacer clic en "Entrar al panel" con sesion activa', async () => {
     await setToken(driver, FAKE_USER_TOKEN);
     await driver.get(APP_URL + '/landing-page');
 
@@ -66,9 +66,9 @@ describe('Landing Page (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 3: Scroll hacia servicios — no requiere backend
+  // PRUEBA 3: Scroll hacia servicios - no requiere backend
   // ──────────────────────────────────────────────────────────────
-  it('Debe hacer scroll hacia la sección #servicios al hacer clic en "Ver servicios"', async () => {
+  it('Debe hacer scroll hacia la seccion #servicios al hacer clic en "Ver servicios"', async () => {
     await clearToken(driver);
     await driver.get(APP_URL + '/landing-page');
     await waitVisible(driver, By.css('section.hero'));
@@ -87,9 +87,9 @@ describe('Landing Page (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 4: 3 tarjetas en servicios — no requiere backend
+  // PRUEBA 4: 3 tarjetas en servicios - no requiere backend
   // ──────────────────────────────────────────────────────────────
-  it('Debe mostrar exactamente 3 tarjetas de características en la sección de servicios', async () => {
+  it('Debe mostrar exactamente 3 tarjetas de caracteristicas en la seccion de servicios', async () => {
     await clearToken(driver);
     await driver.get(APP_URL + '/landing-page');
     await waitVisible(driver, By.css('section.hero'));
@@ -101,9 +101,9 @@ describe('Landing Page (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 5: 3 pasos en "Cómo funciona" — no requiere backend
+  // PRUEBA 5: 3 pasos en "Como funciona" - no requiere backend
   // ──────────────────────────────────────────────────────────────
-  it('Debe mostrar exactamente 3 pasos en la sección "Cómo funciona"', async () => {
+  it('Debe mostrar exactamente 3 pasos en la seccion "Como funciona"', async () => {
     await clearToken(driver);
     await driver.get(APP_URL + '/landing-page');
     await waitVisible(driver, By.css('section.hero'));
@@ -115,9 +115,9 @@ describe('Landing Page (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 6: Botón CTA inferior navega — no requiere backend
+  // PRUEBA 6: Boton CTA inferior navega - no requiere backend
   // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir a /home-page o /login al hacer clic en el botón CTA inferior', async () => {
+  it('Debe redirigir a /home-page o /login al hacer clic en el boton CTA inferior', async () => {
     await clearToken(driver);
     await driver.get(APP_URL + '/landing-page');
     await waitVisible(driver, By.css('section.hero'));
@@ -139,9 +139,9 @@ describe('Landing Page (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 7: Responsive en móvil — no requiere backend
+  // PRUEBA 7: Responsive en movil - no requiere backend
   // ──────────────────────────────────────────────────────────────
-  it('No debe tener overflow horizontal en viewport móvil de 375 × 667', async () => {
+  it('No debe tener overflow horizontal en viewport movil de 375 x 667', async () => {
     await clearToken(driver);
 
     await driver.manage().window().setRect({ width: 375, height: 667 });
