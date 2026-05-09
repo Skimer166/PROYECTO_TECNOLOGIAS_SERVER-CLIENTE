@@ -5,7 +5,6 @@ import {
   APP_URL,
   TIMEOUT,
   NAV_TIMEOUT,
-  FAKE_USER_TOKEN,
   setToken,
   clearToken,
   waitVisible,
@@ -13,13 +12,56 @@ import {
   sleep,
 } from '../helpers';
 
+const BACKEND_URL  = process.env['BACKEND_URL']   ?? 'https://market-ai-api.onrender.com';
+const USER_EMAIL   = process.env['USER_EMAIL']    ?? '';
+const USER_PASSWORD = process.env['USER_PASSWORD'] ?? '';
+
+// Hace login real contra el backend y devuelve el token JWT
+async function loginAndGetToken(): Promise<string | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: USER_EMAIL, password: USER_PASSWORD }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json() as { token?: string };
+    return data.token ?? null;
+  } catch {
+    return null;
+  }
+}
+
 describe('Landing Page (E2E)', () => {
   let driver: WebDriver;
+  let backendAvailable = false;
+  let credentialsAvailable = false;
 
   beforeAll(async () => {
+    // Verificar si el backend está disponible
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      await fetch(`${BACKEND_URL}/auth/login`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      backendAvailable = true;
+    } catch {
+      backendAvailable = false;
+    }
+
+    credentialsAvailable = backendAvailable && !!USER_EMAIL && !!USER_PASSWORD;
+
+    if (!backendAvailable) {
+      console.warn('\nBackend no disponible. Las pruebas que requieren backend serán omitidas.\n');
+    } else if (!credentialsAvailable) {
+      console.warn('\nCredenciales no configuradas (USER_EMAIL / USER_PASSWORD). Las pruebas que requieren autenticación serán omitidas.\n');
+    } else {
+      console.log(`\nBackend disponible en ${BACKEND_URL}\n`);
+    }
+
     const { driver: d, browserUsed } = await createDriver();
     driver = d;
-    console.log(`\nNavegador detectado: ${browserUsed}\n`);
+    console.log(`Navegador detectado: ${browserUsed}\n`);
     await driver.get(APP_URL + '/landing-page');
     await clearToken(driver);
   }, 60_000);
@@ -49,10 +91,21 @@ describe('Landing Page (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 2: Botón "Entrar al panel" redirige — no requiere backend
+  // PRUEBA 2: Botón "Entrar al panel" redirige — requiere backend
   // ──────────────────────────────────────────────────────────────
   it('Debe redirigir a /home-page al hacer clic en "Entrar al panel" con sesión activa', async () => {
-    await setToken(driver, FAKE_USER_TOKEN);
+    if (!credentialsAvailable) {
+      console.warn('  Prueba omitida: credenciales de usuario no disponibles (USER_EMAIL / USER_PASSWORD).');
+      return;
+    }
+
+    const token = await loginAndGetToken();
+    if (!token) {
+      console.warn('  Prueba omitida: no se pudo obtener token del backend.');
+      return;
+    }
+
+    await setToken(driver, token);
     await driver.get(APP_URL + '/landing-page');
 
     const btn = await waitVisible(
