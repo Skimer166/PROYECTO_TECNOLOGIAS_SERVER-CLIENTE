@@ -1,7 +1,4 @@
-/**
- * Landing Page — LP-01 a LP-07
- * Ruta: /landing-page (pública, sin backend)
- */
+// Tests E2E — Landing Page (LP-01 a LP-07)
 import { WebDriver, By, until } from 'selenium-webdriver';
 import { createDriver } from '../browser-factory';
 import {
