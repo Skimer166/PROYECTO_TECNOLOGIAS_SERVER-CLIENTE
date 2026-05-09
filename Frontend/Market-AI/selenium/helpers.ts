@@ -6,17 +6,11 @@ export const NAV_TIMEOUT = 15_000;
 
 // ─── JWT helpers ──────────────────────────────────────────────────────────────
 
-function base64url(str: string): string {
-  return Buffer.from(str)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-}
-
+// Usa base64 estandar (no base64url) para que el componente pueda
+// decodificarlo con atob() del navegador sin lanzar excepcion
 export function makeJwt(payload: Record<string, unknown>): string {
-  const header = base64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const body   = base64url(JSON.stringify(payload));
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
+  const body   = Buffer.from(JSON.stringify(payload)).toString('base64');
   return `${header}.${body}.fakesig`;
 }
 
