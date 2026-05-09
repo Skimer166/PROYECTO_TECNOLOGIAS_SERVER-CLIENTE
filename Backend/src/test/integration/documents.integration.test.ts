@@ -1,4 +1,4 @@
-import { Readable, PassThrough } from 'stream';
+import { PassThrough } from 'stream';
 
 const mockDeleteObject = jest.fn();
 const mockGetObject = jest.fn();

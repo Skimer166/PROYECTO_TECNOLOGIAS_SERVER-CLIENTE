@@ -28,6 +28,12 @@ afterEach(async () => {
   for (const key in cols) await cols[key].deleteMany({});
 });
 
+function omit<T extends object>(obj: T, key: keyof T): Partial<T> {
+  const result = { ...obj };
+  delete result[key];
+  return result;
+}
+
 const validAgentBase = () => ({
   name: 'Agente Test',
   description: 'Descripción del agente',
@@ -97,8 +103,7 @@ describe('UserModel schema validation', () => {
   });
 
   it('requiere name', async () => {
-    const { name, ...withoutName } = validUserBase();
-    await expect(UserModel.create(withoutName)).rejects.toThrow();
+    await expect(UserModel.create(omit(validUserBase(), 'name'))).rejects.toThrow();
   });
 
   it('requiere email', async () => {
@@ -220,28 +225,23 @@ describe('AgentModel schema validation', () => {
   });
 
   it('requiere name', async () => {
-    const { name, ...withoutName } = validAgentBase();
-    await expect(AgentModel.create(withoutName)).rejects.toThrow();
+    await expect(AgentModel.create(omit(validAgentBase(), 'name'))).rejects.toThrow();
   });
 
   it('requiere description', async () => {
-    const { description, ...withoutDesc } = validAgentBase();
-    await expect(AgentModel.create(withoutDesc)).rejects.toThrow();
+    await expect(AgentModel.create(omit(validAgentBase(), 'description'))).rejects.toThrow();
   });
 
   it('requiere instructions', async () => {
-    const { instructions, ...withoutInstr } = validAgentBase();
-    await expect(AgentModel.create(withoutInstr)).rejects.toThrow();
+    await expect(AgentModel.create(omit(validAgentBase(), 'instructions'))).rejects.toThrow();
   });
 
   it('requiere modelVersion', async () => {
-    const { modelVersion, ...withoutModel } = validAgentBase();
-    await expect(AgentModel.create(withoutModel)).rejects.toThrow();
+    await expect(AgentModel.create(omit(validAgentBase(), 'modelVersion'))).rejects.toThrow();
   });
 
   it('requiere createdBy', async () => {
-    const { createdBy, ...withoutCreator } = validAgentBase();
-    await expect(AgentModel.create(withoutCreator)).rejects.toThrow();
+    await expect(AgentModel.create(omit(validAgentBase(), 'createdBy'))).rejects.toThrow();
   });
 
   it('timestamps: createdAt y updatedAt se establecen al crear', async () => {
@@ -289,28 +289,23 @@ describe('FileModel schema validation', () => {
   });
 
   it('requiere ownerId', async () => {
-    const { ownerId: _, ...withoutOwner } = validFileBase();
-    await expect(FileModel.create(withoutOwner)).rejects.toThrow();
+    await expect(FileModel.create(omit(validFileBase(), 'ownerId'))).rejects.toThrow();
   });
 
   it('requiere key', async () => {
-    const { key: _, ...withoutKey } = validFileBase();
-    await expect(FileModel.create(withoutKey)).rejects.toThrow();
+    await expect(FileModel.create(omit(validFileBase(), 'key'))).rejects.toThrow();
   });
 
   it('requiere bucket', async () => {
-    const { bucket: _, ...withoutBucket } = validFileBase();
-    await expect(FileModel.create(withoutBucket)).rejects.toThrow();
+    await expect(FileModel.create(omit(validFileBase(), 'bucket'))).rejects.toThrow();
   });
 
   it('requiere contentType', async () => {
-    const { contentType: _, ...withoutCT } = validFileBase();
-    await expect(FileModel.create(withoutCT)).rejects.toThrow();
+    await expect(FileModel.create(omit(validFileBase(), 'contentType'))).rejects.toThrow();
   });
 
   it('requiere size', async () => {
-    const { size: _, ...withoutSize } = validFileBase();
-    await expect(FileModel.create(withoutSize)).rejects.toThrow();
+    await expect(FileModel.create(omit(validFileBase(), 'size'))).rejects.toThrow();
   });
 
   it('key único — duplicado lanza error', async () => {

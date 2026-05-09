@@ -15,7 +15,7 @@ jest.mock('../app/mailer/controller', () => ({
 
 import { Request, Response } from 'express';
 import { rentAgent, releaseAgent, getMyRentedAgents, searchAgent } from '../app/agents/controller';
-import { verifyToken, verifyAdmin } from '../app/middlewares/auth';
+import { verifyAdmin } from '../app/middlewares/auth';
 import { UserModel } from '../app/users/model';
 import { AgentModel } from '../app/agents/model';
 
@@ -245,7 +245,7 @@ describe('releaseAgent()', () => {
 describe('verifyAdmin()', () => {
   it('401 — req.user es undefined', () => {
     const req = {} as Request;
-    const { res, status, json } = makeRes();
+    const { res, status } = makeRes();
     const next = jest.fn();
 
     verifyAdmin(req, res, next);

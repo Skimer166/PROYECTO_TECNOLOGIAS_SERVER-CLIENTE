@@ -109,7 +109,7 @@ describe('PUT /users/:id', () => {
   });
 
   it('409 — email ya en uso por otro usuario', async () => {
-    const user1 = await createUser({ email: 'u1@test.com', name: 'U1' });
+    await createUser({ email: 'u1@test.com', name: 'U1' });
     const user2 = await createUser({ email: 'u2@test.com', name: 'U2' });
 
     const res = await request(app)

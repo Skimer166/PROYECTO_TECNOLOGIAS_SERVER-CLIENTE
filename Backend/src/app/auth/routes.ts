@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { googleAuthController, googleCallbackController, login, forgotPassword, resetPassword, signup } from "./controller";
-import { sign } from "crypto";
 
 const router = Router();
 

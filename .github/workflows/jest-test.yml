@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: './Backend/package.json'
 
@@ -30,6 +30,11 @@ jobs:
         run: npm i
 
       - name: Run Jest tests
+        env:
+          S3_REGION: us-east-1
+          S3_ACCESS_KEY: test-access-key
+          S3_SECRET_KEY: test-secret-key
+          S3_BUCKET: test-bucket
         run: npx jest --i --coverage --passWithNoTests
 
       - name: Upload coverage report

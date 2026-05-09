@@ -421,7 +421,9 @@ describe('Auth Controller Unit Tests', () => {
       info?: { isNewUser?: boolean }
     ) => {
       passportMock.authenticate.mockImplementation(
-        (_strategy: string, _opts: unknown, callback: Function) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (_strategy: string, _opts: unknown, callback: (...args: any[]) => void) =>
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           (_req: Request, _res: Response, _next: import('express').NextFunction) =>
             callback(err, googleUser, info)
       );
