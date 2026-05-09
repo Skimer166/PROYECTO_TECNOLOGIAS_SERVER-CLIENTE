@@ -148,7 +148,7 @@ describe('UserModel schema validation', () => {
     const user = await UserModel.create(validUserBase());
     const after = new Date();
 
-    const raw = user.toObject() as Record<string, unknown>;
+    const raw = user.toObject() as unknown as Record<string, unknown>;
     expect(raw['createdAt']).toBeDefined();
     expect(new Date(raw['createdAt'] as string).getTime()).toBeGreaterThanOrEqual(before.getTime());
     expect(new Date(raw['createdAt'] as string).getTime()).toBeLessThanOrEqual(after.getTime());
@@ -247,7 +247,7 @@ describe('AgentModel schema validation', () => {
   it('timestamps: createdAt y updatedAt se establecen al crear', async () => {
     const before = new Date();
     const agent = await AgentModel.create(validAgentBase());
-    expect(new Date(agent.createdAt).getTime()).toBeGreaterThanOrEqual(before.getTime());
+    expect(new Date(agent.createdAt!).getTime()).toBeGreaterThanOrEqual(before.getTime());
   });
 
   it('updatedAt cambia después de una actualización', async () => {
@@ -258,8 +258,8 @@ describe('AgentModel schema validation', () => {
     agent.name = 'Modified Name';
     await agent.save();
 
-    expect(new Date(agent.updatedAt).getTime()).toBeGreaterThan(
-      new Date(originalUpdatedAt).getTime()
+    expect(new Date(agent.updatedAt!).getTime()).toBeGreaterThan(
+      new Date(originalUpdatedAt!).getTime()
     );
   });
 });

@@ -13,7 +13,7 @@ jest.mock('multer', () => {
 });
 
 jest.mock('multer-s3', () => {
-  const multerS3Fn = jest.fn().mockReturnValue({});
+  const multerS3Fn = jest.fn().mockReturnValue({}) as jest.Mock & { AUTO_CONTENT_TYPE: jest.Mock };
   multerS3Fn.AUTO_CONTENT_TYPE = jest.fn();
   return multerS3Fn;
 });
@@ -154,7 +154,7 @@ describe('Storage (S3) Unit Tests', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const multerMock = require('multer') as jest.Mock;
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const multerS3Mock = require('multer-s3') as jest.Mock;
+    const multerS3Mock = require('multer-s3') as jest.Mock & { AUTO_CONTENT_TYPE: jest.Mock };
 
     beforeEach(() => {
       // resetMocks/restoreMocks clear implementations; re-apply so multer() returns a usable object
