@@ -43,3 +43,6 @@ Thumbs.db
 
 # Selenium test results
 /selenium-results
+
+# Variables de entorno — credenciales locales, no subir a GitHub
+.env
