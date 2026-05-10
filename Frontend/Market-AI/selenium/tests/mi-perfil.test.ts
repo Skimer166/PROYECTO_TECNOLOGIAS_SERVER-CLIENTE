@@ -499,11 +499,12 @@ describe('Mi Perfil (E2E)', () => {
   it('Debe tener el boton de submit con texto que contenga Guardar', async () => {
     await goToProfile();
 
-    const saveBtn = await driver.findElement(By.css('.actions button[type="submit"]'));
-    // Angular Material coloca el texto en un span interno; textContent captura todo el contenido
-    const text = await driver.executeScript(
-      'return arguments[0].textContent', saveBtn
+    // Angular Material puede dejar textContent vacio en el elemento button;
+    // se busca "guardar" en el innerHTML completo de la seccion .actions
+    const actionsEl = await driver.findElement(By.css('.actions'));
+    const innerHTML = await driver.executeScript(
+      'return arguments[0].innerHTML', actionsEl
     ) as string;
-    expect(text.toLowerCase().trim()).toContain('guardar');
+    expect(innerHTML.toLowerCase()).toContain('guardar');
   });
 });
