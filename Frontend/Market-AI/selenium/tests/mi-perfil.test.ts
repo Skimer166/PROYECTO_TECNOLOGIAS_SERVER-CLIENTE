@@ -499,8 +499,16 @@ describe('Mi Perfil (E2E)', () => {
   it('Debe tener el boton de submit con texto que contenga Guardar', async () => {
     await goToProfile();
 
-    // Angular Material puede dejar textContent vacio en el elemento button;
-    // se busca "guardar" en el innerHTML completo de la seccion .actions
+    // El boton muestra mat-spinner mientras loadUserProfile() esta en vuelo.
+    // Esperar a que el spinner desaparezca para poder leer el texto "Guardar".
+    await driver.wait(async () => {
+      try {
+        const el = await driver.findElement(By.css('.actions'));
+        const html = await driver.executeScript('return arguments[0].innerHTML', el) as string;
+        return !(html as string).includes('mat-spinner');
+      } catch { return false; }
+    }, TIMEOUT);
+
     const actionsEl = await driver.findElement(By.css('.actions'));
     const innerHTML = await driver.executeScript(
       'return arguments[0].innerHTML', actionsEl
