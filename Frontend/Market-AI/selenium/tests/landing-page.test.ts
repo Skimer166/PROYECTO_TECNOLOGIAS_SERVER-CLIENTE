@@ -336,22 +336,22 @@ describe('Landing Page (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 20: El boton "Entrar al panel" no aparece sin sesion - no requiere backend
+  // PRUEBA 20: El boton "Entrar al panel" sin sesion redirige a /login - no requiere backend
+  // Nota: el boton es siempre visible; sin sesion navega a /login en lugar de /home-page
   // ──────────────────────────────────────────────────────────────
-  it('No debe mostrar el boton Entrar al panel cuando no hay sesion activa', async () => {
+  it('Debe redirigir a /login al hacer clic en "Entrar al panel" sin sesion activa', async () => {
     await clearToken(driver);
     await driver.get(APP_URL + '/landing-page');
     await waitVisible(driver, By.css('section.hero'));
 
-    const panelBtns = await driver.findElements(
+    const panelBtn = await waitVisible(
+      driver,
       By.xpath('//section[contains(@class,"hero")]//button[contains(.,"Entrar al panel")]')
     );
-    if (panelBtns.length > 0) {
-      // Si el boton existe, debe estar oculto o no visible
-      expect(await panelBtns[0].isDisplayed()).toBe(false);
-    } else {
-      expect(panelBtns.length).toBe(0);
-    }
+    await panelBtn.click();
+
+    await waitForUrl(driver, '/login', NAV_TIMEOUT);
+    expect(await driver.getCurrentUrl()).toContain('/login');
   });
 
   // ──────────────────────────────────────────────────────────────
