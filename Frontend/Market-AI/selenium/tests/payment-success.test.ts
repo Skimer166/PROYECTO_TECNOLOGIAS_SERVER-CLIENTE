@@ -3,7 +3,6 @@ import { WebDriver, By } from 'selenium-webdriver';
 import { createDriver } from '../browser-factory';
 import {
   APP_URL,
-  TIMEOUT,
   NAV_TIMEOUT,
   FAKE_USER_TOKEN,
   setToken,
