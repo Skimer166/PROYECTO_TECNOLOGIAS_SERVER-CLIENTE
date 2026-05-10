@@ -1,4 +1,4 @@
-// Tests E2E - Landing Page (LP-01 a LP-07)
+// Tests E2E - Landing Page (LP-01 a LP-22)
 import { WebDriver, By, until } from 'selenium-webdriver';
 import { createDriver } from '../browser-factory';
 import {
@@ -153,7 +153,237 @@ describe('Landing Page (E2E)', () => {
 
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 5);
 
-    // Restaurar ventana normal
     await driver.manage().window().setRect({ width: 1280, height: 800 });
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 8: El h1 del hero tiene texto no vacio - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el h1 del hero con texto no vacio', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const h1 = await driver.findElement(By.css('section.hero h1'));
+    const text = await h1.getText();
+    expect(text.length).toBeGreaterThan(0);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 9: El header es visible - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe mostrar el header de la aplicacion en la pagina', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const headers = await driver.findElements(By.css('app-header'));
+    expect(headers.length).toBeGreaterThan(0);
+    if (headers.length > 0) {
+      expect(await headers[0].isDisplayed()).toBe(true);
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 10: Boton "Ver servicios" tiene texto correcto - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe existir el enlace Ver servicios con texto que contenga "servicios"', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const link = await driver.findElement(
+      By.xpath('//a[contains(.,"Ver servicios")] | //button[contains(.,"Ver servicios")]')
+    );
+    const text = await link.getText();
+    expect(text.toLowerCase()).toContain('servicios');
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 11: Las 3 cards de caracteristicas tienen titulo visible - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe mostrar titulo visible en cada tarjeta de caracteristicas', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await driver.wait(until.elementLocated(By.css('.feature')), TIMEOUT);
+
+    const features = await driver.findElements(By.css('.feature'));
+    expect(features.length).toBe(3);
+
+    for (const feature of features) {
+      const headings = await feature.findElements(By.css('h2, h3, h4, strong, .title'));
+      let hasTitle = false;
+      for (const h of headings) {
+        const text = await h.getText();
+        if (text.length > 0) { hasTitle = true; break; }
+      }
+      expect(hasTitle).toBe(true);
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 12: Las 3 cards de caracteristicas tienen descripcion visible - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe mostrar descripcion visible en cada tarjeta de caracteristicas', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await driver.wait(until.elementLocated(By.css('.feature')), TIMEOUT);
+
+    const features = await driver.findElements(By.css('.feature'));
+    expect(features.length).toBe(3);
+
+    for (const feature of features) {
+      const paras = await feature.findElements(By.css('p, span'));
+      let hasDesc = false;
+      for (const p of paras) {
+        const text = await p.getText();
+        if (text.length > 0) { hasDesc = true; break; }
+      }
+      expect(hasDesc).toBe(true);
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 13: La seccion "Como funciona" es visible - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe mostrar la seccion Como funciona con al menos un paso visible', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await driver.wait(until.elementLocated(By.css('.step')), TIMEOUT);
+
+    const firstStep = await driver.findElement(By.css('.step'));
+    expect(await firstStep.isDisplayed()).toBe(true);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 14: La seccion CTA inferior tiene al menos un boton - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe existir al menos un boton o enlace en la seccion CTA inferior', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const ctaSection = await driver.findElement(By.css('section.cta'));
+    const buttons = await ctaSection.findElements(By.css('button, a'));
+    expect(buttons.length).toBeGreaterThan(0);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 15: El footer es visible - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe mostrar el footer al final de la pagina', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const footers = await driver.findElements(By.css('app-footer, footer'));
+    expect(footers.length).toBeGreaterThan(0);
+    if (footers.length > 0) {
+      expect(await footers[0].isDisplayed()).toBe(true);
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 16: La URL raiz redirige a /landing-page - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe redirigir de la ruta raiz a /landing-page automaticamente', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/');
+    await waitForUrl(driver, '/landing-page', NAV_TIMEOUT);
+    expect(await driver.getCurrentUrl()).toContain('/landing-page');
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 17: El titulo del documento no esta vacio - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el titulo del documento no vacio en /landing-page', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const title = await driver.getTitle();
+    expect(title.length).toBeGreaterThan(0);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 18: Sin overflow horizontal en 1280px - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('No debe tener overflow horizontal en viewport de 1280 x 800', async () => {
+    await clearToken(driver);
+    await driver.manage().window().setRect({ width: 1280, height: 800 });
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const scrollWidth = await driver.executeScript('return document.documentElement.scrollWidth') as number;
+    const clientWidth = await driver.executeScript('return document.documentElement.clientWidth') as number;
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 5);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 19: Responsive en tablet 768px - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('No debe tener overflow horizontal en viewport de tablet 768 x 1024', async () => {
+    await clearToken(driver);
+    await driver.manage().window().setRect({ width: 768, height: 1024 });
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const scrollWidth = await driver.executeScript('return document.documentElement.scrollWidth') as number;
+    const clientWidth = await driver.executeScript('return document.documentElement.clientWidth') as number;
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 5);
+
+    await driver.manage().window().setRect({ width: 1280, height: 800 });
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 20: El boton "Entrar al panel" no aparece sin sesion - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('No debe mostrar el boton Entrar al panel cuando no hay sesion activa', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const panelBtns = await driver.findElements(
+      By.xpath('//section[contains(@class,"hero")]//button[contains(.,"Entrar al panel")]')
+    );
+    if (panelBtns.length > 0) {
+      // Si el boton existe, debe estar oculto o no visible
+      expect(await panelBtns[0].isDisplayed()).toBe(false);
+    } else {
+      expect(panelBtns.length).toBe(0);
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 21: Los botones del hero son elementos nativos accesibles - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener botones o enlaces nativos en el hero accesibles por teclado', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const heroBtns = await driver.findElements(
+      By.xpath('//section[contains(@class,"hero")]//button | //section[contains(@class,"hero")]//a')
+    );
+    expect(heroBtns.length).toBeGreaterThan(0);
+
+    for (const btn of heroBtns) {
+      const tag = await btn.getTagName();
+      expect(['button', 'a'].includes(tag)).toBe(true);
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 22: La seccion hero tiene al menos 2 botones CTA - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe existir al menos 2 botones o enlaces CTA en la seccion hero', async () => {
+    await clearToken(driver);
+    await driver.get(APP_URL + '/landing-page');
+    await waitVisible(driver, By.css('section.hero'));
+
+    const heroBtns = await driver.findElements(
+      By.xpath('//section[contains(@class,"hero")]//button | //section[contains(@class,"hero")]//a')
+    );
+    expect(heroBtns.length).toBeGreaterThanOrEqual(2);
   });
 });

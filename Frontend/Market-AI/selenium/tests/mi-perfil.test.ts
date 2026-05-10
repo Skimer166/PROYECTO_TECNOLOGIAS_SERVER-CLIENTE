@@ -1,4 +1,4 @@
-// Tests E2E - Mi Perfil (MP-01 a MP-13)
+// Tests E2E - Mi Perfil (MP-01 a MP-22)
 import { WebDriver, By, until } from 'selenium-webdriver';
 import { createDriver } from '../browser-factory';
 import {
@@ -166,6 +166,8 @@ describe('Mi Perfil (E2E)', () => {
     await nameInput.sendKeys('Victoria Test');
 
     const saveBtn = await driver.findElement(By.css('.actions button[type="submit"]'));
+    // Esperar que Angular habilite el boton (zoneless CD no actualiza instantaneamente)
+    await driver.wait(async () => (await saveBtn.getAttribute('disabled')) === null, TIMEOUT);
     await saveBtn.click();
 
     await driver.wait(
@@ -223,6 +225,8 @@ describe('Mi Perfil (E2E)', () => {
     await nameInput.sendKeys('Victoria Test');
 
     const saveBtn = await driver.findElement(By.css('.actions button[type="submit"]'));
+    // Esperar que Angular habilite el boton (zoneless CD no actualiza instantaneamente)
+    await driver.wait(async () => (await saveBtn.getAttribute('disabled')) === null, TIMEOUT);
     await saveBtn.click();
 
     await driver.wait(until.elementLocated(By.css('mat-dialog-container')), TIMEOUT);
@@ -369,5 +373,128 @@ describe('Mi Perfil (E2E)', () => {
     await driver.get(APP_URL + '/mi-perfil');
     await waitForUrl(driver, '/login', NAV_TIMEOUT);
     expect(await driver.getCurrentUrl()).toContain('/login');
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 14: Campo nombre muestra error con menos de 2 caracteres - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe mostrar error de validacion cuando el nombre tiene menos de 2 caracteres', async () => {
+    await goToProfile();
+
+    const nameInput = await waitVisible(
+      driver,
+      By.xpath('//mat-label[contains(.,"Nombre")]/ancestor::mat-form-field//input')
+    );
+    await nameInput.clear();
+    await nameInput.sendKeys('A');
+
+    // Enfocar otro elemento para disparar la validacion del formulario
+    await driver.findElement(By.css('.profile-card')).click();
+    await sleep(500);
+
+    // Verificar error a traves del mat-error visible O del boton deshabilitado
+    const matErrors = await driver.findElements(By.css('mat-error'));
+    const saveBtn = await driver.findElement(By.css('.actions button[type="submit"]'));
+    const isBtnDisabled = await saveBtn.getAttribute('disabled');
+
+    const hasError = matErrors.length > 0 || isBtnDisabled !== null;
+    expect(hasError).toBe(true);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 15: El campo email contiene el simbolo @ - no requiere backend
+  // El FAKE_USER_TOKEN tiene email: 'vicky@test.com' en su payload
+  // ──────────────────────────────────────────────────────────────
+  it('Debe mostrar el email del usuario con el simbolo @ en el campo email', async () => {
+    await goToProfile();
+
+    const emailInput = await waitVisible(
+      driver,
+      By.xpath('//mat-label[contains(.,"Correo")]/ancestor::mat-form-field//input')
+    );
+    const emailValue = await emailInput.getAttribute('value');
+    expect(emailValue).toContain('@');
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 16: El input de archivo acepta solo imagenes - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el input de archivo con atributo accept igual a image/*', async () => {
+    await goToProfile();
+
+    const fileInput = await driver.findElement(By.id('avatarInput'));
+    expect(await fileInput.getAttribute('accept')).toBe('image/*');
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 17: La seccion de estadisticas tiene exactamente 2 stat-items - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe mostrar exactamente 2 elementos stat-item en la seccion de estadisticas', async () => {
+    await goToProfile();
+
+    const statsRow = await waitVisible(driver, By.css('.stats-row'));
+    const statItems = await statsRow.findElements(By.css('.stat-item'));
+    expect(statItems.length).toBe(2);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 18: El segundo stat-item muestra "Estado de Cuenta" - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe mostrar Estado de Cuenta en el segundo stat-item de estadisticas', async () => {
+    await goToProfile();
+
+    const statItems = await driver.findElements(By.css('.stats-row .stat-item'));
+    expect(statItems.length).toBeGreaterThanOrEqual(2);
+
+    const secondItemText = await statItems[1].getText();
+    expect(secondItemText.toLowerCase()).toContain('estado');
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 19: El componente tiene app-header visible - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener app-header visible en la pagina de perfil', async () => {
+    await goToProfile();
+
+    const headers = await driver.findElements(By.css('app-header'));
+    expect(headers.length).toBeGreaterThan(0);
+    if (headers.length > 0) {
+      expect(await headers[0].isDisplayed()).toBe(true);
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 20: El componente tiene app-footer visible - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener app-footer visible en la pagina de perfil', async () => {
+    await goToProfile();
+
+    const footers = await driver.findElements(By.css('app-footer, footer'));
+    expect(footers.length).toBeGreaterThan(0);
+    if (footers.length > 0) {
+      expect(await footers[0].isDisplayed()).toBe(true);
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 21: El h2 de la pagina dice "Mi Perfil" - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe mostrar Mi Perfil en el h2 dentro de profile-card', async () => {
+    await goToProfile();
+
+    const h2 = await driver.findElement(By.css('.profile-card h2'));
+    const text = await h2.getText();
+    expect(text.toLowerCase()).toMatch(/mi\s*perfil/);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 22: El boton Guardar tiene el texto correcto - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el boton de submit con texto que contenga Guardar', async () => {
+    await goToProfile();
+
+    const saveBtn = await driver.findElement(By.css('.actions button[type="submit"]'));
+    const text = await saveBtn.getText();
+    expect(text.toLowerCase()).toContain('guardar');
   });
 });
