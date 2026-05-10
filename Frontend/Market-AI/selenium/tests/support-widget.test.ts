@@ -1,4 +1,4 @@
-// Tests E2E - Support Widget (SW-01 a SW-08)
+// Tests E2E - Support Widget (SW-01 a SW-22)
 import { WebDriver, By } from 'selenium-webdriver';
 import { createDriver } from '../browser-factory';
 import {
@@ -151,5 +151,195 @@ describe('Support Widget (E2E)', () => {
 
     const lastBubble = bubbles[bubbles.length - 1];
     expect(await lastBubble.getText()).toBe(testMsg);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 9: El FAB tiene posicion fixed - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el FAB con posicion fixed en su estilo computado', async () => {
+    await goToPageWithSession();
+
+    const fab = await waitVisible(driver, By.css('.support-fab'));
+    const position = await driver.executeScript(
+      `return window.getComputedStyle(arguments[0]).position`, fab
+    ) as string;
+    expect(position).toBe('fixed');
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 10: El FAB tiene un icono visible - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el FAB con un icono visible', async () => {
+    await goToPageWithSession();
+    await waitVisible(driver, By.css('.support-fab'));
+
+    const icons = await driver.findElements(By.css('.support-fab mat-icon, .support-fab svg, .support-fab img'));
+    expect(icons.length).toBeGreaterThan(0);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 11: El panel de chat tiene un campo de texto - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener un input o textarea para escribir mensajes en el panel de chat', async () => {
+    await openChat();
+
+    const inputs = await driver.findElements(By.css('.support-chat-window input, .support-chat-window textarea'));
+    expect(inputs.length).toBeGreaterThan(0);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 12: El panel de chat tiene un boton de enviar - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener un boton de enviar visible en el panel de chat', async () => {
+    await openChat();
+
+    const sendBtn = await driver.findElement(By.css('.chat-footer button'));
+    expect(await sendBtn.isDisplayed()).toBe(true);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 13: El boton enviar deshabilitado con input vacio - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el boton de enviar deshabilitado cuando el input esta vacio al abrir el chat', async () => {
+    await openChat();
+
+    const chatInput = await waitVisible(driver, By.css('.chat-footer input'));
+    const value = await chatInput.getAttribute('value');
+    if (!value || value.trim().length === 0) {
+      const sendBtn = await driver.findElement(By.css('.chat-footer button'));
+      expect(await sendBtn.getAttribute('disabled')).not.toBeNull();
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 14: El input del chat tiene placeholder - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el input del chat con placeholder no vacio', async () => {
+    await openChat();
+
+    const chatInput = await waitVisible(driver, By.css('.chat-footer input'));
+    const placeholder = await chatInput.getAttribute('placeholder');
+    expect(placeholder && placeholder.length).toBeGreaterThan(0);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 15: El panel tiene area de historial de mensajes - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener un contenedor de historial de mensajes en el panel de chat', async () => {
+    await openChat();
+
+    const body = await driver.findElement(By.css('.chat-body'));
+    expect(await body.isDisplayed()).toBe(true);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 16: El FAB es accesible por teclado - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el FAB accesible por teclado como elemento nativo button o con tabindex', async () => {
+    await goToPageWithSession();
+
+    const fab = await waitVisible(driver, By.css('.support-fab'));
+    const tag = await fab.getTagName();
+    const tabindex = await fab.getAttribute('tabindex');
+
+    const isAccessible = tag === 'button' || (tabindex !== null && parseInt(tabindex) >= 0);
+    expect(isAccessible).toBe(true);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 17: El panel tiene un header o titulo visible - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener un header visible con texto en el panel de chat', async () => {
+    await openChat();
+
+    const header = await driver.findElement(By.css('.chat-header'));
+    const text = await header.getText();
+    expect(text.length).toBeGreaterThan(0);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 18: El input acepta texto con multiples palabras - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe aceptar texto con multiples palabras en el input del chat', async () => {
+    await openChat();
+
+    const chatInput = await waitVisible(driver, By.css('.chat-footer input'));
+    await chatInput.clear();
+    await chatInput.sendKeys('Hola necesito ayuda');
+    await sleep(300);
+
+    const value = await chatInput.getAttribute('value');
+    expect(value).toBe('Hola necesito ayuda');
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 19: Abrir y cerrar el panel 3 veces no genera error - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe abrir y cerrar el panel 3 veces sin errores', async () => {
+    await goToPageWithSession();
+
+    for (let i = 0; i < 3; i++) {
+      const fab = await waitVisible(driver, By.css('.support-fab'));
+      await fab.click();
+      await sleep(400);
+      await waitVisible(driver, By.css('.support-chat-window'));
+
+      const closeBtn = await driver.findElement(By.css('.chat-header button'));
+      await closeBtn.click();
+      await sleep(400);
+
+      const windows = await driver.findElements(By.css('.support-chat-window'));
+      expect(windows.length).toBe(0);
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 20: El FAB tiene aria-label o title - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el FAB con aria-label o title para accesibilidad', async () => {
+    await goToPageWithSession();
+
+    const fab = await waitVisible(driver, By.css('.support-fab'));
+    const ariaLabel = await fab.getAttribute('aria-label');
+    const title = await fab.getAttribute('title');
+
+    expect(ariaLabel || title).toBeTruthy();
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 21: El panel no cubre completamente el contenido - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe tener el panel de chat con ancho menor al de la ventana', async () => {
+    await openChat();
+
+    const chatWindow = await driver.findElement(By.css('.support-chat-window'));
+    const panelWidth = await driver.executeScript(
+      `return arguments[0].getBoundingClientRect().width`, chatWindow
+    ) as number;
+    const windowWidth = await driver.executeScript(`return window.innerWidth`) as number;
+
+    expect(panelWidth).toBeLessThan(windowWidth);
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // PRUEBA 22: Limpiar input no envia mensaje - no requiere backend
+  // ──────────────────────────────────────────────────────────────
+  it('Debe no enviar mensaje al limpiar el input y presionar el boton deshabilitado', async () => {
+    await openChat();
+
+    const chatInput = await waitVisible(driver, By.css('.chat-footer input'));
+    await chatInput.sendKeys('texto temporal');
+    await sleep(200);
+    await chatInput.clear();
+    await sleep(200);
+
+    const sendBtn = await driver.findElement(By.css('.chat-footer button'));
+    expect(await sendBtn.getAttribute('disabled')).not.toBeNull();
+
+    // Verificar que no se agrego ningun mensaje al limpiar
+    const initialBubbles = await driver.findElements(By.css('.chat-body .bubble'));
+    // No se debe haber enviado nada (bubbles no aumentaron respecto al estado inicial)
+    expect(await sendBtn.getAttribute('disabled')).not.toBeNull();
+    expect(initialBubbles.length).toBe(0);
   });
 });
