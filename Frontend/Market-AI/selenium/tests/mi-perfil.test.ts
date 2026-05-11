@@ -35,7 +35,7 @@ describe('Mi Perfil (E2E)', () => {
     }
     console.log(`Backend disponible: ${backendAvailable}\n`);
 
-    // Intentar login real con credenciales del .env para tests [BE]
+    // Intentar login real con credenciales del .env para tests [Requiere Backend activo]
     const email    = process.env['USER_EMAIL'];
     const password = process.env['USER_PASSWORD'];
     if (backendAvailable && email && password) {
@@ -71,7 +71,7 @@ describe('Mi Perfil (E2E)', () => {
 
   // Navega a /mi-perfil con sesion activa y espera que cargue la tarjeta.
   //
-  // La app usa SSR (outputMode: server): el servidor no puede leer localStorage,
+  // La app usa Server Side Rendering (outputMode: server): el servidor no puede leer localStorage,
   // por lo que el guard redirige a /login y el guestOnlyGuard del cliente termina
   // en /landing-page. Para evitarlo, se usa history.pushState + popstate que
   // navega dentro del router de Angular en el cliente (sin peticion HTTP al servidor).
@@ -109,7 +109,7 @@ describe('Mi Perfil (E2E)', () => {
   }
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 1: Carga correcta del perfil [BE]
+  // PRUEBA 1: Carga correcta del perfil [Requiere Backend activo]
   // ──────────────────────────────────────────────────────────────
   it('Debe cargar avatar nombre email y contador de agentes al navegar a /mi-perfil', async () => {
     if (!backendAvailable) { console.warn('SKIP MP-01: backend no disponible'); return; }
@@ -151,7 +151,7 @@ describe('Mi Perfil (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 3: Edicion de nombre exitosa [BE]
+  // PRUEBA 3: Edicion de nombre exitosa [Requiere Backend activo]
   // ──────────────────────────────────────────────────────────────
   it('Debe guardar el nuevo nombre y mostrar notificacion de exito', async () => {
     if (!backendAvailable) { console.warn('SKIP MP-03: backend no disponible'); return; }
@@ -166,7 +166,7 @@ describe('Mi Perfil (E2E)', () => {
     await nameInput.sendKeys('Victoria Test');
 
     const saveBtn = await driver.findElement(By.css('.actions button[type="submit"]'));
-    // Esperar que Angular habilite el boton (zoneless CD no actualiza instantaneamente)
+    // Esperar que Angular habilite el boton (deteccion de cambios zoneless de Angular no actualiza instantaneamente)
     await driver.wait(async () => (await saveBtn.getAttribute('disabled')) === null, TIMEOUT);
     await saveBtn.click();
 
@@ -181,7 +181,7 @@ describe('Mi Perfil (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 4: Boton Guardar deshabilitado si formulario no cambio [BE]
+  // PRUEBA 4: Boton Guardar deshabilitado si formulario no cambio [Requiere Backend activo]
   // ──────────────────────────────────────────────────────────────
   it('Debe tener el boton Guardar deshabilitado cuando el formulario no ha sido modificado', async () => {
     if (!backendAvailable) { console.warn('SKIP MP-04: backend no disponible'); return; }
@@ -197,16 +197,30 @@ describe('Mi Perfil (E2E)', () => {
   // ──────────────────────────────────────────────────────────────
   it('Debe deshabilitar el boton Guardar cuando el nombre tiene menos de 2 caracteres', async () => {
     await goToProfile();
+    // Esperar que el backend responda y patchValue llene el formulario antes de manipularlo.
+    // goToProfile() solo espera que aparezca .profile-card (el shell HTML), pero el backend
+    // puede responder despues. Si manipulamos el input antes de que patchValue sea llamado,
+    // el backend sobreescribe nuestro valor y el formulario queda valido, dejando el boton habilitado.
+    await sleep(1500);
 
     const nameInput = await waitVisible(
       driver,
       By.xpath('//mat-label[contains(.,"Nombre")]/ancestor::mat-form-field//input')
     );
-    await nameInput.clear();
-    await nameInput.sendKeys('A');
+    // Usar executeScript para reemplazar el valor y disparar eventos Angular correctamente.
+    // clear() + sendKeys() no funciona con formularios reactivos en Edge porque clear()
+    // no despacha el evento input y sendKeys concatena al valor anterior.
+    await driver.executeScript(`
+      const el = arguments[0];
+      el.value = 'A';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    `, nameInput);
+    await sleep(500);
 
     const saveBtn = await driver.findElement(By.css('.actions button[type="submit"]'));
-    expect(await saveBtn.getAttribute('disabled')).not.toBeNull();
+    const isDisabled = await driver.executeScript(`return arguments[0].disabled`, saveBtn) as boolean;
+    expect(isDisabled).toBe(true);
   });
 
   // ──────────────────────────────────────────────────────────────
@@ -225,7 +239,7 @@ describe('Mi Perfil (E2E)', () => {
     await nameInput.sendKeys('Victoria Test');
 
     const saveBtn = await driver.findElement(By.css('.actions button[type="submit"]'));
-    // Esperar que Angular habilite el boton (zoneless CD no actualiza instantaneamente)
+    // Esperar que Angular habilite el boton (deteccion de cambios zoneless de Angular no actualiza instantaneamente)
     await driver.wait(async () => (await saveBtn.getAttribute('disabled')) === null, TIMEOUT);
     await saveBtn.click();
 
@@ -254,7 +268,7 @@ describe('Mi Perfil (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 8: Upload de avatar exitoso [BE]
+  // PRUEBA 8: Upload de avatar exitoso [Requiere Backend activo]
   // Requiere TEST_IMAGE_PATH en .env apuntando a una imagen de prueba
   // ──────────────────────────────────────────────────────────────
   it('Debe actualizar el avatar visualmente al subir una imagen valida', async () => {
@@ -285,7 +299,7 @@ describe('Mi Perfil (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 9: Preview del avatar se actualiza inmediatamente [BE]
+  // PRUEBA 9: Preview del avatar se actualiza inmediatamente [Requiere Backend activo]
   // Requiere TEST_IMAGE_PATH en .env apuntando a una imagen de prueba
   // ──────────────────────────────────────────────────────────────
   it('Debe mostrar preview del nuevo avatar al seleccionar el archivo', async () => {
@@ -338,7 +352,7 @@ describe('Mi Perfil (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 11: Contador de agentes rentados se muestra [BE]
+  // PRUEBA 11: Contador de agentes rentados se muestra [Requiere Backend activo]
   // ──────────────────────────────────────────────────────────────
   it('Debe mostrar el numero de agentes rentados en la seccion de estadisticas', async () => {
     if (!backendAvailable) { console.warn('SKIP MP-11: backend no disponible'); return; }
@@ -380,24 +394,37 @@ describe('Mi Perfil (E2E)', () => {
   // ──────────────────────────────────────────────────────────────
   it('Debe mostrar error de validacion cuando el nombre tiene menos de 2 caracteres', async () => {
     await goToProfile();
+    // Esperar que el backend responda y patchValue llene el formulario antes de manipularlo.
+    // Si el backend sobreescribe el valor 'A' con el nombre real despues de nuestra intervencion,
+    // el formulario queda valido y no hay error visible ni boton deshabilitado.
+    await sleep(1500);
 
     const nameInput = await waitVisible(
       driver,
       By.xpath('//mat-label[contains(.,"Nombre")]/ancestor::mat-form-field//input')
     );
-    await nameInput.clear();
-    await nameInput.sendKeys('A');
+    // Usar executeScript para reemplazar el valor y disparar eventos Angular correctamente.
+    // clear() + sendKeys() concatena al valor anterior en Edge con formularios reactivos.
+    await driver.executeScript(`
+      const el = arguments[0];
+      el.value = 'A';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    `, nameInput);
 
     // Enfocar otro elemento para disparar la validacion del formulario
     await driver.findElement(By.css('.profile-card')).click();
     await sleep(500);
 
-    // Verificar error a traves del mat-error visible O del boton deshabilitado
+    // Verificar error a traves del mat-error visible O del boton deshabilitado.
+    // El template solo muestra mat-error para el validador 'required' (campo vacio),
+    // no para 'minLength'. Con valor 'A', no hay mat-error visible pero el boton
+    // si debe estar deshabilitado porque form.invalid es true (minLength falla).
     const matErrors = await driver.findElements(By.css('mat-error'));
     const saveBtn = await driver.findElement(By.css('.actions button[type="submit"]'));
-    const isBtnDisabled = await saveBtn.getAttribute('disabled');
+    const isDisabled = await driver.executeScript(`return arguments[0].disabled`, saveBtn) as boolean;
 
-    const hasError = matErrors.length > 0 || isBtnDisabled !== null;
+    const hasError = matErrors.length > 0 || isDisabled;
     expect(hasError).toBe(true);
   });
 

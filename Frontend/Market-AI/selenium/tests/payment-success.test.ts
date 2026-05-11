@@ -41,7 +41,7 @@ describe('Payment Success (E2E)', () => {
   });
 
   // Navega a /payment/success con sesion activa usando client-side navigation
-  // para evitar que SSR redirija a /login por no leer localStorage.
+  // para evitar que Server Side Rendering redirija a /login por no leer localStorage.
   // Si se pasa sessionId, lo incluye como query param.
   async function goToPaymentSuccess(sessionId?: string): Promise<void> {
     const currentUrl = await driver.getCurrentUrl().catch(() => '');
@@ -78,7 +78,7 @@ describe('Payment Success (E2E)', () => {
 
   // ──────────────────────────────────────────────────────────────
   // PRUEBA 1: Sin sesion activa redirige a /login - no requiere backend
-  // Se usa driver.get() porque SSR redirige sin token directamente a /login
+  // Se usa driver.get() porque Server Side Rendering redirige sin token directamente a /login
   // ──────────────────────────────────────────────────────────────
   it('Debe redirigir a /login al navegar a /payment/success sin token', async () => {
     await clearToken(driver);
@@ -112,9 +112,9 @@ describe('Payment Success (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 4: Con session_id invalido el componente no crashea [BE]
-  // Nota: el componente no usa cdr.detectChanges() en el callback async de error,
-  // por lo que con zoneless CD el div .error no aparece en el DOM aunque la
+  // PRUEBA 4: Con session_id invalido el componente no crashea [Requiere Backend activo]
+  // Nota: el componente no usa ChangeDetectorRef.detectChanges() en el callback async de error,
+  // por lo que con deteccion de cambios zoneless de Angular el div .error no aparece en el Document Object Model aunque la
   // propiedad se actualice. Se verifica que el componente sigue activo.
   // ──────────────────────────────────────────────────────────────
   it('Debe mantener el componente activo al enviar un session_id invalido al backend', async () => {
@@ -122,7 +122,7 @@ describe('Payment Success (E2E)', () => {
     await goToPaymentSuccess('invalid_test_abc123');
     await sleep(4000); // dar tiempo al backend para rechazar
 
-    // Con zoneless CD el .error no aparece en DOM, pero el contenedor si
+    // Con deteccion de cambios zoneless de Angular el .error no aparece en Document Object Model, pero el contenedor si
     const containers = await driver.findElements(By.css('.status-container'));
     expect(containers.length).toBeGreaterThan(0);
     expect(await driver.getCurrentUrl()).toContain('/payment/success');
@@ -149,7 +149,7 @@ describe('Payment Success (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 6: En estado de error el div de exito no esta en el DOM - no requiere backend
+  // PRUEBA 6: En estado de error el div de exito no esta en el Document Object Model - no requiere backend
   // Los bloques @if son mutuamente excluyentes
   // ──────────────────────────────────────────────────────────────
   it('Debe ocultar el div de exito cuando se muestra un estado de error', async () => {
@@ -199,7 +199,7 @@ describe('Payment Success (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 10: El boton "Volver al home" existe en el DOM - no requiere backend
+  // PRUEBA 10: El boton "Volver al home" existe en el Document Object Model - no requiere backend
   // Se verifica en el estado de error (sin session_id)
   // ──────────────────────────────────────────────────────────────
   it('Debe existir un boton de retorno al home en el estado de error', async () => {
@@ -303,13 +303,13 @@ describe('Payment Success (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 18: El componente no lanza errores criticos de JS - no requiere backend
+  // PRUEBA 18: El componente no lanza errores criticos de JavaScript - no requiere backend
   // ──────────────────────────────────────────────────────────────
   it('Debe cargar el componente sin errores criticos de JavaScript', async () => {
     await goToPaymentSuccess();
     await sleep(500);
 
-    // Si el componente lanzara un error fatal el .status-container no estaria en el DOM
+    // Si el componente lanzara un error fatal el .status-container no estaria en el Document Object Model
     const containers = await driver.findElements(By.css('.status-container'));
     expect(containers.length).toBeGreaterThan(0);
 

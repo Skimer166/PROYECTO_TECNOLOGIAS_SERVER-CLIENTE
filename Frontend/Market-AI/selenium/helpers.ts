@@ -1,4 +1,5 @@
 import { WebDriver, By, until, WebElement } from 'selenium-webdriver';
+import * as crypto from 'crypto';
 
 export const APP_URL = 'http://localhost:4200';
 export const TIMEOUT = 10_000;
@@ -6,21 +7,37 @@ export const NAV_TIMEOUT = 15_000;
 
 // ─── JWT helpers ──────────────────────────────────────────────────────────────
 
-// Usa base64 estandar (no base64url) para que el componente pueda
-// decodificarlo con atob() del navegador sin lanzar excepcion
+const JWT_SECRET = process.env['JWT_KEY'] ?? 'holamundo';
+
+function b64url(input: string): string {
+  return Buffer.from(input)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
 export function makeJwt(payload: Record<string, unknown>): string {
-  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
-  const body   = Buffer.from(JSON.stringify(payload)).toString('base64');
-  return `${header}.${body}.fakesig`;
+  const header  = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const body    = b64url(JSON.stringify(payload));
+  const signing = `${header}.${body}`;
+  const sig     = crypto.createHmac('sha256', JWT_SECRET)
+    .update(signing)
+    .digest('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+  return `${signing}.${sig}`;
 }
 
 // Token de usuario normal con expiración futura
+// ID real de MongoDB: VickyTest (role: user)
 export const FAKE_USER_TOKEN = makeJwt({
-  sub: '507f1f77bcf86cd799439011',
-  id:  '507f1f77bcf86cd799439011',
-  name: 'Vicky Test',
-  email: 'vicky@test.com',
-  credits: 100,
+  sub: '69fe8dd6a2764f5e773b8440',
+  id:  '69fe8dd6a2764f5e773b8440',
+  name: 'VickyTest',
+  email: 'gsdggdg842@gmail.com',
+  credits: 500,
   role: 'user',
   iat: Math.floor(Date.now() / 1000),
   exp: Math.floor(Date.now() / 1000) + 3600,
@@ -28,23 +45,24 @@ export const FAKE_USER_TOKEN = makeJwt({
 
 // Token con expiración ya vencida (para GR-06)
 export const EXPIRED_USER_TOKEN = makeJwt({
-  sub: '507f1f77bcf86cd799439011',
-  id:  '507f1f77bcf86cd799439011',
-  name: 'Vicky Test',
-  email: 'vicky@test.com',
-  credits: 100,
+  sub: '69fe8dd6a2764f5e773b8440',
+  id:  '69fe8dd6a2764f5e773b8440',
+  name: 'VickyTest',
+  email: 'gsdggdg842@gmail.com',
+  credits: 500,
   role: 'user',
   iat: Math.floor(Date.now() / 1000) - 7200,
   exp: Math.floor(Date.now() / 1000) - 3600,  // ya expiró
 });
 
 // Token de admin (para EC / CD)
+// ID real de MongoDB: Victoria Rivera (role: admin)
 export const FAKE_ADMIN_TOKEN = makeJwt({
-  sub: '507f1f77bcf86cd799439012',
-  id:  '507f1f77bcf86cd799439012',
-  name: 'Admin Test',
-  email: 'admin@test.com',
-  credits: 1000,
+  sub: '6936f54e771a2960c813a7d9',
+  id:  '6936f54e771a2960c813a7d9',
+  name: 'Victoria Rivera',
+  email: 'leli.perros@gmail.com',
+  credits: 460,
   role: 'admin',
   iat: Math.floor(Date.now() / 1000),
   exp: Math.floor(Date.now() / 1000) + 3600,

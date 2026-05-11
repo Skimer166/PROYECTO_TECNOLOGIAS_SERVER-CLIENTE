@@ -26,14 +26,14 @@ describe('Support Widget (E2E)', () => {
     if (driver) await driver.quit();
   });
 
-  // Helper: navega a landing-page con sesion activa y espera el FAB
+  // Helper: navega a landing-page con sesion activa y espera el boton flotante de accion (FAB)
   async function goToPageWithSession(): Promise<void> {
     await setToken(driver, FAKE_USER_TOKEN);
     await driver.get(APP_URL + '/landing-page');
     await sleep(2000);
   }
 
-  // Helper: abre la ventana de chat (asume sesion activa y FAB visible)
+  // Helper: abre la ventana de chat (asume sesion activa y boton flotante de accion (FAB) visible)
   async function openChat(): Promise<void> {
     await goToPageWithSession();
     const fab = await waitVisible(driver, By.css('.support-fab'));
@@ -43,7 +43,7 @@ describe('Support Widget (E2E)', () => {
   }
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 1: FAB no visible sin sesion activa - no requiere backend
+  // PRUEBA 1: boton flotante de accion (FAB) no visible sin sesion activa - no requiere backend
   // ──────────────────────────────────────────────────────────────
   it('Debe ocultar el FAB de soporte cuando no hay sesion activa', async () => {
     await clearToken(driver);
@@ -55,7 +55,7 @@ describe('Support Widget (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 2: FAB visible cuando hay sesion activa - no requiere backend
+  // PRUEBA 2: boton flotante de accion (FAB) visible cuando hay sesion activa - no requiere backend
   // El widget usa isLoggedIn$ del AuthService para mostrar el boton
   // ──────────────────────────────────────────────────────────────
   it('Debe mostrar el FAB de soporte cuando hay sesion activa', async () => {
@@ -66,7 +66,7 @@ describe('Support Widget (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 3: Click en FAB abre la ventana de chat - no requiere backend
+  // PRUEBA 3: Click en boton flotante de accion (FAB) abre la ventana de chat - no requiere backend
   // ──────────────────────────────────────────────────────────────
   it('Debe abrir la ventana de chat al hacer clic en el FAB', async () => {
     await goToPageWithSession();
@@ -154,7 +154,7 @@ describe('Support Widget (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 9: El FAB tiene posicion fixed - no requiere backend
+  // PRUEBA 9: El boton flotante de accion (FAB) tiene posicion fixed - no requiere backend
   // ──────────────────────────────────────────────────────────────
   it('Debe tener el FAB con posicion fixed en su estilo computado', async () => {
     await goToPageWithSession();
@@ -167,7 +167,7 @@ describe('Support Widget (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 10: El FAB tiene un icono visible - no requiere backend
+  // PRUEBA 10: El boton flotante de accion (FAB) tiene un icono visible - no requiere backend
   // ──────────────────────────────────────────────────────────────
   it('Debe tener el FAB con un icono visible', async () => {
     await goToPageWithSession();
@@ -233,7 +233,7 @@ describe('Support Widget (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 16: El FAB es accesible por teclado - no requiere backend
+  // PRUEBA 16: El boton flotante de accion (FAB) es accesible por teclado - no requiere backend
   // ──────────────────────────────────────────────────────────────
   it('Debe tener el FAB accesible por teclado como elemento nativo button o con tabindex', async () => {
     await goToPageWithSession();
@@ -294,7 +294,7 @@ describe('Support Widget (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 20: El FAB es un elemento button nativo accesible - no requiere backend
+  // PRUEBA 20: El boton flotante de accion (FAB) es un elemento button nativo accesible - no requiere backend
   // Nota: el componente no define aria-label ni title; la accesibilidad viene
   // del elemento button nativo que es focusable por teclado por defecto
   // ──────────────────────────────────────────────────────────────
@@ -334,7 +334,7 @@ describe('Support Widget (E2E)', () => {
     await chatInput.sendKeys('texto temporal');
     await sleep(200);
 
-    // Limpiar via JS y disparar evento input para que Angular actualice el binding
+    // Limpiar via JavaScript y disparar evento input para que Angular actualice el binding
     await driver.executeScript(`
       const el = arguments[0];
       el.value = '';
