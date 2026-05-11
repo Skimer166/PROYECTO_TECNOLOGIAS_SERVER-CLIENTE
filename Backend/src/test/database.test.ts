@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { dbConnect } from '../database/index';
 
 // Mock de Mongoose
@@ -114,6 +115,16 @@ describe('Database Connection Tests', () => {
 
       expect(connect).toHaveBeenCalledTimes(3);
       expect(connect).toHaveBeenCalledWith(mockUrl);
+    });
+
+    it('Debe intentar conectar con undefined si MONGO_URL no está definido', async () => {
+      delete process.env.MONGO_URL;
+      const { connect } = require('mongoose');
+      (connect as jest.Mock).mockResolvedValue(undefined);
+
+      await dbConnect();
+
+      expect(connect).toHaveBeenCalledWith(undefined);
     });
 
     it('Debe manejar conexiones lentas (timeout)', async () => {

@@ -29,7 +29,19 @@ describe('Payments Controller Unit Tests', () => {
   let statusMock: jest.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    // resetMocks: true in jest.config clears mock implementations before each test.
+    // Re-apply the Stripe constructor implementation so new Stripe() returns our mock.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const MockStripe = require('stripe') as jest.Mock;
+    MockStripe.mockImplementation(() => ({
+      checkout: {
+        sessions: {
+          create: mockSessionCreate,
+          retrieve: mockSessionRetrieve,
+        },
+      },
+    }));
+
     jsonMock = jest.fn();
     statusMock = jest.fn().mockReturnValue({ json: jsonMock });
     res = {
