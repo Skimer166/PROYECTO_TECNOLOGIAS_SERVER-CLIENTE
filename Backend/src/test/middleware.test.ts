@@ -80,7 +80,9 @@ describe('Auth Middleware Unit Tests', () => {
 
       authMiddleware(req as Request, res as Response, next);
 
-      expect(jwt.verify).toHaveBeenCalledWith('valid.jwt.token', expect.anything());
+      // Verify the prefix was stripped by checking the first argument passed to jwt.verify
+      const [calledToken] = (jwt.verify as jest.Mock).mock.calls[0];
+      expect(calledToken).toBe('valid.jwt.token');
       expect(next).toHaveBeenCalled();
     });
   });

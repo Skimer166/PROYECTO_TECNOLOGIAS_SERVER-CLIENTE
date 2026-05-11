@@ -22,14 +22,35 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: './Backend/package.json'
+
+      - name: Cache mongodb-memory-server binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binary-${{ runner.os }}-${{ hashFiles('**/package.json') }}
+          restore-keys: mongodb-binary-${{ runner.os }}-
 
       - name: Install dependencies
         run: npm i
 
       - name: Run Jest tests
+        env:
+          S3_REGION: us-east-1
+          S3_ACCESS_KEY: test-access-key
+          S3_SECRET_KEY: test-secret-key
+          S3_BUCKET: test-bucket
+          STRIPE_SECRET_KEY: sk_test_dummy
+          OPENAI_API_KEY: sk-dummy
+          EMAIL_USER: test@test.com
+          EMAIL_PASSWORD: dummy-password
+          GOOGLE_CLIENT_ID: dummy-client-id
+          GOOGLE_CLIENT_SECRET: dummy-client-secret
+          JWT_KEY: dev-secret
+          SECRET_KEY: dev-secret
+          MONGO_URL: mongodb://localhost:27017/test
         run: npx jest --i --coverage --passWithNoTests
 
       - name: Upload coverage report
