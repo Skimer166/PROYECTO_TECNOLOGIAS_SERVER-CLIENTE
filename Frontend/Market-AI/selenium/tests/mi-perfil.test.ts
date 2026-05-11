@@ -288,10 +288,8 @@ describe('Mi Perfil (E2E)', () => {
     // Descartar alerta si el backend rechaza el upload (p.ej. configuracion de Cloudinary)
     try {
       const alert = await driver.switchTo().alert();
-      const alertText = await alert.getText();
       await alert.accept();
-      console.warn(`MP-08: upload rechazado por backend (${alertText})`);
-      return; // no se puede verificar la imagen si el upload fallo
+      return; // no se puede verificar la imagen si el upload fallo (por ejemplo S3 no configurado)
     } catch { /* sin alerta: upload exitoso */ }
 
     const avatarImg = await driver.findElements(By.css('.avatar-wrapper img'));
@@ -322,10 +320,8 @@ describe('Mi Perfil (E2E)', () => {
     // Descartar alerta si el backend rechaza el upload
     try {
       const alert = await driver.switchTo().alert();
-      const alertText = await alert.getText();
       await alert.accept();
-      console.warn(`MP-09: upload rechazado por backend (${alertText})`);
-      return;
+      return; // no se puede verificar preview si el upload fallo (por ejemplo S3 no configurado)
     } catch { /* sin alerta: upload exitoso */ }
 
     const afterImgs = await driver.findElements(By.css('.avatar-wrapper img'));
@@ -429,22 +425,25 @@ describe('Mi Perfil (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 15: El campo email contiene el simbolo @ - no requiere backend
-  // El FAKE_USER_TOKEN tiene email: 'vicky@test.com' en su payload
+  // PRUEBA 15: El campo email contiene el simbolo @ [Requiere Backend activo]
+  // Con credenciales reales en .env el backend devuelve el email del usuario.
   // ──────────────────────────────────────────────────────────────
   it('Debe mostrar el email del usuario con el simbolo @ en el campo email', async () => {
     await goToProfile();
+    // Esperar que el backend responda y llene el campo email antes de leerlo.
+    await sleep(1500);
 
     const emailInput = await waitVisible(
       driver,
       By.xpath('//mat-label[contains(.,"Correo")]/ancestor::mat-form-field//input')
     );
     const emailValue = await emailInput.getAttribute('value');
-    if (emailValue && emailValue.length > 0) {
+    if (userToken !== FAKE_USER_TOKEN) {
+      // Con token real el backend devuelve el email del usuario registrado
       expect(emailValue).toContain('@');
     } else {
-      // Con token falso el backend no devuelve datos del usuario (404); el campo queda vacio
-      console.warn('MP-15: email vacio (usuario falso no existe en BD); se verifica solo visibilidad');
+      // Sin credenciales en .env el backend no puede autenticar; se verifica solo visibilidad
+      console.warn('MP-15: sin credenciales en .env; se verifica solo visibilidad del campo email');
       expect(await emailInput.isDisplayed()).toBe(true);
     }
   });
