@@ -31,32 +31,26 @@ jobs:
         run: npm install
 
       - name: Start Angular dev server en background
-        run: |
-          $workDir = (Get-Location).Path
-          Start-Process -NoNewWindow -FilePath "npx" -ArgumentList @("ng", "serve", "--host", "0.0.0.0", "--port", "4200") -WorkingDirectory $workDir
-        shell: pwsh
+        run: nohup npx ng serve --host 0.0.0.0 --port 4200 > /tmp/angular.log 2>&1 &
+        shell: bash
 
       - name: Esperar a que Angular esté listo en el puerto 4200
         run: |
-          $timeout = 180
-          $elapsed = 0
-          Write-Host "Esperando Angular en http://localhost:4200..."
-          while ($elapsed -lt $timeout) {
-            try {
-              Invoke-WebRequest -Uri "http://localhost:4200" -UseBasicParsing -ErrorAction Stop | Out-Null
-              Write-Host "Angular listo despues de $elapsed segundos"
-              break
-            } catch {
-              Write-Host "Esperando... ($elapsed s)"
-              Start-Sleep -Seconds 5
-              $elapsed += 5
-            }
-          }
-          if ($elapsed -ge $timeout) {
-            Write-Error "Angular no inicio en $timeout segundos"
-            exit 1
-          }
-        shell: pwsh
+          timeout=240
+          elapsed=0
+          echo "Esperando Angular en http://localhost:4200..."
+          until curl -s http://localhost:4200 > /dev/null 2>&1; do
+            echo "Esperando... ($elapsed s)"
+            sleep 5
+            elapsed=$((elapsed + 5))
+            if [ $elapsed -ge $timeout ]; then
+              echo "Angular no inicio en $timeout segundos. Log:"
+              cat /tmp/angular.log || true
+              exit 1
+            fi
+          done
+          echo "Angular listo despues de $elapsed segundos"
+        shell: bash
 
       - name: Ejecutar pruebas Selenium
         run: npm run selenium
