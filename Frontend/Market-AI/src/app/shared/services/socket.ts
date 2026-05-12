@@ -13,7 +13,7 @@ export interface SupportMessage {
 
 export interface SupportSession {
   userId: string;
-  userName: string;
+  userName?: string;
   messages?: SupportMessage[];
   [key: string]: unknown;
 }
