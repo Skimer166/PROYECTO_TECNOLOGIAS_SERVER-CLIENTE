@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - '**'
 
 jobs:
   backend-tests:
@@ -77,6 +80,13 @@ jobs:
           path: Backend/coverage/
           retention-days: 7
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./Backend/coverage/lcov.info
+          flags: backend
+          fail_ci_if_error: true
+
   frontend-tests:
     name: Frontend – Karma (Angular)
     runs-on: ubuntu-latest
@@ -109,3 +119,10 @@ jobs:
           name: frontend-coverage
           path: Frontend/Market-AI/coverage/
           retention-days: 7
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./Frontend/Market-AI/coverage/market-ai/lcov.info
+          flags: frontend
+          fail_ci_if_error: true
