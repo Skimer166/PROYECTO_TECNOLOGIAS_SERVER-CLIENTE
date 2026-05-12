@@ -1,11 +1,11 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick, flushMicrotasks } from '@angular/core/testing';
 import { Login } from './login';
 import { FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../shared/services/auth';
 import { from } from 'rxjs';
 import { Location } from '@angular/common';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 describe('Login', () => {
@@ -20,7 +20,7 @@ describe('Login', () => {
     dialogMock = jasmine.createSpyObj('MatDialog', ['open']);
 
     authMock.login.and.returnValue(from(Promise.resolve({ token: 'Bearer1234' })));
-    dialogMock.open.and.returnValue({ close: jasmine.createSpy('close') } as any);
+    dialogMock.open.and.returnValue({ close: jasmine.createSpy('close') } as unknown as MatDialogRef<unknown>);
 
     await TestBed.configureTestingModule({
       imports: [Login],
@@ -42,7 +42,7 @@ describe('Login', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call auth.login and navigate on valid submit', async () => {
+  it('should call auth.login and navigate on valid submit', fakeAsync(() => {
     spyOn(window.localStorage, 'setItem');
     component.form.setValue({ Correo: 'test@mail.com', Contrasena: '12345678' });
     component.doOnSubmit();
@@ -50,15 +50,17 @@ describe('Login', () => {
       email: 'test@mail.com',
       password: '12345678'
     });
-    await Promise.resolve();
+    flushMicrotasks();
+    tick(4000);
     expect(window.localStorage.setItem).toHaveBeenCalledWith('token', 'Bearer1234');
     expect(routerMock.navigate).toHaveBeenCalledWith(['/home-page']);
-  });
+  }));
 
-  it('should not call auth.login if form is invalid', () => {
+  it('should not call auth.login if form is invalid', fakeAsync(() => {
     authMock.login.calls.reset();
     component.form.setValue({ Correo: '', Contrasena: '' });
     component.doOnSubmit();
+    tick(4000);
     expect(authMock.login).not.toHaveBeenCalled();
-  });
+  }));
 });
