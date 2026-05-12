@@ -38,21 +38,22 @@ jobs:
         run: |
           timeout=300
           elapsed=0
-          echo "Esperando que Angular compile en http://localhost:4200..."
-          until curl -s http://localhost:4200 | grep -q "app-root\|ng-version\|Market-AI\|<!DOCTYPE"; do
-            echo "Esperando... ($elapsed s)"
+          echo "Esperando que Angular compile completamente..."
+          until grep -q "Compiled successfully\|compiled successfully\|Application bundle generation complete\|Local:" /tmp/angular.log 2>/dev/null; do
+            echo "Compilando... ($elapsed s)"
             sleep 5
             elapsed=$((elapsed + 5))
             if [ $elapsed -ge $timeout ]; then
-              echo "Angular no inicio en $timeout segundos. Log:"
+              echo "Angular no compilo en $timeout segundos. Log:"
               cat /tmp/angular.log || true
               exit 1
             fi
           done
-          echo "Angular respondiendo HTML despues de $elapsed segundos"
-          echo "Esperando 60s adicionales para que termine la compilacion completa..."
-          sleep 60
-          echo "Angular listo para pruebas"
+          echo "Angular compilado despues de $elapsed segundos"
+          echo "Ultimas lineas del log:"
+          tail -5 /tmp/angular.log
+          echo "Esperando 10s adicionales para que el servidor este estable..."
+          sleep 10
         shell: bash
 
       - name: Ejecutar pruebas Selenium
