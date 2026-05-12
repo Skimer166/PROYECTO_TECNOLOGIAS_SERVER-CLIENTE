@@ -34,12 +34,12 @@ jobs:
         run: nohup npx ng serve --host 0.0.0.0 --port 4200 > /tmp/angular.log 2>&1 &
         shell: bash
 
-      - name: Esperar a que Angular esté listo en el puerto 4200
+      - name: Esperar a que Angular compile y esté listo
         run: |
-          timeout=240
+          timeout=300
           elapsed=0
-          echo "Esperando Angular en http://localhost:4200..."
-          until curl -s http://localhost:4200 > /dev/null 2>&1; do
+          echo "Esperando que Angular compile en http://localhost:4200..."
+          until curl -s http://localhost:4200 | grep -q "app-root\|ng-version\|Market-AI\|<!DOCTYPE"; do
             echo "Esperando... ($elapsed s)"
             sleep 5
             elapsed=$((elapsed + 5))
@@ -49,13 +49,18 @@ jobs:
               exit 1
             fi
           done
-          echo "Angular listo despues de $elapsed segundos"
+          echo "Angular respondiendo HTML despues de $elapsed segundos"
+          echo "Esperando 60s adicionales para que termine la compilacion completa..."
+          sleep 60
+          echo "Angular listo para pruebas"
         shell: bash
 
       - name: Ejecutar pruebas Selenium
         run: npm run selenium
         env:
           BACKEND_URL: https://market-ai-api.onrender.com
+          USER_EMAIL: ${{ secrets.USER_EMAIL }}
+          USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
 
       - name: Subir reporte de resultados
         uses: actions/upload-artifact@v4
