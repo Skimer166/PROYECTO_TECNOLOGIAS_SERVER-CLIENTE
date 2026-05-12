@@ -30,30 +30,28 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Start Angular dev server en background
-        run: nohup npx ng serve --host 0.0.0.0 --port 4200 > /tmp/angular.log 2>&1 &
+      - name: Build Angular (browser SPA)
+        run: npx ng build --configuration=development 2>&1
         shell: bash
 
-      - name: Esperar a que Angular compile y esté listo
+      - name: Start static file server
+        run: nohup npx http-server dist/Market-AI/browser -p 4200 --spa -c-1 --cors > /tmp/server.log 2>&1 &
+        shell: bash
+
+      - name: Esperar a que el servidor este listo
         run: |
-          timeout=300
           elapsed=0
-          echo "Esperando que Angular compile completamente..."
-          until grep -q "Compiled successfully\|compiled successfully\|Application bundle generation complete\|Local:" /tmp/angular.log 2>/dev/null; do
-            echo "Compilando... ($elapsed s)"
-            sleep 5
-            elapsed=$((elapsed + 5))
-            if [ $elapsed -ge $timeout ]; then
-              echo "Angular no compilo en $timeout segundos. Log:"
-              cat /tmp/angular.log || true
+          until curl -s http://localhost:4200 > /dev/null 2>&1; do
+            echo "Esperando servidor... ($elapsed s)"
+            sleep 3
+            elapsed=$((elapsed + 3))
+            if [ $elapsed -ge 60 ]; then
+              echo "Servidor no inicio. Log:"
+              cat /tmp/server.log || true
               exit 1
             fi
           done
-          echo "Angular compilado despues de $elapsed segundos"
-          echo "Ultimas lineas del log:"
-          tail -5 /tmp/angular.log
-          echo "Esperando 10s adicionales para que el servidor este estable..."
-          sleep 10
+          echo "Servidor listo despues de $elapsed segundos"
         shell: bash
 
       - name: Ejecutar pruebas Selenium
