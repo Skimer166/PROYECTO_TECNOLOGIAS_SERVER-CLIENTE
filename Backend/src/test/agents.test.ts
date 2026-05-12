@@ -476,5 +476,41 @@ describe('Agent Controller Unit Tests', () => {
       expect(mockAgent.save).toHaveBeenCalled();
       expect(jsonMock).toHaveBeenCalledWith({ message: 'Agente liberado' });
     });
+
+    it('Debe retornar 403 si no hay usuario autenticado (userId es undefined)', async () => {
+      req = { params: { id: 'agent123' }, user: undefined } as unknown as Request;
+      const mockAgent = { rentedBy: { toString: () => 'user123' }, save: jest.fn() };
+      (AgentModel.findById as jest.Mock).mockReturnValue({ exec: jest.fn().mockResolvedValue(mockAgent) });
+
+      await releaseAgent(req as Request, res as Response);
+
+      // userId is undefined, rentedBy is 'user123' → not equal → 403
+      expect(statusMock).toHaveBeenCalledWith(403);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'No eres el dueño de este alquiler' });
+    });
+
+    it('Debe retornar 500 si falla la BD en releaseAgent', async () => {
+      req = { params: { id: 'agent123' }, user: { id: 'user123' } } as unknown as Request;
+      (AgentModel.findById as jest.Mock).mockReturnValue({ exec: jest.fn().mockRejectedValue(new Error('DB error')) });
+
+      await releaseAgent(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'Error al liberar agente' });
+    });
+  });
+
+  // ─── getMyRentedAgents (casos adicionales) ───────────────────────────────────
+
+  describe('getMyRentedAgents() casos adicionales', () => {
+    it('Debe retornar 500 si falla la BD', async () => {
+      req = { user: { id: 'user123' } } as unknown as Request;
+      const mockExec = jest.fn().mockRejectedValue(new Error('DB error'));
+      (AgentModel.find as jest.Mock).mockReturnValue({ lean: jest.fn().mockReturnValue({ exec: mockExec }) });
+
+      await getMyRentedAgents(req as Request, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+    });
   });
 });

@@ -3,7 +3,8 @@ import { isValidObjectId } from "mongoose";
 import { UserModel } from "./model";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { sendWelcomeEmail } from "../mailer/controller";
+
+const JWT_SECRET = process.env.JWT_KEY ?? 'dev-secret';
 
 const JWT_SECRET = process.env.JWT_KEY ?? 'dev-secret';
 
