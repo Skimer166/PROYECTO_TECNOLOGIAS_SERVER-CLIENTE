@@ -32,7 +32,7 @@ describe('Login', () => {
   });
 
   it('should call auth.login and navigate on valid submit', fakeAsync(() => {
-    spyOn(component as any, 'openDialog');
+    spyOn(component as unknown as { openDialog: () => void }, 'openDialog');
     const router = TestBed.inject(Router);
     spyOn(router, 'navigate');
     spyOn(window.localStorage, 'setItem');
@@ -50,7 +50,7 @@ describe('Login', () => {
   }));
 
   it('should not call auth.login if form is invalid', () => {
-    spyOn(component as any, 'openDialog');
+    spyOn(component as unknown as { openDialog: () => void }, 'openDialog');
     authMock.login.calls.reset();
     component.form.setValue({ Correo: '', Contrasena: '' });
     component.doOnSubmit();
