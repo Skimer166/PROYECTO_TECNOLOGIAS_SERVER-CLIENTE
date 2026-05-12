@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: './Backend/package-lock.json'
+          cache-dependency-path: './Backend/package.json'
 
       - name: Cache mongodb-memory-server binary
         uses: actions/cache@v4
@@ -94,7 +94,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: './Frontend/Market-AI/package-lock.json'
+          cache-dependency-path: './Frontend/Market-AI/package.json'
 
       - name: Install dependencies
         run: npm install
