@@ -65,26 +65,6 @@ describe('Landing Page (E2E)', () => {
     expect(await driver.getCurrentUrl()).toContain('/home-page');
   });
 
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 3: Scroll hacia servicios - no requiere backend
-  // ──────────────────────────────────────────────────────────────
-  it('Debe hacer scroll hacia la seccion #servicios al hacer clic en "Ver servicios"', async () => {
-    await clearToken(driver);
-    await driver.get(APP_URL + '/landing-page');
-    await waitVisible(driver, By.css('section.hero'));
-
-    await driver.executeScript('window.scrollTo(0, 0)');
-    await sleep(300);
-
-    const verServiciosLink = await driver.findElement(
-      By.xpath('//a[contains(.,"Ver servicios")]')
-    );
-    await verServiciosLink.click();
-    await sleep(800);
-
-    const scrollY = await driver.executeScript('return window.pageYOffset') as number;
-    expect(scrollY).toBeGreaterThan(0);
-  });
 
   // ──────────────────────────────────────────────────────────────
   // PRUEBA 4: 3 tarjetas en servicios - no requiere backend

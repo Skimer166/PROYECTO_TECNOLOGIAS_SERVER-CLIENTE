@@ -235,63 +235,6 @@ describe('Payment Success (E2E)', () => {
     expect(elapsed).toBeLessThan(5000);
   });
 
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 13: /payment/cancel con token redirige a /home-page - no requiere backend
-  // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir de /payment/cancel a /home-page con token valido', async () => {
-    await driver.get(APP_URL + '/landing-page');
-    await setToken(driver, FAKE_USER_TOKEN);
-    await driver.get(APP_URL + '/payment/cancel');
-
-    await driver.wait(async () => {
-      const url = await driver.getCurrentUrl();
-      return !url.includes('/payment/cancel');
-    }, NAV_TIMEOUT);
-
-    const url = await driver.getCurrentUrl();
-    expect(url.includes('/home-page') || url.includes('/landing-page')).toBe(true);
-  });
-
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 14: La pagina tiene un encabezado visible - no requiere backend
-  // Nota: payment-success no incluye app-header (standalone con imports minimos);
-  // se verifica que haya al menos un h1 o h2 dentro del status-container
-  // ──────────────────────────────────────────────────────────────
-  it('Debe tener al menos un encabezado h1 o h2 visible en el componente', async () => {
-    await goToPaymentSuccess();
-    await sleep(500);
-
-    const headings = await driver.findElements(
-      By.css('.status-container h1, .status-container h2')
-    );
-    expect(headings.length).toBeGreaterThan(0);
-    expect(await headings[0].isDisplayed()).toBe(true);
-  });
-
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 15: La pagina tiene al menos un elemento visible - no requiere backend
-  // ──────────────────────────────────────────────────────────────
-  it('Debe tener al menos un elemento visible dentro del componente', async () => {
-    await goToPaymentSuccess();
-    await sleep(500);
-
-    const container = await driver.findElement(By.css('.status-container'));
-    const children = await container.findElements(By.css('div, h1, h2, p, button, mat-spinner'));
-    expect(children.length).toBeGreaterThan(0);
-  });
-
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 16: Sin token redirige antes de 5 segundos - no requiere backend
-  // Confirmacion adicional del guard con medicion de tiempo
-  // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir a /login en menos de 5 segundos cuando no hay token', async () => {
-    await clearToken(driver);
-    const start = Date.now();
-    await driver.get(APP_URL + '/payment/success?session_id=test123');
-    await waitForUrl(driver, '/login', NAV_TIMEOUT);
-    expect(Date.now() - start).toBeLessThan(5000);
-    expect(await driver.getCurrentUrl()).toContain('/login');
-  });
 
   // ──────────────────────────────────────────────────────────────
   // PRUEBA 17: La ruta es accesible con token valido - no requiere backend

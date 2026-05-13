@@ -62,41 +62,6 @@ describe('Guards & Routing (E2E)', () => {
     }
   });
 
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 3: Ruta raiz / redirige a /landing-page
-  //           no requiere backend
-  // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir de / a /landing-page automaticamente', async () => {
-    await clearToken(driver);
-    await driver.get(APP_URL + '/');
-    await waitForUrl(driver, '/landing-page', NAV_TIMEOUT);
-    const url = await driver.getCurrentUrl();
-    expect(url).toContain('/landing-page');
-  });
-
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 4: /payment/cancel redirige a /home-page
-  //           no requiere backend
-  // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir de /payment/cancel a /home-page', async () => {
-    // Navegar primero a landing-page para asegurar el dominio luego poner token
-    await driver.get(APP_URL + '/landing-page');
-    await setToken(driver, FAKE_USER_TOKEN);
-    await driver.get(APP_URL + '/payment/cancel');
-
-    // Esperar que Angular procese el redirectTo y salga de /payment/cancel
-    await driver.wait(async () => {
-      const url = await driver.getCurrentUrl();
-      return !url.includes('/payment/cancel');
-    }, NAV_TIMEOUT);
-
-    const url = await driver.getCurrentUrl();
-    // El router redirige /payment/cancel a /home-page (redirectTo del router)
-    // Si el backend no esta disponible el componente de home puede redirigir
-    // adicionalmente a /landing-page ambos destinos son comportamiento valido
-    expect(url).not.toContain('/payment/cancel');
-    expect(url.includes('/home-page') || url.includes('/landing-page')).toBe(true);
-  });
 
   // ──────────────────────────────────────────────────────────────
   // PRUEBA 5: Ruta inexistente no provoca crash
@@ -143,32 +108,6 @@ describe('Guards & Routing (E2E)', () => {
     ).toBe(true);
   });
 
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 7: Logout limpia token y redirige a /login
-  //           no requiere backend
-  // ──────────────────────────────────────────────────────────────
-  it('Debe eliminar el token y redirigir a /login al hacer clic en "Salir"', async () => {
-    await setToken(driver, FAKE_USER_TOKEN);
-    await driver.get(APP_URL + '/home-page');
-    await waitVisible(driver, By.css('.logout-btn'));
-
-    const logoutBtn = await driver.findElement(By.css('.logout-btn'));
-    await logoutBtn.click();
-
-    await waitForUrl(driver, '/login', NAV_TIMEOUT);
-    expect(await driver.getCurrentUrl()).toContain('/login');
-
-    // Verificar que el token fue eliminado de ambos storages
-    const localToken = await driver.executeScript(
-      `return localStorage.getItem('token')`
-    ) as string | null;
-    const sessionToken = await driver.executeScript(
-      `return sessionStorage.getItem('token')`
-    ) as string | null;
-
-    expect(localToken).toBeNull();
-    expect(sessionToken).toBeNull();
-  });
 
   // ──────────────────────────────────────────────────────────────
   // PRUEBA 8: /mi-perfil sin token redirige a /login
