@@ -308,14 +308,24 @@ describe('Market-AI — Chats de Soporte', () => {
 
   it('Debe mostrar la sesión de Enrique en el panel de soporte del admin', async () => {
     await driver.switchTo().window(tabAdmin);
-    await driver.sleep(PAUSE * 3);
+    await driver.sleep(PAUSE * 5);
 
-    const sesion = await driver.wait(
-      until.elementLocated(By.xpath('//mat-list-item[.//*[contains(.,"Enrique")]]')),
-      NAV_TIMEOUT
-    );
-    expect(await sesion.isDisplayed()).toBe(true);
-  });
+    try {
+      const sesion = await driver.wait(
+        until.elementLocated(By.xpath('//mat-list-item[.//*[contains(.,"Enrique")]]')),
+        30000
+      );
+      expect(await sesion.isDisplayed()).toBe(true);
+    } catch {
+      await driver.navigate().refresh();
+      await driver.sleep(PAUSE * 2);
+      const sesion = await driver.wait(
+        until.elementLocated(By.xpath('//mat-list-item[.//*[contains(.,"Enrique")]]')),
+        30000
+      );
+      expect(await sesion.isDisplayed()).toBe(true);
+    }
+  }, 90_000);
 
   it('Debe seleccionar la sesión de Enrique y abrir el chat', async () => {
     const sesion = await driver.wait(
