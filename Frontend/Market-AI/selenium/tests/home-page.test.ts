@@ -58,7 +58,13 @@ describe('HP — Home Page (E2E Selenium)', () => {
         ? (adminToken ?? makeFakeJwt('admin'))
         : (userToken ?? makeFakeJwt('user'));
     await injectToken(driver!, token, role);
-    await driver!.get(`${BASE_URL}/home-page`);
+    // Navegación client-side: evita que el servidor SSR ejecute el guard
+    // (en SSR isPlatformBrowser=false → hasToken()=false → redirect a /login siempre)
+    await driver!.executeScript(`
+      history.pushState(null, '', '/home-page');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }));
+    `);
+    await driver!.sleep(500);
   }
 
   async function waitForCarousel(): Promise<WebElement> {
@@ -572,7 +578,11 @@ describe('HP — Home Page (E2E Selenium)', () => {
   // ─── HP-20 ─────────────────────────────────────────────────────────────────
   it('HP-20: Botón "Panel de agentes" navega a /admin/agents', async () => {
     await injectToken(driver!, makeFakeJwt('admin'), 'admin');
-    await driver!.get(`${BASE_URL}/home-page`);
+    await driver!.executeScript(`
+      history.pushState(null, '', '/home-page');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }));
+    `);
+    await driver!.sleep(500);
 
     const adminPanel = await triggerCdAndWaitForAdminPanel();
     expect(await adminPanel.isDisplayed()).toBe(true);
@@ -589,7 +599,11 @@ describe('HP — Home Page (E2E Selenium)', () => {
   // ─── HP-21 ─────────────────────────────────────────────────────────────────
   it('HP-21: Botón "Panel de usuarios" navega a /admin/users', async () => {
     await injectToken(driver!, makeFakeJwt('admin'), 'admin');
-    await driver!.get(`${BASE_URL}/home-page`);
+    await driver!.executeScript(`
+      history.pushState(null, '', '/home-page');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }));
+    `);
+    await driver!.sleep(500);
 
     await triggerCdAndWaitForAdminPanel();
 
@@ -605,7 +619,11 @@ describe('HP — Home Page (E2E Selenium)', () => {
   // ─── HP-22 ─────────────────────────────────────────────────────────────────
   it('HP-22: Botón "Chats de Soporte" navega a /admin/support', async () => {
     await injectToken(driver!, makeFakeJwt('admin'), 'admin');
-    await driver!.get(`${BASE_URL}/home-page`);
+    await driver!.executeScript(`
+      history.pushState(null, '', '/home-page');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }));
+    `);
+    await driver!.sleep(500);
 
     await triggerCdAndWaitForAdminPanel();
 
@@ -645,15 +663,21 @@ describe('HP — Home Page (E2E Selenium)', () => {
 
   // ─── HP-24 ─────────────────────────────────────────────────────────────────
   it('HP-24: Sin token, el guard redirige a /login', async () => {
-    // Limpiar cualquier token existente
+    // Asegurarse de estar en la app (mismo origen) antes de manipular storage
     await driver!.get(`${BASE_URL}/landing-page`);
     await driver!.executeScript(`
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user_role');
       localStorage.removeItem('token');
+      localStorage.removeItem('user_role');
     `);
 
-    await driver!.get(`${BASE_URL}/home-page`);
+    // Navegación client-side: guard corre en el browser (no en SSR)
+    // → sin token → authActivateGuard redirige a /login
+    await driver!.executeScript(`
+      history.pushState(null, '', '/home-page');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }));
+    `);
 
     await driver!.wait(until.urlContains('/login'), TIMEOUT);
     expect(await driver!.getCurrentUrl()).toContain('/login');
@@ -661,9 +685,12 @@ describe('HP — Home Page (E2E Selenium)', () => {
 
   // ── Prueba adicional — hero section sin depender de backend ────────────────
   it('HP-extra: La sección hero se renderiza inmediatamente para usuarios autenticados', async () => {
-    // Usa token falso — el hero renderiza antes de que llegue la respuesta HTTP
     await injectToken(driver!, makeFakeJwt('user'), 'user');
-    await driver!.get(`${BASE_URL}/home-page`);
+    await driver!.executeScript(`
+      history.pushState(null, '', '/home-page');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }));
+    `);
+    await driver!.sleep(500);
 
     const hero = await driver!.wait(
       until.elementLocated(By.css('.hero')),

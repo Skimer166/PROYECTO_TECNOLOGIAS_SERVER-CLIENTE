@@ -52,7 +52,12 @@ describe('MA — My Agents Page (E2E Selenium)', () => {
   async function goToMyAgents(): Promise<void> {
     const token = userToken ?? makeFakeJwt('user');
     await injectToken(driver!, token, 'user');
-    await driver!.get(`${BASE_URL}/mis-agentes`);
+    // Navegación client-side: evita que el servidor SSR ejecute el guard
+    await driver!.executeScript(`
+      history.pushState(null, '', '/mis-agentes');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }));
+    `);
+    await driver!.sleep(500);
   }
 
   /** Espera a que carguen las tarjetas de agentes. Retorna false si grid vacío. */
@@ -596,15 +601,20 @@ describe('MA — My Agents Page (E2E Selenium)', () => {
 
   // ─── MA-16 ─────────────────────────────────────────────────────────────────
   it('MA-16: Sin token, el guard redirige a /login', async () => {
-    // Limpiar cualquier token existente
+    // Asegurarse de estar en la app antes de manipular storage
     await driver!.get(`${BASE_URL}/landing-page`);
     await driver!.executeScript(`
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user_role');
       localStorage.removeItem('token');
+      localStorage.removeItem('user_role');
     `);
 
-    await driver!.get(`${BASE_URL}/mis-agentes`);
+    // Navegación client-side: guard corre en el browser → sin token → redirige a /login
+    await driver!.executeScript(`
+      history.pushState(null, '', '/mis-agentes');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: history.state }));
+    `);
 
     await driver!.wait(until.urlContains('/login'), TIMEOUT);
     expect(await driver!.getCurrentUrl()).toContain('/login');
