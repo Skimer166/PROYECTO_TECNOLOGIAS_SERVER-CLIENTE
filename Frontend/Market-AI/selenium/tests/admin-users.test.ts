@@ -1,6 +1,6 @@
 import { By, until, WebDriver } from 'selenium-webdriver';
 import { createDriver } from '../browser-factory';
-import { APP_URL } from '../helpers';
+import { APP_URL, TIMEOUT, NAV_TIMEOUT } from '../helpers';
 
 const BASE_URL = APP_URL;
 const PAUSE = 1000;
@@ -24,7 +24,7 @@ describe('Market-AI — Panel de Usuarios', () => {
 
   it('Debe abrir la landing page correctamente', async () => {
     await driver.get(`${BASE_URL}/landing-page`);
-    await driver.wait(until.titleContains('Market'), 10000);
+    await driver.wait(until.titleContains('Market'), TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/landing-page');
   });
@@ -32,7 +32,7 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe mostrar el título principal', async () => {
     const titulo = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"El marketplace donde encuentras")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await titulo.isDisplayed()).toBe(true);
@@ -41,7 +41,7 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe mostrar el botón "Ingresar"', async () => {
     const btn = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Ingresar")] | //a[contains(.,"Ingresar")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await btn.isDisplayed()).toBe(true);
@@ -52,10 +52,10 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe navegar a la página de login al presionar "Ingresar"', async () => {
     const btn = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Ingresar")]')),
-      10000
+      TIMEOUT
     );
     await btn.click();
-    await driver.wait(until.urlContains('/login'), 10000);
+    await driver.wait(until.urlContains('/login'), TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/login');
   });
@@ -63,20 +63,20 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe verificar que la página de login se muestra correctamente', async () => {
     const titulo = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"Inicia sesion en Market AI")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await titulo.isDisplayed()).toBe(true);
 
     const inputCorreo = await driver.wait(
       until.elementLocated(By.css('input[name="Correo"]')),
-      10000
+      TIMEOUT
     );
     expect(await inputCorreo.isDisplayed()).toBe(true);
 
     const inputContrasena = await driver.wait(
       until.elementLocated(By.css('input[name="Contrasena"]')),
-      10000
+      TIMEOUT
     );
     expect(await inputContrasena.isDisplayed()).toBe(true);
   });
@@ -84,14 +84,14 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe llenar el formulario de login y presionar Enviar', async () => {
     const inputCorreo = await driver.wait(
       until.elementLocated(By.css('input[name="Correo"]')),
-      10000
+      TIMEOUT
     );
     await inputCorreo.clear();
     await inputCorreo.sendKeys('ianrdzwong@gmail.com');
 
     const inputContrasena = await driver.wait(
       until.elementLocated(By.css('input[name="Contrasena"]')),
-      10000
+      TIMEOUT
     );
     await inputContrasena.clear();
     await inputContrasena.sendKeys('123456789');
@@ -99,7 +99,7 @@ describe('Market-AI — Panel de Usuarios', () => {
 
     const btnEnviar = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Enviar")]')),
-      10000
+      TIMEOUT
     );
     await btnEnviar.click();
     await driver.sleep(PAUSE);
@@ -108,13 +108,13 @@ describe('Market-AI — Panel de Usuarios', () => {
   // ── Home Page ───────────────────────────────────────────────────────────────
 
   it('Debe estar en el home-page después de iniciar sesión', async () => {
-    await driver.wait(until.urlContains('/home-page'), 15000);
+    await driver.wait(until.urlContains('/home-page'), NAV_TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/home-page');
 
     const titulo = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"Bienvenido a Market-AI")]')),
-      10000
+      TIMEOUT
     );
     expect(await titulo.isDisplayed()).toBe(true);
   });
@@ -122,13 +122,13 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe mostrar el panel de administración con sus botones', async () => {
     const panel = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"Panel de administración")]')),
-      10000
+      TIMEOUT
     );
     expect(await panel.isDisplayed()).toBe(true);
 
     const btnUsuarios = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Panel de usuarios")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await btnUsuarios.isDisplayed()).toBe(true);
@@ -145,12 +145,12 @@ describe('Market-AI — Panel de Usuarios', () => {
 
     const btn = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Panel de usuarios")]')),
-      10000
+      TIMEOUT
     );
     await driver.executeScript('arguments[0].scrollIntoView({block:"center"})', btn);
     await driver.sleep(300);
     await driver.executeScript('arguments[0].click()', btn);
-    await driver.wait(until.urlContains('/admin/users'), 10000);
+    await driver.wait(until.urlContains('/admin/users'), TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/admin/users');
   });
@@ -158,7 +158,7 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe mostrar el título del Panel de Administración de Usuarios', async () => {
     const titulo = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"Panel de Administración de Usuarios")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await titulo.isDisplayed()).toBe(true);
@@ -168,7 +168,7 @@ describe('Market-AI — Panel de Usuarios', () => {
     for (const col of ['Estado', 'Rol', 'Nombre', 'Correo', 'Créditos', 'Acciones']) {
       const el = await driver.wait(
         until.elementLocated(By.xpath(`//*[contains(@class,"user-row--header")]//*[contains(.,"${col}")]`)),
-        10000
+        TIMEOUT
       );
       expect(await el.isDisplayed()).toBe(true);
     }
@@ -178,7 +178,7 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe mostrar al menos un usuario en la lista', async () => {
     const userRow = await driver.wait(
       until.elementLocated(By.css('.user-row:not(.user-row--header)')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await userRow.isDisplayed()).toBe(true);
@@ -189,7 +189,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]`)
       ),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await row.isDisplayed()).toBe(true);
@@ -202,7 +202,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"state-chip")]`)
       ),
-      10000
+      TIMEOUT
     );
     expect(await btn.isDisplayed()).toBe(true);
     const texto = await btn.getText();
@@ -214,7 +214,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"state-chip")]`)
       ),
-      10000
+      TIMEOUT
     );
     const estadoOriginal = (await btn.getText()).trim();
     await driver.executeScript('arguments[0].click()', btn);
@@ -224,7 +224,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"state-chip")]`)
       ),
-      10000
+      TIMEOUT
     );
     const estadoNuevo = (await btnActualizado.getText()).trim();
     expect(estadoNuevo).not.toBe(estadoOriginal);
@@ -235,7 +235,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"state-chip")]`)
       ),
-      10000
+      TIMEOUT
     );
     const estadoCambiado = (await btn.getText()).trim();
     await driver.executeScript('arguments[0].click()', btn);
@@ -245,7 +245,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"state-chip")]`)
       ),
-      10000
+      TIMEOUT
     );
     const estadoFinal = (await btnRevertido.getText()).trim();
     expect(estadoFinal).not.toBe(estadoCambiado);
@@ -258,7 +258,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//mat-select`)
       ),
-      10000
+      TIMEOUT
     );
     expect(await select.isDisplayed()).toBe(true);
   });
@@ -268,7 +268,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//mat-select`)
       ),
-      10000
+      TIMEOUT
     );
 
     // Seleccionar 'Usuario' primero para garantizar cambio pendiente real (idempotente si DB es 'Admin')
@@ -276,7 +276,7 @@ describe('Market-AI — Panel de Usuarios', () => {
     await driver.sleep(500);
     const usuarioOption = await driver.wait(
       until.elementLocated(By.xpath('//mat-option[.//span[contains(.,"Usuario")]]')),
-      10000
+      TIMEOUT
     );
     await driver.executeScript('arguments[0].click()', usuarioOption);
     await driver.sleep(PAUSE);
@@ -287,7 +287,7 @@ describe('Market-AI — Panel de Usuarios', () => {
 
     const adminOption = await driver.wait(
       until.elementLocated(By.xpath('//mat-option[.//span[contains(.,"Admin")]]')),
-      10000
+      TIMEOUT
     );
     await driver.executeScript('arguments[0].scrollIntoView({block:"center"})', adminOption);
     await driver.sleep(200);
@@ -311,7 +311,7 @@ describe('Market-AI — Panel de Usuarios', () => {
         const disabled = await btns[0].getAttribute('disabled');
         return disabled === null;
       },
-      10000
+      TIMEOUT
     );
     const btnRevertir = await driver.findElement(
       By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"user-btn-role")]`)
@@ -325,7 +325,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"user-btn-role")]`)
       ),
-      10000
+      TIMEOUT
     );
     await driver.executeScript('arguments[0].click()', btnRevertir);
     await driver.sleep(PAUSE);
@@ -344,7 +344,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"credits-edit-btn")]`)
       ),
-      10000
+      TIMEOUT
     );
     expect(await btn.isDisplayed()).toBe(true);
   });
@@ -354,13 +354,13 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"credits-edit-btn")]`)
       ),
-      10000
+      TIMEOUT
     );
     await driver.executeScript('arguments[0].click()', btn);
 
     const dialog = await driver.wait(
       until.elementLocated(By.css('mat-dialog-container')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await dialog.isDisplayed()).toBe(true);
@@ -369,7 +369,7 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe mostrar el título "Agregar créditos" en el diálogo', async () => {
     const titulo = await driver.wait(
       until.elementLocated(By.xpath('//mat-dialog-container//*[contains(.,"Agregar créditos")]')),
-      10000
+      TIMEOUT
     );
     expect(await titulo.isDisplayed()).toBe(true);
   });
@@ -377,19 +377,19 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe mostrar el campo de cantidad y los botones Cancelar/Guardar', async () => {
     const input = await driver.wait(
       until.elementLocated(By.xpath('//mat-dialog-container//input[@placeholder="Ej. 100"]')),
-      10000
+      TIMEOUT
     );
     expect(await input.isDisplayed()).toBe(true);
 
     const btnCancelar = await driver.wait(
       until.elementLocated(By.xpath('//mat-dialog-container//button[contains(.,"Cancelar")]')),
-      10000
+      TIMEOUT
     );
     expect(await btnCancelar.isDisplayed()).toBe(true);
 
     const btnGuardar = await driver.wait(
       until.elementLocated(By.xpath('//mat-dialog-container//button[contains(.,"Guardar")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await btnGuardar.isDisplayed()).toBe(true);
@@ -398,7 +398,7 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe cerrar el diálogo de créditos al presionar "Cancelar"', async () => {
     const btnCancelar = await driver.wait(
       until.elementLocated(By.xpath('//mat-dialog-container//button[contains(.,"Cancelar")]')),
-      10000
+      TIMEOUT
     );
     await btnCancelar.click();
     await driver.sleep(PAUSE);
@@ -414,7 +414,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"user-btn-delete")]`)
       ),
-      10000
+      TIMEOUT
     );
     expect(await btn.isDisplayed()).toBe(true);
   });
@@ -424,13 +424,13 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]//button[contains(@class,"user-btn-delete")]`)
       ),
-      10000
+      TIMEOUT
     );
     await driver.executeScript('arguments[0].click()', btn);
 
     const confirmacion = await driver.wait(
       until.elementLocated(By.xpath(`//mat-dialog-container//*[contains(.,"¿Seguro que deseas eliminar")]`)),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await confirmacion.isDisplayed()).toBe(true);
@@ -439,13 +439,13 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe mostrar los botones "Cancelar" y "Sí, eliminar" en el diálogo', async () => {
     const btnCancelar = await driver.wait(
       until.elementLocated(By.xpath('//mat-dialog-container//button[contains(.,"Cancelar")]')),
-      10000
+      TIMEOUT
     );
     expect(await btnCancelar.isDisplayed()).toBe(true);
 
     const btnSiEliminar = await driver.wait(
       until.elementLocated(By.xpath('//mat-dialog-container//button[contains(.,"Sí, eliminar")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await btnSiEliminar.isDisplayed()).toBe(true);
@@ -454,7 +454,7 @@ describe('Market-AI — Panel de Usuarios', () => {
   it(`Debe cancelar la eliminación y mantener a "${TARGET_USER}" en la lista`, async () => {
     const btnCancelar = await driver.wait(
       until.elementLocated(By.xpath('//mat-dialog-container//button[contains(.,"Cancelar")]')),
-      10000
+      TIMEOUT
     );
     await btnCancelar.click();
     await driver.sleep(PAUSE);
@@ -466,7 +466,7 @@ describe('Market-AI — Panel de Usuarios', () => {
       until.elementLocated(
         By.xpath(`//div[contains(@class,"user-row")][.//div[contains(@class,"user-col--email") and contains(.,"${TARGET_EMAIL}")]]`)
       ),
-      10000
+      TIMEOUT
     );
     expect(await row.isDisplayed()).toBe(true);
   });
@@ -476,12 +476,12 @@ describe('Market-AI — Panel de Usuarios', () => {
   it('Debe regresar al home-page desde el Panel de Usuarios', async () => {
     const btnBack = await driver.wait(
       until.elementLocated(By.css('button[mat-icon-button][routerlink="/home-page"]')),
-      10000
+      TIMEOUT
     );
     await driver.executeScript('arguments[0].scrollIntoView({block:"center"})', btnBack);
     await driver.sleep(300);
     await driver.executeScript('arguments[0].click()', btnBack);
-    await driver.wait(until.urlContains('/home-page'), 10000);
+    await driver.wait(until.urlContains('/home-page'), TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/home-page');
   });

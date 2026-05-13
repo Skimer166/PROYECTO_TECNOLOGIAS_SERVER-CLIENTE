@@ -1,7 +1,8 @@
-import { Builder, By, until, WebDriver } from 'selenium-webdriver';
-import * as chrome from 'selenium-webdriver/chrome';
+import { By, until, WebDriver } from 'selenium-webdriver';
+import { createDriver } from '../browser-factory';
+import { APP_URL, TIMEOUT, NAV_TIMEOUT } from '../helpers';
 
-const BASE_URL = 'https://proyectoservidorcliente.vercel.app';
+const BASE_URL = APP_URL;
 const PAUSE = 1000;
 
 describe('Market-AI — Chats de Soporte', () => {
@@ -10,16 +11,12 @@ describe('Market-AI — Chats de Soporte', () => {
   let tabUser: string;
 
   beforeAll(async () => {
-    const options = new chrome.Options();
-    options.addArguments('--no-sandbox', '--disable-dev-shm-usage', '--start-maximized');
-    driver = await new Builder()
-      .forBrowser('chrome')
-      .setChromeOptions(options)
-      .build();
+    const { driver: d, browserUsed } = await createDriver();
+    driver = d;
+    console.log(`Navegador detectado: ${browserUsed}`);
   }, 120000);
 
   afterAll(async () => {
-    await driver.sleep(PAUSE);
     if (driver) await driver.quit();
   });
 
@@ -27,7 +24,7 @@ describe('Market-AI — Chats de Soporte', () => {
 
   it('Debe abrir la landing page correctamente', async () => {
     await driver.get(`${BASE_URL}/landing-page`);
-    await driver.wait(until.titleContains('Market'), 10000);
+    await driver.wait(until.titleContains('Market'), TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/landing-page');
   });
@@ -35,7 +32,7 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe mostrar el título principal', async () => {
     const titulo = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"El marketplace donde encuentras")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await titulo.isDisplayed()).toBe(true);
@@ -44,7 +41,7 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe mostrar el botón "Ingresar"', async () => {
     const btn = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Ingresar")] | //a[contains(.,"Ingresar")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await btn.isDisplayed()).toBe(true);
@@ -55,10 +52,10 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe navegar a la página de login al presionar "Ingresar"', async () => {
     const btn = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Ingresar")]')),
-      10000
+      TIMEOUT
     );
     await btn.click();
-    await driver.wait(until.urlContains('/login'), 10000);
+    await driver.wait(until.urlContains('/login'), TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/login');
   });
@@ -66,20 +63,20 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe verificar que la página de login se muestra correctamente', async () => {
     const titulo = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"Inicia sesion en Market AI")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await titulo.isDisplayed()).toBe(true);
 
     const inputCorreo = await driver.wait(
       until.elementLocated(By.css('input[name="Correo"]')),
-      10000
+      TIMEOUT
     );
     expect(await inputCorreo.isDisplayed()).toBe(true);
 
     const inputContrasena = await driver.wait(
       until.elementLocated(By.css('input[name="Contrasena"]')),
-      10000
+      TIMEOUT
     );
     expect(await inputContrasena.isDisplayed()).toBe(true);
   });
@@ -87,14 +84,14 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe llenar el formulario de login y presionar Enviar', async () => {
     const inputCorreo = await driver.wait(
       until.elementLocated(By.css('input[name="Correo"]')),
-      10000
+      TIMEOUT
     );
     await inputCorreo.clear();
     await inputCorreo.sendKeys('ianrdzwong@gmail.com');
 
     const inputContrasena = await driver.wait(
       until.elementLocated(By.css('input[name="Contrasena"]')),
-      10000
+      TIMEOUT
     );
     await inputContrasena.clear();
     await inputContrasena.sendKeys('123456789');
@@ -102,7 +99,7 @@ describe('Market-AI — Chats de Soporte', () => {
 
     const btnEnviar = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Enviar")]')),
-      10000
+      TIMEOUT
     );
     await btnEnviar.click();
     await driver.sleep(PAUSE);
@@ -111,13 +108,13 @@ describe('Market-AI — Chats de Soporte', () => {
   // ── Home Page Admin ─────────────────────────────────────────────────────────
 
   it('Debe estar en el home-page después de iniciar sesión', async () => {
-    await driver.wait(until.urlContains('/home-page'), 15000);
+    await driver.wait(until.urlContains('/home-page'), NAV_TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/home-page');
 
     const titulo = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"Bienvenido a Market-AI")]')),
-      10000
+      TIMEOUT
     );
     expect(await titulo.isDisplayed()).toBe(true);
   });
@@ -125,13 +122,13 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe mostrar el panel de administración con sus botones', async () => {
     const panel = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"Panel de administración")]')),
-      10000
+      TIMEOUT
     );
     expect(await panel.isDisplayed()).toBe(true);
 
     const btnSoporte = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Chats de Soporte")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await btnSoporte.isDisplayed()).toBe(true);
@@ -148,12 +145,12 @@ describe('Market-AI — Chats de Soporte', () => {
 
     const btn = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Chats de Soporte")]')),
-      10000
+      TIMEOUT
     );
     await driver.executeScript('arguments[0].scrollIntoView({block:"center"})', btn);
     await driver.sleep(300);
     await driver.executeScript('arguments[0].click()', btn);
-    await driver.wait(until.urlContains('/admin/support'), 10000);
+    await driver.wait(until.urlContains('/admin/support'), TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/admin/support');
   });
@@ -161,7 +158,7 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe mostrar el título "Chats Activos"', async () => {
     const titulo = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"Chats Activos")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await titulo.isDisplayed()).toBe(true);
@@ -173,7 +170,7 @@ describe('Market-AI — Chats de Soporte', () => {
       until.elementLocated(
         By.xpath('//*[contains(.,"No hay solicitudes de soporte")] | //mat-list-item')
       ),
-      10000
+      TIMEOUT
     );
     expect(await contenido.isDisplayed()).toBe(true);
 
@@ -195,7 +192,7 @@ describe('Market-AI — Chats de Soporte', () => {
 
     const btnSalir = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(@class,"logout-btn")]')),
-      10000
+      TIMEOUT
     );
     await driver.executeScript('arguments[0].click()', btnSalir);
     await driver.sleep(PAUSE);
@@ -207,18 +204,18 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe iniciar sesión como kikeruv en la nueva pestaña', async () => {
     // Navegar directo a /login (landing-page oculta "Ingresar" si hay sesión activa)
     await driver.get(`${BASE_URL}/login`);
-    await driver.wait(until.urlContains('/login'), 10000);
+    await driver.wait(until.urlContains('/login'), TIMEOUT);
 
     const inputCorreo = await driver.wait(
       until.elementLocated(By.css('input[name="Correo"]')),
-      10000
+      TIMEOUT
     );
     await inputCorreo.clear();
     await inputCorreo.sendKeys('kikeruv2004@gmail.com');
 
     const inputContrasena = await driver.wait(
       until.elementLocated(By.css('input[name="Contrasena"]')),
-      10000
+      TIMEOUT
     );
     await inputContrasena.clear();
     await inputContrasena.sendKeys('1234567890');
@@ -226,11 +223,11 @@ describe('Market-AI — Chats de Soporte', () => {
 
     const btnEnviar = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Enviar")]')),
-      10000
+      TIMEOUT
     );
     await btnEnviar.click();
 
-    await driver.wait(until.urlContains('/home-page'), 15000);
+    await driver.wait(until.urlContains('/home-page'), NAV_TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/home-page');
   });
@@ -240,7 +237,7 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe mostrar el botón flotante de soporte', async () => {
     const fab = await driver.wait(
       until.elementLocated(By.css('button.support-fab')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await fab.isDisplayed()).toBe(true);
@@ -249,14 +246,14 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe abrir el chat de soporte al presionar el botón flotante', async () => {
     const fab = await driver.wait(
       until.elementLocated(By.css('button.support-fab')),
-      10000
+      TIMEOUT
     );
     await fab.click();
     await driver.sleep(PAUSE);
 
     const ventanaChat = await driver.wait(
       until.elementLocated(By.css('.support-chat-window')),
-      10000
+      TIMEOUT
     );
     expect(await ventanaChat.isDisplayed()).toBe(true);
   });
@@ -264,7 +261,7 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe mostrar el título "Soporte Técnico" en el chat', async () => {
     const titulo = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(@class,"chat-header")]//*[contains(.,"Soporte Técnico")]')),
-      10000
+      TIMEOUT
     );
     expect(await titulo.isDisplayed()).toBe(true);
   });
@@ -272,13 +269,13 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe mostrar el campo de texto y el botón de enviar', async () => {
     const input = await driver.wait(
       until.elementLocated(By.xpath('//input[@placeholder="Escribe tu duda..."]')),
-      10000
+      TIMEOUT
     );
     expect(await input.isDisplayed()).toBe(true);
 
     const btnEnviar = await driver.wait(
       until.elementLocated(By.css('.chat-footer button[mat-mini-fab]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await btnEnviar.isDisplayed()).toBe(true);
@@ -287,7 +284,7 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe enviar un mensaje de soporte', async () => {
     const input = await driver.wait(
       until.elementLocated(By.xpath('//input[@placeholder="Escribe tu duda..."]')),
-      10000
+      TIMEOUT
     );
     await input.clear();
     await input.sendKeys('Hola, necesito ayuda con mi cuenta - Selenium Test');
@@ -295,14 +292,14 @@ describe('Market-AI — Chats de Soporte', () => {
 
     const btnEnviar = await driver.wait(
       until.elementLocated(By.css('.chat-footer button[mat-mini-fab]')),
-      10000
+      TIMEOUT
     );
     await btnEnviar.click();
     await driver.sleep(PAUSE * 2);
 
     const mensaje = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(@class,"bubble")]//*[contains(.,"Hola, necesito ayuda")]')),
-      10000
+      TIMEOUT
     );
     expect(await mensaje.isDisplayed()).toBe(true);
   });
@@ -315,7 +312,7 @@ describe('Market-AI — Chats de Soporte', () => {
 
     const sesion = await driver.wait(
       until.elementLocated(By.xpath('//mat-list-item[.//*[contains(.,"Enrique")]]')),
-      15000
+      NAV_TIMEOUT
     );
     expect(await sesion.isDisplayed()).toBe(true);
   });
@@ -323,14 +320,14 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe seleccionar la sesión de Enrique y abrir el chat', async () => {
     const sesion = await driver.wait(
       until.elementLocated(By.xpath('//mat-list-item[.//*[contains(.,"Enrique")]]')),
-      10000
+      TIMEOUT
     );
     await sesion.click();
     await driver.sleep(PAUSE);
 
     const chatHeader = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(@class,"chat-header")][contains(.,"Enrique")]')),
-      10000
+      TIMEOUT
     );
     expect(await chatHeader.isDisplayed()).toBe(true);
   });
@@ -338,7 +335,7 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe mostrar el mensaje enviado por kikeruv en el chat del admin', async () => {
     const mensaje = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(@class,"messages")]//*[contains(.,"Hola, necesito ayuda")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await mensaje.isDisplayed()).toBe(true);
@@ -347,13 +344,13 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe mostrar el campo de respuesta del admin y el botón "Enviar"', async () => {
     const inputRespuesta = await driver.wait(
       until.elementLocated(By.xpath('//input[@placeholder="Escribe una respuesta..."]')),
-      10000
+      TIMEOUT
     );
     expect(await inputRespuesta.isDisplayed()).toBe(true);
 
     const btnEnviar = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Enviar")]')),
-      10000
+      TIMEOUT
     );
     await driver.sleep(PAUSE);
     expect(await btnEnviar.isDisplayed()).toBe(true);
@@ -362,7 +359,7 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe enviar una respuesta al usuario desde el panel de admin', async () => {
     const inputRespuesta = await driver.wait(
       until.elementLocated(By.xpath('//input[@placeholder="Escribe una respuesta..."]')),
-      10000
+      TIMEOUT
     );
     await inputRespuesta.clear();
     await inputRespuesta.sendKeys('Hola kikeruv, estamos revisando tu caso - Admin Selenium');
@@ -370,14 +367,14 @@ describe('Market-AI — Chats de Soporte', () => {
 
     const btnEnviar = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Enviar")]')),
-      10000
+      TIMEOUT
     );
     await btnEnviar.click();
     await driver.sleep(PAUSE * 2);
 
     const respuesta = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(@class,"messages")]//*[contains(.,"Hola kikeruv, estamos revisando")]')),
-      10000
+      TIMEOUT
     );
     expect(await respuesta.isDisplayed()).toBe(true);
   });
@@ -390,7 +387,7 @@ describe('Market-AI — Chats de Soporte', () => {
 
     const respuesta = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(@class,"bubble")]//*[contains(.,"Hola kikeruv, estamos revisando")]')),
-      10000
+      TIMEOUT
     );
     expect(await respuesta.isDisplayed()).toBe(true);
   });
@@ -398,7 +395,7 @@ describe('Market-AI — Chats de Soporte', () => {
   it('Debe cerrar el chat de soporte del usuario', async () => {
     const btnCerrar = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(@class,"chat-header")]//button[@mat-icon-button]')),
-      10000
+      TIMEOUT
     );
     await btnCerrar.click();
     await driver.sleep(PAUSE);
@@ -414,12 +411,12 @@ describe('Market-AI — Chats de Soporte', () => {
 
     const btnBack = await driver.wait(
       until.elementLocated(By.css('button[mat-icon-button][routerlink="/home-page"]')),
-      10000
+      TIMEOUT
     );
     await driver.executeScript('arguments[0].scrollIntoView({block:"center"})', btnBack);
     await driver.sleep(300);
     await driver.executeScript('arguments[0].click()', btnBack);
-    await driver.wait(until.urlContains('/home-page'), 10000);
+    await driver.wait(until.urlContains('/home-page'), TIMEOUT);
     await driver.sleep(PAUSE);
     expect(await driver.getCurrentUrl()).toContain('/home-page');
   });
