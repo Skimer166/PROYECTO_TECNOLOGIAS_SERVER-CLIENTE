@@ -113,16 +113,32 @@ describe('RP — Reset Password Page (E2E Selenium)', () => {
     }
 
     await goToResetWithToken('invalid-expired-token-123');
-    await driver!.findElement(By.css('input[formControlName="Contrasena"]')).sendKeys('NewPassword123');
-    await driver!.findElement(By.css('input[formControlName="ConfirmarContrasena"]')).sendKeys('NewPassword123');
-    await driver!.findElement(By.xpath('//button[contains(.,"Guardar")]')).click();
+
+    await driver!
+      .findElement(By.css('input[formControlName="Contrasena"]'))
+      .sendKeys('NewPassword123');
+
+    await driver!
+      .findElement(By.css('input[formControlName="ConfirmarContrasena"]'))
+      .sendKeys('NewPassword123');
+
+    await driver!
+      .findElement(By.xpath('//button[contains(.,"Guardar")]'))
+      .click();
 
     const dialog = await driver!.wait(
       until.elementLocated(By.css('mat-dialog-container')),
       TIMEOUT
     );
-    const text = await dialog.getText();
-    expect(text.toLowerCase()).toMatch(/inválido|expirado|error/);
+
+    await driver!.wait(async () => {
+      const text = await dialog.getText();
+      return text.trim().length > 0;
+    }, TIMEOUT);
+
+    const text = (await dialog.getText()).toLowerCase();
+
+    expect(text).toMatch(/inválido|expirado|error/);
   });
 
   // ─── RP-05 ─────────────────────────────────────────────────────────────────
