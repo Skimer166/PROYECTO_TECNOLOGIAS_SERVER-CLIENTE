@@ -1,5 +1,6 @@
 import { Builder, By, until, WebDriver } from 'selenium-webdriver';
 import * as chrome from 'selenium-webdriver/chrome';
+import * as chromedriver from 'chromedriver';
 
 const BASE_URL = 'https://proyectoservidorcliente.vercel.app';
 const PAUSE = 1000;
@@ -8,13 +9,15 @@ describe('Market-AI — Panel de Agentes', () => {
   let driver: WebDriver;
 
   beforeAll(async () => {
+    const service = new chrome.ServiceBuilder(chromedriver.path);
     const options = new chrome.Options();
     options.addArguments('--no-sandbox', '--disable-dev-shm-usage', '--start-maximized');
     driver = await new Builder()
       .forBrowser('chrome')
+      .setChromeService(service)
       .setChromeOptions(options)
       .build();
-  }, 120000);
+  }, 60000);
 
   afterAll(async () => {
     await driver.sleep(PAUSE);
@@ -142,7 +145,7 @@ describe('Market-AI — Panel de Agentes', () => {
     // Cerrar cualquier overlay/dialog abierto (p.ej. snackbar de login)
     const overlays = await driver.findElements(By.css('.cdk-overlay-backdrop-showing'));
     for (const overlay of overlays) {
-      try { await driver.executeScript('arguments[0].click()', overlay); } catch (e) { console.warn('overlay click failed', e); }
+      try { await driver.executeScript('arguments[0].click()', overlay); } catch (_) {}
     }
     if (overlays.length > 0) await driver.sleep(500);
 

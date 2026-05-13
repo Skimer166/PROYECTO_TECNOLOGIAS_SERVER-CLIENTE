@@ -1,7 +1,7 @@
 import { Builder, By, until, WebDriver } from 'selenium-webdriver';
 import * as chrome from 'selenium-webdriver/chrome';
 
-const BASE_URL = 'http://localhost:4200';
+const BASE_URL = 'https://proyectoservidorcliente.vercel.app';
 const PAUSE = 1000;
 
 describe('Market-AI — Chats de Soporte', () => {
@@ -16,7 +16,7 @@ describe('Market-AI — Chats de Soporte', () => {
       .forBrowser('chrome')
       .setChromeOptions(options)
       .build();
-  }, 60000);
+  }, 120000);
 
   afterAll(async () => {
     await driver.sleep(PAUSE);

@@ -4,7 +4,7 @@ const config = {
   testEnvironment: 'node',
   testMatch: ['**/selenium/tests/**/*.test.ts'],
   passWithNoTests: true,
-  testTimeout: 30000,
+  testTimeout: 60000,
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: { esModuleInterop: true } }],
   },
