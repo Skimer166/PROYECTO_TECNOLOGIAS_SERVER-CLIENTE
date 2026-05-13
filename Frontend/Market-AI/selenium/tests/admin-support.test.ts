@@ -23,11 +23,17 @@ describe('Market-AI — Chats de Soporte', () => {
       } catch (error) {
         lastError = error as Error;
         console.warn(`⚠ Intento ${i + 1} falló: ${lastError.message}`);
-        if (i < maxRetries - 1) await new Promise(r => setTimeout(r, 2000));
+        console.warn(`Stack: ${lastError.stack}`);
+        if (i < maxRetries - 1) await new Promise(r => setTimeout(r, 3000));
       }
     }
 
-    throw new Error(`WebDriver no pudo iniciarse tras ${maxRetries} intentos: ${lastError?.message}`);
+    const errorMsg =
+      `WebDriver no pudo iniciarse tras ${maxRetries} intentos.\n` +
+      `Último error: ${lastError?.message}\n` +
+      `Verifica que el navegador y WebDriver están disponibles en el ambiente CI.`;
+    console.error(errorMsg);
+    throw new Error(errorMsg);
   }, 120000);
 
   afterAll(async () => {
