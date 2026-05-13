@@ -3,34 +3,31 @@ import { Options as ChromeOptions } from 'selenium-webdriver/chrome';
 import { Options as EdgeOptions } from 'selenium-webdriver/edge';
 import * as fs from 'fs';
 
-const EDGE_PATHS = [
-  // Windows
-  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
-  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
-  // Linux (pre-instalado en GitHub Actions ubuntu-latest)
-  '/usr/bin/microsoft-edge',
-  '/usr/bin/microsoft-edge-stable',
-  '/usr/bin/msedge',
+// Rutas Windows
+const BRAVE_PATHS = [
+  'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+  'C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
 ];
 
 const CHROME_PATHS = [
   // Windows
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
   'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-  // Linux
+  // Linux (GitHub Actions ubuntu-latest)
   '/usr/bin/google-chrome',
   '/usr/bin/google-chrome-stable',
   '/usr/bin/chromium-browser',
   '/usr/bin/chromium',
 ];
 
-const BRAVE_PATHS = [
+const EDGE_PATHS = [
   // Windows
-  'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
-  'C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
   // Linux
-  '/usr/bin/brave-browser',
-  '/usr/bin/brave',
+  '/usr/bin/microsoft-edge',
+  '/usr/bin/microsoft-edge-stable',
+  '/usr/bin/msedge',
 ];
 
 function findBinary(paths: string[]): string | null {
@@ -50,6 +47,7 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
   if (edgePath) {
     try {
       const options = new EdgeOptions();
+      options.setBinaryPath(edgePath);
       options.addArguments(...headlessArgs);
       const driver = await new Builder()
         .forBrowser('MicrosoftEdge')
@@ -59,25 +57,12 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
     } catch { /* intentar siguiente */ }
   }
 
-  // 2. Intentar Brave (usa ChromeDriver)
-  const bravePath = findBinary(BRAVE_PATHS);
-  if (bravePath) {
-    try {
-      const options = new EdgeOptions();
-      options.addArguments(...headlessArgs);
-      const driver = await new Builder()
-        .forBrowser('MicrosoftEdge')
-        .setEdgeOptions(options)
-        .build();
-      return { driver, browserUsed: 'Microsoft Edge' };
-    } catch { /* intentar siguiente */ }
-  }
-
-  // 3. Intentar Chrome
+  // 2. Intentar Chrome con ruta explícita
   const chromePath = findBinary(CHROME_PATHS);
   if (chromePath) {
     try {
       const options = new ChromeOptions();
+      options.setBinaryPath(chromePath);
       options.addArguments(...headlessArgs);
       const driver = await new Builder()
         .forBrowser('chrome')
@@ -86,6 +71,32 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
       return { driver, browserUsed: 'Chrome' };
     } catch { /* intentar siguiente */ }
   }
+
+  // 3. Intentar Brave (usa ChromeDriver)
+  const bravePath = findBinary(BRAVE_PATHS);
+  if (bravePath) {
+    try {
+      const options = new ChromeOptions();
+      options.setBinaryPath(bravePath);
+      options.addArguments(...headlessArgs);
+      const driver = await new Builder()
+        .forBrowser('chrome')
+        .setChromeOptions(options)
+        .build();
+      return { driver, browserUsed: 'Brave' };
+    } catch { /* intentar siguiente */ }
+  }
+
+  // 4. Fallback: dejar que Selenium Manager encuentre Chrome en el PATH del sistema
+  try {
+    const options = new ChromeOptions();
+    options.addArguments(...headlessArgs);
+    const driver = await new Builder()
+      .forBrowser('chrome')
+      .setChromeOptions(options)
+      .build();
+    return { driver, browserUsed: 'Chrome (PATH)' };
+  } catch { /* intentar siguiente */ }
 
   throw new Error(
     'No se encontró ningún navegador compatible (Brave, Chrome o Edge).\n' +

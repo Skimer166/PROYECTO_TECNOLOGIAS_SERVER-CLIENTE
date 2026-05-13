@@ -35,6 +35,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Google Chrome
+        run: |
+          wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i /tmp/chrome.deb
+          sudo apt-get -fy install
+          google-chrome --version
+
+      - name: Apuntar Angular al backend de produccion
+        run: sed -i "s|http://localhost:3001|https://market-ai-api.onrender.com|g" src/app/shared/config.ts
+        shell: bash
+
       - name: Build Angular (browser SPA)
         run: npx ng build --configuration=development 2>&1
         shell: bash
@@ -43,29 +54,23 @@ jobs:
         run: nohup npx http-server dist/Market-AI/browser -p 4200 --spa -c-1 --cors > /tmp/server.log 2>&1 &
         shell: bash
 
-      - name: Esperar a que el servidor este listo
+      - name: Esperar a que Angular esté listo en el puerto 4200
         run: |
-          elapsed=0
-          until curl -s http://localhost:4200 > /dev/null 2>&1; do
-            echo "Esperando servidor... ($elapsed s)"
-            sleep 3
-            elapsed=$((elapsed + 3))
-            if [ $elapsed -ge 60 ]; then
-              echo "Servidor no inicio. Log:"
-              cat /tmp/server.log || true
-              exit 1
+          echo "Esperando Angular en http://localhost:4200..."
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:4200 > /dev/null; then
+              echo "Angular listo"
+              exit 0
             fi
+            sleep 3
           done
-          echo "Servidor listo despues de $elapsed segundos"
-        shell: bash
+          echo "Timeout esperando Angular"
+          exit 1
 
       - name: Ejecutar pruebas Selenium
         run: npm run selenium
         env:
-          CI: true
           BACKEND_URL: https://market-ai-api.onrender.com
-          USER_EMAIL: ${{ secrets.USER_EMAIL }}
-          USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
 
       - name: Subir reporte de resultados
         uses: actions/upload-artifact@v4

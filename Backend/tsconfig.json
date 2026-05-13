@@ -8,6 +8,7 @@
     "strict": true,
     "moduleResolution": "nodenext",
     "resolveJsonModule": true,
+    "isolatedModules": true,
     "types": ["jest", "node", "passport"]
   },
   "files": ["./src/types/express.d.ts"],
