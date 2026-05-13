@@ -41,7 +41,7 @@ export async function chatWithAgent(req: Request, res: Response) {
 
     const botResponse = completion.choices[0].message.content;
 
-    return res.json({ 
+    return res.status(200).json({ 
       agent: agent.name,
       response: botResponse,
       usage: completion.usage 

@@ -1,7 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Register } from './register';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideRouter } from '@angular/router';
+import {
+  provideRouter,
+  ActivatedRoute,
+  convertToParamMap
+} from '@angular/router';
+
+import { of } from 'rxjs';
+
+import {
+  provideHttpClient
+} from '@angular/common/http';
+
+import {
+  provideHttpClientTesting
+} from '@angular/common/http/testing';
 
 describe('RG — Register Page', () => {
   let component: Register;
@@ -13,6 +27,14 @@ describe('RG — Register Page', () => {
       providers: [
         provideAnimationsAsync(),
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParamMap: of(convertToParamMap({}))
+          }
+        }
       ],
     }).compileComponents();
 

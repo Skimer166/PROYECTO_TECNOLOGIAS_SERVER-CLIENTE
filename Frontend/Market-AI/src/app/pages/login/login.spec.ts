@@ -1,8 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, flushMicrotasks } from '@angular/core/testing';
 import { Login } from './login';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, throwError, from } from 'rxjs';
 import { AuthService } from '../../shared/services/auth';
 import { MatDialog } from '@angular/material/dialog';
 import { Location } from '@angular/common';
@@ -22,7 +22,12 @@ describe('LG — Login Page', () => {
       'requestPasswordReset',
       'setTokenFromOAuth',
       'getToken',
+      'getGoogleLoginUrl'
     ]);
+
+    authMock.login.and.returnValue(
+      from(Promise.resolve({ token: 'Bearer1234' }))
+    );
 
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
@@ -49,13 +54,16 @@ describe('LG — Login Page', () => {
     fixture = TestBed.createComponent(Login);
     component = fixture.componentInstance;
 
-    spyOn(component as Login & {
-      openDialog: (
-        title: string,
-        message: string,
-        type: string
-      ) => void;
-    }, 'openDialog').and.stub();
+    spyOn(
+      component as Login & {
+        openDialog: (
+          title: string,
+          message: string,
+          type: string
+        ) => void;
+      },
+      'openDialog'
+    ).and.stub();
 
     fixture.detectChanges();
   });
@@ -263,5 +271,43 @@ describe('LG — Login Page', () => {
         'Mensaje'
       );
     }).not.toThrow();
+  });
+
+  it('LG-20: login exitoso guarda token y navega', fakeAsync(() => {
+    
+    spyOn(window.localStorage, 'setItem');
+
+    component.form.setValue({
+      Correo: 'test@mail.com',
+      Contrasena: '12345678'
+    });
+
+    component.doOnSubmit();
+
+    expect(authMock.login).toHaveBeenCalledOnceWith({
+      email: 'test@mail.com',
+      password: '12345678'
+    });
+
+    flushMicrotasks();
+
+    expect(window.localStorage.setItem)
+      .toHaveBeenCalledWith('token', 'Bearer1234');
+
+    expect(routerSpy.navigate)
+      .toHaveBeenCalledWith(['/home-page']);
+  }));
+
+  it('LG-21: no llama login si el form es inválido', () => {
+    authMock.login.calls.reset();
+
+    component.form.setValue({
+      Correo: '',
+      Contrasena: ''
+    });
+
+    component.doOnSubmit();
+
+    expect(authMock.login).not.toHaveBeenCalled();
   });
 });
