@@ -35,6 +35,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Google Chrome
+        run: |
+          wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i /tmp/chrome.deb
+          sudo apt-get -fy install
+          google-chrome --version
+
       - name: Apuntar Angular al backend de produccion
         run: sed -i "s|http://localhost:3001|https://market-ai-api.onrender.com|g" src/app/shared/config.ts
         shell: bash
