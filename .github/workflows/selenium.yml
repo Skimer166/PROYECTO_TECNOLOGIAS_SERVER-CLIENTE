@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Google Chrome
+        uses: browser-actions/setup-chrome@v1
+
       - name: Start Angular dev server en background
         run: npx ng serve --host 0.0.0.0 &
 
@@ -55,6 +58,10 @@ jobs:
         run: npm run selenium
         env:
           BACKEND_URL: https://market-ai-api.onrender.com
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
 
       - name: Subir reporte de resultados
         uses: actions/upload-artifact@v4

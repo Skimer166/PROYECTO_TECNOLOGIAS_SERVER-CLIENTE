@@ -3,20 +3,33 @@ import { Options as ChromeOptions } from 'selenium-webdriver/chrome';
 import { Options as EdgeOptions } from 'selenium-webdriver/edge';
 import * as fs from 'fs';
 
-// Rutas donde puede estar instalado cada navegador en Windows
 const BRAVE_PATHS = [
+  // Windows
   'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
   'C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+  // Linux
+  '/usr/bin/brave-browser',
+  '/usr/bin/brave',
 ];
 
 const CHROME_PATHS = [
+  // Windows
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
   'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  // Linux
+  '/usr/bin/google-chrome',
+  '/usr/bin/google-chrome-stable',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/chromium',
 ];
 
 const EDGE_PATHS = [
+  // Windows
   'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
   'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+  // Linux
+  '/usr/bin/microsoft-edge',
+  '/usr/bin/microsoft-edge-stable',
 ];
 
 function findBinary(paths: string[]): string | null {
