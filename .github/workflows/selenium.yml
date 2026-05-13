@@ -35,6 +35,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Apuntar Angular al backend de produccion
+        run: sed -i "s|http://localhost:3001|https://market-ai-api.onrender.com|g" src/app/shared/config.ts
+        shell: bash
+
       - name: Build Angular (browser SPA)
         run: npx ng build --configuration=development 2>&1
         shell: bash
