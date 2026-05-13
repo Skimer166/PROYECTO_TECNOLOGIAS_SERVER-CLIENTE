@@ -1,21 +1,5 @@
 # Backend — Test Suite Documentation
 
-## Overview
-
-| Metric | Value |
-|--------|-------|
-| Total test suites | 20 |
-| Total tests | 359 |
-| All tests passing | Yes |
-| Overall statement coverage | 93.32 % |
-| Overall branch coverage | 80.14 % |
-| Overall function coverage | 84.72 % |
-| Overall line coverage | 94.94 % |
-| Test runner | Jest 30 + ts-jest |
-| Test environment | Node |
-
----
-
 ## Test stack
 
 | Package | Purpose |
@@ -413,41 +397,6 @@ Mocks: mailer functions
 
 ---
 
-## Coverage by module
-
-```
-File                        | Stmts  | Branch | Funcs  | Lines
-----------------------------|--------|--------|--------|--------
-All files                   | 93.32% | 80.14% | 84.72% | 94.94%
-src/app/agents/controller   | 85.08% | 75.75% | 90.90% | 90.62%
-src/app/auth/controller     | 97.41% | 87.69% |   100% | 98.23%
-src/app/auth/google         | 95.12% | 80.76% | 66.66% | 95.00%
-src/app/chat/controller     |   100% |   100% |   100% |   100%
-src/app/documents/controller| 94.28% | 81.25% |   100% | 94.28%
-src/app/mailer/controller   |   100% | 50.00% |   100% |   100%
-src/app/middlewares/auth    | 95.91% | 93.75% |   100% | 95.45%
-src/app/payments/controller | 97.36% | 79.16% |   100% |   100%
-src/app/storage/s3          | 80.00% | 67.64% | 44.44% | 78.57%
-src/app/users/controller    | 97.27% | 82.05% |   100% | 98.97%
-src/database/index          |   100% |   100% |   100% |   100%
-src/app/*/model             |   100% |   100% |   100% |   100%
-src/app/*/routes            |   100% |   100% |   100% |   100%
-```
-
-### Uncovered areas
-
-| File | Uncovered lines | Reason |
-|------|----------------|--------|
-| `agents/controller.ts` | 149–153, 181–182, 265–277, 289–290 | `updateAgent` admin path, timer teardown on `rentAgent` |
-| `auth/controller.ts` | 96, 145 | Edge branches in login and resetPassword |
-| `auth/google.ts` | 54, 83 | Google strategy error branches |
-| `documents/controller.ts` | 120–121, 156–157 | Content-Length absent path, S3 delete + DB delete combined error |
-| `middlewares/auth.ts` | 34–35 | `authMiddleware` token extraction fallback |
-| `storage/s3.ts` | 71–75, 88–98 | `uploadBuffer` + `getObject` return type branches |
-| `payments/controller.ts` | 9–15, 45, 70, 73 | Stripe singleton init guard, minor branches |
-
----
-
 ## Running the tests
 
 ```bash
@@ -488,14 +437,3 @@ Tests run automatically on every pull request via `.github/workflows/jest-test.y
 | `MONGO_URL` | `dbConnect()` unit tests |
 
 A separate job in `.github/workflows/pre-commit.yml` runs ESLint (`--max-warnings=0`) and `tsc --noEmit` on every pull request.
-
----
-
-## Known gaps / documented behaviors
-
-| Gap | Location | Notes |
-|-----|----------|-------|
-| Download route has no auth guard | `GET /files/:id/download` | Any user can download any file by ID. Documented in `documents.integration.test.ts`. |
-| No ownership check on user profile update | `PUT /users/:id` | Any authenticated user can edit any other user's profile. Documented in `security.integration.test.ts`. |
-| `storage/s3.ts` branch coverage 67 % | `src/app/storage/s3.ts` | Content-type detection and upload/get return branches are integration-tested implicitly but not all paths reached by unit tests. |
-| Socket.IO `rentAgent` timer not fully tested | `agents/controller.ts` lines 265–277 | The countdown timer that auto-releases an agent is difficult to unit test with fixed time mocks; covered partially by integration rent tests. |
