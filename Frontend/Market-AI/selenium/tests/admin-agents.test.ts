@@ -6,7 +6,7 @@ const BASE_URL = 'http://localhost:4200';
 const BACKEND_URL = process.env['BACKEND_URL'] ?? 'https://market-ai-api.onrender.com';
 const ADMIN_EMAIL = process.env['ADMIN_EMAIL'] ?? '';
 const ADMIN_PASSWORD = process.env['ADMIN_PASSWORD'] ?? '';
-const TIMEOUT = 10000;
+const TIMEOUT = process.env['CI'] ? 30000 : 10000;
 
 // Inicia sesión como admin y espera la redirección al home
 async function loginAsAdmin(driver: WebDriver): Promise<void> {
