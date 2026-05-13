@@ -34,24 +34,27 @@ jobs:
         run: npm install
 
       - name: Start Angular dev server en background
-        run: Start-Process -NoNewWindow npx -ArgumentList "ng serve --host 0.0.0.0"
-        shell: pwsh
+        run: npx ng serve --host 0.0.0.0 &
+        shell: bash
 
       - name: Esperar a que Angular esté listo en el puerto 4200
         run: |
-          $timeout = 90
+          $timeout = 120
           $elapsed = 0
           Write-Host "Esperando Angular en http://localhost:4200..."
           while ($elapsed -lt $timeout) {
             try {
               Invoke-WebRequest -Uri "http://localhost:4200" -UseBasicParsing -ErrorAction Stop | Out-Null
-              Write-Host "Angular listo"
-              break
+              Write-Host "Angular listo en $elapsed segundos"
+              exit 0
             } catch {
               Start-Sleep -Seconds 3
               $elapsed += 3
+              Write-Host "Esperando... ($elapsed/$timeout s)"
             }
           }
+          Write-Error "Angular no inicio en $timeout segundos"
+          exit 1
         shell: pwsh
 
       - name: Ejecutar pruebas Selenium
