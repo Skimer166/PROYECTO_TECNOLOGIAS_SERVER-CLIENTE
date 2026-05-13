@@ -1,293 +1,421 @@
-// Tests E2E - Admin Agents
-import { Builder, By, until, WebDriver } from 'selenium-webdriver';
-import * as chrome from 'selenium-webdriver/chrome';
+import { By, until, WebDriver } from 'selenium-webdriver';
+import { createDriver } from '../browser-factory';
+import { TIMEOUT, NAV_TIMEOUT } from '../helpers';
 
-const BASE_URL = 'http://localhost:4200';
-const BACKEND_URL = process.env['BACKEND_URL'] ?? 'https://market-ai-api.onrender.com';
-const ADMIN_EMAIL = process.env['ADMIN_EMAIL'] ?? '';
-const ADMIN_PASSWORD = process.env['ADMIN_PASSWORD'] ?? '';
-const TIMEOUT = process.env['CI'] ? 30000 : 10000;
+const BASE_URL = 'https://proyectoservidorcliente.vercel.app';
+const PAUSE = 1000;
 
-// Inicia sesión como admin y espera la redirección al home
-async function loginAsAdmin(driver: WebDriver): Promise<void> {
-  await driver.get(`${BASE_URL}/login`);
-  await driver.findElement(By.css('input[formControlName="Correo"]')).sendKeys(ADMIN_EMAIL);
-  await driver.findElement(By.css('input[formControlName="Contrasena"]')).sendKeys(ADMIN_PASSWORD);
-  await driver.findElement(By.xpath('//button[contains(.,"Enviar")]')).click();
-  await driver.wait(until.urlContains('/home-page'), TIMEOUT);
-}
-
-describe('Admin — Agentes (E2E)', () => {
-  let driver: WebDriver | undefined;
-  let backendAvailable = false;
-  let adminCredentialsAvailable = false;
+describe('Market-AI — Panel de Agentes', () => {
+  let driver: WebDriver;
 
   beforeAll(async () => {
-    // Verificar si el backend está disponible
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      await fetch(`${BACKEND_URL}/auth/login`, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      backendAvailable = true;
-    } catch {
-      backendAvailable = false;
-    }
-
-    adminCredentialsAvailable = backendAvailable && !!ADMIN_EMAIL && !!ADMIN_PASSWORD;
-
-    if (!backendAvailable) {
-      console.warn('\nBackend no disponible. Las pruebas que requieren backend serán omitidas.\n');
-    } else if (!adminCredentialsAvailable) {
-      console.warn('\nCredenciales de admin no configuradas (ADMIN_EMAIL / ADMIN_PASSWORD).');
-      console.warn('Las pruebas que requieren autenticación serán omitidas.\n');
-    } else {
-      console.log(`\nBackend disponible en ${BACKEND_URL}\n`);
-    }
-
-    const options = new chrome.Options();
-    options.addArguments('--headless', '--no-sandbox', '--disable-dev-shm-usage');
-    driver = await new Builder().forBrowser('chrome').setChromeOptions(options).build();
-    console.log('Navegador detectado: Chrome\n');
-  }, 60000);
+    const { driver: d, browserUsed } = await createDriver();
+    driver = d;
+    console.log(`Navegador detectado: ${browserUsed}`);
+  }, 120000);
 
   afterAll(async () => {
     if (driver) await driver.quit();
   });
 
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 2: Requiere backend + credenciales de admin
-  // ──────────────────────────────────────────────────────────────
-  it('Debe mostrar el título del panel de administración de agentes', async () => {
-    if (!adminCredentialsAvailable) {
-      console.warn('  Prueba omitida: credenciales de admin no disponibles.');
-      return;
-    }
+  // ── Landing Page ────────────────────────────────────────────────────────────
 
-    await loginAsAdmin(driver!);
-    await driver!.get(`${BASE_URL}/admin/agents`);
-
-    const heading = await driver!.wait(
-      until.elementLocated(By.xpath('//h1[contains(.,"Panel de Administración de Agentes")]')),
-      TIMEOUT
-    );
-    expect(await heading.isDisplayed()).toBe(true);
+  it('Debe abrir la landing page correctamente', async () => {
+    await driver.get(`${BASE_URL}/landing-page`);
+    await driver.wait(until.titleContains('Market'), TIMEOUT);
+    await driver.sleep(PAUSE);
+    const url = await driver.getCurrentUrl();
+    expect(url).toContain('/landing-page');
   });
 
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 3: Requiere backend + credenciales de admin
-  // ──────────────────────────────────────────────────────────────
-  it('Debe mostrar el botón "Crear Agente" habilitado', async () => {
-    if (!adminCredentialsAvailable) {
-      console.warn('  Prueba omitida: credenciales de admin no disponibles.');
-      return;
-    }
+  it('Debe mostrar el título principal', async () => {
+    const titulo = await driver.wait(
+      until.elementLocated(By.xpath('//*[contains(.,"El marketplace donde encuentras")]')),
+      TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await titulo.isDisplayed()).toBe(true);
+  });
 
-    const createBtn = await driver!.wait(
+  it('Debe mostrar el botón "Ingresar"', async () => {
+    const btn = await driver.wait(
+      until.elementLocated(By.xpath('//button[contains(.,"Ingresar")] | //a[contains(.,"Ingresar")]')),
+      TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await btn.isDisplayed()).toBe(true);
+  });
+
+  // ── Login ───────────────────────────────────────────────────────────────────
+
+  it('Debe navegar a la página de login al presionar "Ingresar"', async () => {
+    const btn = await driver.wait(
+      until.elementLocated(By.xpath('//button[contains(.,"Ingresar")]')),
+      TIMEOUT
+    );
+    await btn.click();
+    await driver.wait(until.urlContains('/login'), TIMEOUT);
+    await driver.sleep(PAUSE);
+    expect(await driver.getCurrentUrl()).toContain('/login');
+  });
+
+  it('Debe verificar que la página de login se muestra correctamente', async () => {
+    const titulo = await driver.wait(
+      until.elementLocated(By.xpath('//*[contains(.,"Inicia sesion en Market AI")]')),
+      TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await titulo.isDisplayed()).toBe(true);
+
+    const inputCorreo = await driver.wait(
+      until.elementLocated(By.css('input[name="Correo"]')),
+      TIMEOUT
+    );
+    expect(await inputCorreo.isDisplayed()).toBe(true);
+
+    const inputContrasena = await driver.wait(
+      until.elementLocated(By.css('input[name="Contrasena"]')),
+      TIMEOUT
+    );
+    expect(await inputContrasena.isDisplayed()).toBe(true);
+  });
+
+  it('Debe llenar el formulario de login y presionar Enviar', async () => {
+    const inputCorreo = await driver.wait(
+      until.elementLocated(By.css('input[name="Correo"]')),
+      TIMEOUT
+    );
+    await inputCorreo.clear();
+    await inputCorreo.sendKeys('ianrdzwong@gmail.com');
+
+    const inputContrasena = await driver.wait(
+      until.elementLocated(By.css('input[name="Contrasena"]')),
+      TIMEOUT
+    );
+    await inputContrasena.clear();
+    await inputContrasena.sendKeys('123456789');
+    await driver.sleep(PAUSE);
+
+    const btnEnviar = await driver.wait(
+      until.elementLocated(By.xpath('//button[contains(.,"Enviar")]')),
+      TIMEOUT
+    );
+    await btnEnviar.click();
+    await driver.sleep(PAUSE);
+  });
+
+  // ── Home Page ───────────────────────────────────────────────────────────────
+
+  it('Debe estar en el home-page después de iniciar sesión', async () => {
+    await driver.wait(until.urlContains('/home-page'), NAV_TIMEOUT);
+    await driver.sleep(PAUSE);
+    expect(await driver.getCurrentUrl()).toContain('/home-page');
+
+    const titulo = await driver.wait(
+      until.elementLocated(By.xpath('//*[contains(.,"Bienvenido a Market-AI")]')),
+      TIMEOUT
+    );
+    expect(await titulo.isDisplayed()).toBe(true);
+  });
+
+  it('Debe mostrar el panel de administración con sus botones', async () => {
+    const panel = await driver.wait(
+      until.elementLocated(By.xpath('//*[contains(.,"Panel de administración")]')),
+      TIMEOUT
+    );
+    expect(await panel.isDisplayed()).toBe(true);
+
+    const btnAgentes = await driver.wait(
+      until.elementLocated(By.xpath('//button[contains(.,"Panel de agentes")]')),
+      TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await btnAgentes.isDisplayed()).toBe(true);
+  });
+
+  // ── Panel de Agentes ────────────────────────────────────────────────────────
+
+  it('Debe navegar al Panel de Agentes al presionar el botón correspondiente', async () => {
+    // Cerrar cualquier overlay/dialog abierto (p.ej. snackbar de login)
+    const overlays = await driver.findElements(By.css('.cdk-overlay-backdrop-showing'));
+    for (const overlay of overlays) {
+      try { await driver.executeScript('arguments[0].click()', overlay); } catch (e) { console.warn('overlay click failed', e); }
+    }
+    if (overlays.length > 0) await driver.sleep(500);
+
+    const btn = await driver.wait(
+      until.elementLocated(By.xpath('//button[contains(.,"Panel de agentes")]')),
+      TIMEOUT
+    );
+    await driver.executeScript('arguments[0].scrollIntoView({block:"center"})', btn);
+    await driver.sleep(300);
+    await driver.executeScript('arguments[0].click()', btn);
+    await driver.wait(until.urlContains('/admin/agents'), TIMEOUT);
+    await driver.sleep(PAUSE);
+    expect(await driver.getCurrentUrl()).toContain('/admin/agents');
+  });
+
+  it('Debe mostrar el título del Panel de Administración de Agentes', async () => {
+    const titulo = await driver.wait(
+      until.elementLocated(By.xpath('//*[contains(.,"Panel de Administración de Agentes")]')),
+      TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await titulo.isDisplayed()).toBe(true);
+  });
+
+  it('Debe mostrar el botón "Crear Agente"', async () => {
+    const btn = await driver.wait(
       until.elementLocated(By.xpath('//button[contains(.,"Crear Agente")]')),
       TIMEOUT
     );
-    expect(await createBtn.isDisplayed()).toBe(true);
-    expect(await createBtn.isEnabled()).toBe(true);
+    await driver.sleep(PAUSE);
+    expect(await btn.isDisplayed()).toBe(true);
   });
 
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 4: Requiere backend + credenciales de admin
-  // ──────────────────────────────────────────────────────────────
-  it('Debe mostrar las columnas de encabezado o el mensaje de lista vacía', async () => {
-    if (!adminCredentialsAvailable) {
-      console.warn('  Prueba omitida: credenciales de admin no disponibles.');
-      return;
-    }
+  it('Debe mostrar las columnas de la tabla de agentes', async () => {
+    const colNombre = await driver.wait(
+      until.elementLocated(By.xpath('//*[contains(.,"Nombre")]')),
+      TIMEOUT
+    );
+    expect(await colNombre.isDisplayed()).toBe(true);
 
-    // Esperar a que termine la carga
-    await driver!.wait(
+    const colCategoria = await driver.wait(
+      until.elementLocated(By.xpath('//*[contains(.,"Categoría")]')),
+      TIMEOUT
+    );
+    expect(await colCategoria.isDisplayed()).toBe(true);
+
+    const colDescripcion = await driver.wait(
+      until.elementLocated(By.xpath('//*[contains(.,"Descripción")]')),
+      TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await colDescripcion.isDisplayed()).toBe(true);
+  });
+
+  // ── Formulario Crear Agente ─────────────────────────────────────────────────
+
+  it('Debe abrir el formulario "Crear Nuevo Agente" al presionar el botón', async () => {
+    const btn = await driver.wait(
+      until.elementLocated(By.xpath('//button[contains(.,"Crear Agente")]')),
+      TIMEOUT
+    );
+    await btn.click();
+    const dialog = await driver.wait(
+      until.elementLocated(By.css('mat-dialog-container')),
+      TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await dialog.isDisplayed()).toBe(true);
+  });
+
+  it('Debe mostrar el título "Crear Nuevo Agente" en el formulario', async () => {
+    const titulo = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//*[contains(.,"Crear Nuevo Agente")]')),
+      TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await titulo.isDisplayed()).toBe(true);
+  });
+
+  it('Debe mostrar los campos del formulario', async () => {
+    const inputNombre = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//input[@placeholder="Ej. Experto Python"]')),
+      TIMEOUT
+    );
+    expect(await inputNombre.isDisplayed()).toBe(true);
+
+    const inputModelo = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//input[@placeholder="Ej. gpt-4o"]')),
+      TIMEOUT
+    );
+    expect(await inputModelo.isDisplayed()).toBe(true);
+
+    const inputIdioma = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//input[@placeholder="Ej. es, en"]')),
+      TIMEOUT
+    );
+    expect(await inputIdioma.isDisplayed()).toBe(true);
+
+    const textareas = await driver.findElements(By.xpath('//mat-dialog-container//textarea'));
+    await driver.sleep(PAUSE);
+    expect(textareas.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('Debe mostrar los botones "Cancelar" y "Crear Agente" en el formulario', async () => {
+    const btnCancelar = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//button[contains(.,"Cancelar")]')),
+      TIMEOUT
+    );
+    expect(await btnCancelar.isDisplayed()).toBe(true);
+
+    const btnCrear = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//button[contains(.,"Crear Agente")]')),
+      TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await btnCrear.isDisplayed()).toBe(true);
+  });
+
+  it('Debe llenar el formulario con datos válidos', async () => {
+    const inputNombre = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//input[@placeholder="Ej. Experto Python"]')),
+      TIMEOUT
+    );
+    await inputNombre.clear();
+    await inputNombre.sendKeys('Agente Selenium Test');
+
+    const inputModelo = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//input[@placeholder="Ej. gpt-4o"]')),
+      TIMEOUT
+    );
+    await inputModelo.clear();
+    await inputModelo.sendKeys('gpt-4o-mini');
+
+    const inputIdioma = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//input[@placeholder="Ej. es, en"]')),
+      TIMEOUT
+    );
+    await inputIdioma.clear();
+    await inputIdioma.sendKeys('es');
+
+    const textareas = await driver.findElements(By.xpath('//mat-dialog-container//textarea'));
+    await textareas[0].clear();
+    await textareas[0].sendKeys('Agente de prueba creado por Selenium para tests automatizados.');
+    await textareas[1].clear();
+    await textareas[1].sendKeys('Eres un asistente de prueba generado automáticamente por Selenium.');
+    await driver.sleep(PAUSE);
+  });
+
+  it('Debe cerrar el formulario al presionar "Cancelar"', async () => {
+    const btnCancelar = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//button[contains(.,"Cancelar")]')),
+      TIMEOUT
+    );
+    await btnCancelar.click();
+    await driver.sleep(PAUSE);
+    const dialogs = await driver.findElements(By.css('mat-dialog-container'));
+    expect(dialogs.length).toBe(0);
+  });
+
+  it('Debe abrir el formulario de nuevo, llenarlo y presionar "Crear Agente"', async () => {
+    const btnAbrirCrear = await driver.wait(
+      until.elementLocated(By.xpath('//button[contains(.,"Crear Agente")]')),
+      TIMEOUT
+    );
+    await btnAbrirCrear.click();
+    await driver.wait(until.elementLocated(By.css('mat-dialog-container')), TIMEOUT);
+    await driver.sleep(PAUSE);
+
+    const inputNombre = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//input[@placeholder="Ej. Experto Python"]')),
+      TIMEOUT
+    );
+    await inputNombre.clear();
+    await inputNombre.sendKeys('Agente Selenium Demo');
+
+    const textareas = await driver.findElements(By.xpath('//mat-dialog-container//textarea'));
+    await textareas[0].clear();
+    await textareas[0].sendKeys('Descripción del agente creado por Selenium.');
+    await textareas[1].clear();
+    await textareas[1].sendKeys('Eres un asistente demo generado por pruebas automatizadas.');
+    await driver.sleep(PAUSE);
+
+    const btnCrearFinal = await driver.wait(
+      until.elementLocated(By.xpath('//mat-dialog-container//button[contains(.,"Crear Agente")]')),
+      TIMEOUT
+    );
+    await btnCrearFinal.click();
+    await driver.sleep(PAUSE * 3);
+  });
+
+  // ── Editar y Eliminar Agente ────────────────────────────────────────────────
+
+  it('Debe encontrar el agente "Agente Selenium Demo" en la lista', async () => {
+    const row = await driver.wait(
       until.elementLocated(
-        By.xpath('//*[contains(@class,"agent-list-container")] | //*[contains(.,"No hay agentes registrados")]')
+        By.xpath('//div[contains(@class,"list-row")][.//span[contains(.,"Agente Selenium Demo")]]')
+      ),
+      NAV_TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await row.isDisplayed()).toBe(true);
+  });
+
+  it('Debe abrir el modo edición al presionar el botón Editar', async () => {
+    const btnEditar = await driver.wait(
+      until.elementLocated(
+        By.xpath('//div[contains(@class,"list-row")][.//span[contains(.,"Agente Selenium Demo")]]//button[@title="Editar"]')
       ),
       TIMEOUT
     );
-
-    const containers = await driver!.findElements(By.css('.agent-list-container'));
-
-    if (containers.length > 0) {
-      const nombreCol = await driver!.findElement(
-        By.xpath('//div[contains(@class,"col-name") and contains(.,"Nombre")]')
-      );
-      const categoriaCol = await driver!.findElement(
-        By.xpath('//div[contains(@class,"col-category") and contains(.,"Categoría")]')
-      );
-      const descCol = await driver!.findElement(
-        By.xpath('//div[contains(@class,"col-desc") and contains(.,"Descripción")]')
-      );
-      const accionesCol = await driver!.findElement(
-        By.xpath('//div[contains(@class,"col-actions") and contains(.,"Acciones")]')
-      );
-
-      expect(await nombreCol.isDisplayed()).toBe(true);
-      expect(await categoriaCol.isDisplayed()).toBe(true);
-      expect(await descCol.isDisplayed()).toBe(true);
-      expect(await accionesCol.isDisplayed()).toBe(true);
-    } else {
-      const emptyMsg = await driver!.findElement(
-        By.xpath('//*[contains(.,"No hay agentes registrados")]')
-      );
-      expect(await emptyMsg.isDisplayed()).toBe(true);
-    }
-  });
-
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 5: Requiere backend + credenciales de admin
-  // ──────────────────────────────────────────────────────────────
-  it('Debe mostrar botones de editar y eliminar en la primera fila', async () => {
-    if (!adminCredentialsAvailable) {
-      console.warn('  Prueba omitida: credenciales de admin no disponibles.');
-      return;
-    }
-
-    const rows = await driver!.findElements(By.css('.list-row'));
-    if (rows.length === 0) {
-      console.log('  No hay agentes en la lista, prueba omitida.');
-      return;
-    }
-
-    const firstRow = rows[0];
-    const editBtn = await firstRow.findElement(By.css('button.btn-icon-edit'));
-    const deleteBtn = await firstRow.findElement(By.css('button.btn-icon-delete'));
-
-    expect(await editBtn.isDisplayed()).toBe(true);
-    expect(await deleteBtn.isDisplayed()).toBe(true);
-  });
-
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 6: Requiere backend + credenciales de admin
-  // ──────────────────────────────────────────────────────────────
-  it('Debe activar modo edición al hacer clic en el botón editar', async () => {
-    if (!adminCredentialsAvailable) {
-      console.warn('  Prueba omitida: credenciales de admin no disponibles.');
-      return;
-    }
-
-    const rows = await driver!.findElements(By.css('.list-row'));
-    if (rows.length === 0) {
-      console.log('  No hay agentes, prueba omitida.');
-      return;
-    }
-
-    const editBtn = await rows[0].findElement(By.css('button.btn-icon-edit'));
-    await editBtn.click();
-
-    // Debe aparecer un input en la columna de nombre
-    const nameInput = await driver!.wait(
-      until.elementLocated(By.css('.col-name mat-form-field input')),
+    await btnEditar.click();
+    await driver.sleep(PAUSE);
+    const inputEditar = await driver.wait(
+      until.elementLocated(By.xpath('//div[contains(@class,"list-row")]//input[@placeholder="Nombre"]')),
       TIMEOUT
     );
-    expect(await nameInput.isDisplayed()).toBe(true);
-
-    // Deben aparecer los botones de guardar y cancelar
-    const updatedRow = (await driver!.findElements(By.css('.list-row')))[0];
-    const cancelBtn = await updatedRow.findElement(By.css('button[title="Cancelar"]'));
-    const saveBtn = await updatedRow.findElement(By.css('button[title="Guardar"]'));
-    expect(await cancelBtn.isDisplayed()).toBe(true);
-    expect(await saveBtn.isDisplayed()).toBe(true);
+    expect(await inputEditar.isDisplayed()).toBe(true);
   });
 
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 7: Requiere backend + credenciales de admin
-  // ──────────────────────────────────────────────────────────────
-  it('Debe cancelar la edición y restaurar el estado de visualización', async () => {
-    if (!adminCredentialsAvailable) {
-      console.warn('  Prueba omitida: credenciales de admin no disponibles.');
-      return;
-    }
-
-    const rows = await driver!.findElements(By.css('.list-row'));
-    if (rows.length === 0) {
-      console.log('  No hay agentes, prueba omitida.');
-      return;
-    }
-
-    // Si no estamos en modo edición, entrar a él
-    const nameInputs = await driver!.findElements(By.css('.col-name mat-form-field input'));
-    if (nameInputs.length === 0) {
-      await rows[0].findElement(By.css('button.btn-icon-edit')).click();
-      await driver!.wait(
-        until.elementLocated(By.css('.col-name mat-form-field input')),
-        TIMEOUT
-      );
-    }
-
-    // Hacer clic en cancelar
-    const currentRow = (await driver!.findElements(By.css('.list-row')))[0];
-    await currentRow.findElement(By.css('button[title="Cancelar"]')).click();
-
-    // Debe volver a mostrar el texto (span.text-display)
-    await driver!.wait(
-      until.elementLocated(By.css('.col-name span.text-display')),
+  it('Debe modificar el nombre del agente y guardar los cambios', async () => {
+    const inputNombre = await driver.wait(
+      until.elementLocated(By.xpath('//div[contains(@class,"list-row")]//input[@placeholder="Nombre"]')),
       TIMEOUT
     );
-    const displaySpans = await driver!.findElements(By.css('.col-name span.text-display'));
-    expect(displaySpans.length).toBeGreaterThan(0);
+    await inputNombre.clear();
+    await inputNombre.sendKeys('Agente Selenium Editado');
+    await driver.sleep(PAUSE);
+
+    const btnGuardar = await driver.wait(
+      until.elementLocated(By.xpath('//button[@title="Guardar"]')),
+      TIMEOUT
+    );
+    await btnGuardar.click();
+    await driver.sleep(PAUSE * 2);
   });
 
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 8: Requiere backend + credenciales de admin
-  // ──────────────────────────────────────────────────────────────
-  it('Debe mostrar confirmación ¿Seguro? al hacer clic en eliminar', async () => {
-    if (!adminCredentialsAvailable) {
-      console.warn('  Prueba omitida: credenciales de admin no disponibles.');
-      return;
-    }
+  it('Debe verificar que el agente fue actualizado con el nuevo nombre', async () => {
+    const row = await driver.wait(
+      until.elementLocated(
+        By.xpath('//div[contains(@class,"list-row")][.//span[contains(.,"Agente Selenium Editado")]]')
+      ),
+      TIMEOUT
+    );
+    await driver.sleep(PAUSE);
+    expect(await row.isDisplayed()).toBe(true);
+  });
 
-    const rows = await driver!.findElements(By.css('.list-row'));
-    if (rows.length === 0) {
-      console.log('  No hay agentes, prueba omitida.');
-      return;
-    }
+  it('Debe mostrar la confirmación "¿Seguro?" al presionar Eliminar', async () => {
+    const btnEliminar = await driver.wait(
+      until.elementLocated(
+        By.xpath('//div[contains(@class,"list-row")][.//span[contains(.,"Agente Selenium Editado")]]//button[@title="Eliminar"]')
+      ),
+      TIMEOUT
+    );
+    await btnEliminar.click();
+    await driver.sleep(PAUSE);
 
-    const deleteBtn = await rows[0].findElement(By.css('button.btn-icon-delete'));
-    await deleteBtn.click();
-
-    // Debe aparecer el texto "¿Seguro?" y los botones Sí / No
-    const confirmLabel = await driver!.wait(
+    const confirmLabel = await driver.wait(
       until.elementLocated(By.xpath('//*[contains(.,"¿Seguro?")]')),
       TIMEOUT
     );
     expect(await confirmLabel.isDisplayed()).toBe(true);
-
-    const updatedRow = (await driver!.findElements(By.css('.list-row')))[0];
-    const noBtn = await updatedRow.findElement(By.xpath('.//button[contains(.,"No")]'));
-    const yesBtn = await updatedRow.findElement(By.xpath('.//button[contains(.,"Sí")]'));
-    expect(await noBtn.isDisplayed()).toBe(true);
-    expect(await yesBtn.isDisplayed()).toBe(true);
-
-    // Cancelar la eliminación para no modificar datos reales
-    await noBtn.click();
-    await driver!.wait(
-      until.elementLocated(By.css('button.btn-icon-edit')),
-      TIMEOUT
-    );
   });
 
-  // ──────────────────────────────────────────────────────────────
-  // PRUEBA 9: Requiere backend + credenciales de admin
-  // ──────────────────────────────────────────────────────────────
-  it('El botón de regreso debe navegar a /home-page', async () => {
-    if (!adminCredentialsAvailable) {
-      console.warn('  Prueba omitida: credenciales de admin no disponibles.');
-      return;
-    }
+  // Regresar
 
-    await driver!.get(`${BASE_URL}/admin/agents`);
-
-    // El botón contiene el ícono arrow_back
-    const backBtn = await driver!.wait(
-      until.elementLocated(By.xpath('//button[.//mat-icon[contains(.,"arrow_back")]]')),
+  it('Debe regresar al home-page desde el Panel de Agentes', async () => {
+    const btnBack = await driver.wait(
+      until.elementLocated(By.css('button[mat-icon-button][routerlink="/home-page"]')),
       TIMEOUT
     );
-    await backBtn.click();
-
-    await driver!.wait(until.urlContains('/home-page'), TIMEOUT);
-    expect(await driver!.getCurrentUrl()).toContain('/home-page');
+    await driver.executeScript('arguments[0].scrollIntoView({block:"center"})', btnBack);
+    await driver.sleep(300);
+    await driver.executeScript('arguments[0].click()', btnBack);
+    await driver.wait(until.urlContains('/home-page'), TIMEOUT);
+    await driver.sleep(PAUSE);
+    expect(await driver.getCurrentUrl()).toContain('/home-page');
   });
 });
