@@ -38,6 +38,9 @@ describe('MA — My Agents Page (E2E Selenium)', () => {
     const { driver: d, browserUsed } = await createDriver();
     driver = d;
     console.log(`✓ Navegador detectado: ${browserUsed}\n`);
+
+    // Warm-up: pre-cargar Angular antes del primer test
+    await driver.get(`${BASE_URL}/landing-page`);
   }, 60_000);
 
   afterAll(async () => {

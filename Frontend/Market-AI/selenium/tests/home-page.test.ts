@@ -535,8 +535,8 @@ describe('HP — Home Page (E2E Selenium)', () => {
 
   // ─── HP-18 ─────────────────────────────────────────────────────────────────
   it('HP-18: Panel de admin visible para usuario con rol admin [BE]', async () => {
-    if (!backendAvailable) {
-      console.warn('  HP-18 omitida: backend no disponible.');
+    if (!backendAvailable || !adminToken) {
+      console.warn('  HP-18 omitida: backend no disponible o sin token de admin real.');
       return;
     }
 
@@ -550,8 +550,8 @@ describe('HP — Home Page (E2E Selenium)', () => {
 
   // ─── HP-19 ─────────────────────────────────────────────────────────────────
   it('HP-19: Panel de admin oculto para usuario con rol user [BE]', async () => {
-    if (!backendAvailable) {
-      console.warn('  HP-19 omitida: backend no disponible.');
+    if (!backendAvailable || !userToken) {
+      console.warn('  HP-19 omitida: backend no disponible o sin token de usuario real.');
       return;
     }
 

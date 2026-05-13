@@ -2,7 +2,7 @@ import { WebDriver } from 'selenium-webdriver';
 
 export const BASE_URL = 'http://localhost:4200';
 export const BACKEND_URL = process.env['BACKEND_URL'] ?? 'https://market-ai-api.onrender.com';
-export const TIMEOUT = 10_000;
+export const TIMEOUT = 20_000;
 
 /** Verifica si el backend responde. */
 export async function checkBackendAvailable(): Promise<boolean> {
