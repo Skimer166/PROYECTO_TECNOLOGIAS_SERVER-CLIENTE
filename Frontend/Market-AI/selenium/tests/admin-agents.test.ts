@@ -1,8 +1,8 @@
 import { By, until, WebDriver } from 'selenium-webdriver';
 import { createDriver } from '../browser-factory';
-import { APP_URL, TIMEOUT, NAV_TIMEOUT } from '../helpers';
+import { TIMEOUT, NAV_TIMEOUT } from '../helpers';
 
-const BASE_URL = APP_URL;
+const BASE_URL = 'https://proyectoservidorcliente.vercel.app';
 const PAUSE = 1000;
 
 describe('Market-AI — Panel de Agentes', () => {
