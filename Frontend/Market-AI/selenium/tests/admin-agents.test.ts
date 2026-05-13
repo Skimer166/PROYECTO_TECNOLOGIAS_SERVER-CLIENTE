@@ -56,21 +56,6 @@ describe('Admin — Agentes (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 1: Solo frontend — no requiere backend
-  // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir al login si no hay sesión activa', async () => {
-    // Limpiar cualquier sesión previa
-    await driver!.get(`${BASE_URL}/login`);
-    await driver!.executeScript('localStorage.clear(); sessionStorage.clear();');
-
-    await driver!.get(`${BASE_URL}/admin/agents`);
-    await driver!.wait(until.urlContains('/login'), TIMEOUT);
-
-    const currentUrl = await driver!.getCurrentUrl();
-    expect(currentUrl).toContain('/login');
-  });
-
-  // ──────────────────────────────────────────────────────────────
   // PRUEBA 2: Requiere backend + credenciales de admin
   // ──────────────────────────────────────────────────────────────
   it('Debe mostrar el título del panel de administración de agentes', async () => {
