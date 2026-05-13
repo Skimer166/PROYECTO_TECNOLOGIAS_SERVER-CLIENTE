@@ -369,7 +369,9 @@ describe('Market-AI — Chats de Soporte', () => {
       until.elementLocated(By.xpath('//button[contains(.,"Enviar")]')),
       TIMEOUT
     );
-    await btnEnviar.click();
+    await driver.executeScript('arguments[0].scrollIntoView({block:"center"})', btnEnviar);
+    await driver.sleep(300);
+    await driver.executeScript('arguments[0].click()', btnEnviar);
     await driver.sleep(PAUSE * 2);
 
     const respuesta = await driver.wait(
