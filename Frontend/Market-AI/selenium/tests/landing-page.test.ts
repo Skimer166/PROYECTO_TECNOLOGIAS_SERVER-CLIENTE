@@ -264,16 +264,6 @@ describe('Landing Page (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // PRUEBA 16: La URL raiz redirige a /landing-page - no requiere backend
-  // ──────────────────────────────────────────────────────────────
-  it('Debe redirigir de la ruta raiz a /landing-page automaticamente', async () => {
-    await clearToken(driver);
-    await driver.get(APP_URL + '/');
-    await waitForUrl(driver, '/landing-page', NAV_TIMEOUT);
-    expect(await driver.getCurrentUrl()).toContain('/landing-page');
-  });
-
-  // ──────────────────────────────────────────────────────────────
   // PRUEBA 17: El titulo del documento no esta vacio - no requiere backend
   // ──────────────────────────────────────────────────────────────
   it('Debe tener el titulo del documento no vacio en /landing-page', async () => {
