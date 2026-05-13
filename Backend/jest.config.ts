@@ -9,8 +9,10 @@ export default {
   resetMocks: true,
   restoreMocks: true,
   setupFiles: ['dotenv/config'],
-  transform: {
-    '^.+\\.tsx?$': ['ts-jest', {}],
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
+    },
   },
   collectCoverageFrom: [
     'src/**/*.ts',
