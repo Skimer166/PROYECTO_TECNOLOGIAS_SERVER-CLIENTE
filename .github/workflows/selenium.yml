@@ -15,7 +15,7 @@ on:
 jobs:
   e2e-selenium:
     name: Selenium E2E Frontend
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     defaults:
       run:
@@ -29,33 +29,27 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './Frontend/Market-AI/package.json'
 
       - name: Install dependencies
         run: npm install
 
       - name: Start Angular dev server en background
         run: npx ng serve --host 0.0.0.0 &
-        shell: bash
 
       - name: Esperar a que Angular esté listo en el puerto 4200
         run: |
-          $timeout = 120
-          $elapsed = 0
-          Write-Host "Esperando Angular en http://localhost:4200..."
-          while ($elapsed -lt $timeout) {
-            try {
-              Invoke-WebRequest -Uri "http://localhost:4200" -UseBasicParsing -ErrorAction Stop | Out-Null
-              Write-Host "Angular listo en $elapsed segundos"
+          echo "Esperando Angular en http://localhost:4200..."
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:4200 > /dev/null; then
+              echo "Angular listo"
               exit 0
-            } catch {
-              Start-Sleep -Seconds 3
-              $elapsed += 3
-              Write-Host "Esperando... ($elapsed/$timeout s)"
-            }
-          }
-          Write-Error "Angular no inicio en $timeout segundos"
+            fi
+            sleep 3
+          done
+          echo "Timeout esperando Angular"
           exit 1
-        shell: pwsh
 
       - name: Ejecutar pruebas Selenium
         run: npm run selenium

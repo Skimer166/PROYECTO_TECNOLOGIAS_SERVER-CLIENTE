@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HomePage } from './home-page';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -34,9 +34,10 @@ describe('HomePage (Unitarias)', () => {
     fixture.detectChanges();
   });
 
-  it('Prueba Unitaria 5: Filtro de búsqueda', () => {
+  it('Prueba Unitaria 5: Filtro de búsqueda', fakeAsync(() => {
     component.onSearchTermChange('Python');
+    tick(300);
     expect(component.filteredAgents.length).toBe(1);
     expect(component.filteredAgents[0].name).toBe('Agente Python');
-  });
+  }));
 });
