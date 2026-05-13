@@ -11,9 +11,23 @@ describe('Market-AI — Chats de Soporte', () => {
   let tabUser: string;
 
   beforeAll(async () => {
-    const { driver: d, browserUsed } = await createDriver();
-    driver = d;
-    console.log(`Navegador detectado: ${browserUsed}`);
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const { driver: d, browserUsed } = await createDriver();
+        driver = d;
+        console.log(`Navegador detectado: ${browserUsed} (intento ${i + 1})`);
+        return;
+      } catch (error) {
+        lastError = error as Error;
+        console.warn(`⚠ Intento ${i + 1} falló: ${lastError.message}`);
+        if (i < maxRetries - 1) await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+
+    throw new Error(`WebDriver no pudo iniciarse tras ${maxRetries} intentos: ${lastError?.message}`);
   }, 120000);
 
   afterAll(async () => {
