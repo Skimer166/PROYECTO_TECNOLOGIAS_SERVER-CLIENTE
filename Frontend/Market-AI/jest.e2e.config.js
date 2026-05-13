@@ -4,7 +4,9 @@ const config = {
   testEnvironment: 'node',
   testMatch: ['**/selenium/tests/**/*.test.ts'],
   passWithNoTests: true,
-  testTimeout: 60000,
+  testTimeout: 30000,
+  // Carga variables del .env antes de cada suite (ej: TEST_IMAGE_PATH, BACKEND_URL)
+  setupFiles: ['<rootDir>/selenium/setup-env.js'],
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: { esModuleInterop: true } }],
   },
