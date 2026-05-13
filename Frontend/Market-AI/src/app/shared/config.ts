@@ -1,6 +1,6 @@
 
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:3001',
-  socketUrl: 'http://localhost:3001',
+  production: true,
+  apiUrl: 'https://market-ai-api.onrender.com', 
+  socketUrl: 'https://market-ai-api.onrender.com', 
 };
