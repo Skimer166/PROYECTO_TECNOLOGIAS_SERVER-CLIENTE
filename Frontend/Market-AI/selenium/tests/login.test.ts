@@ -51,7 +51,12 @@ describe('LG — Login Page (E2E Selenium)', () => {
       sessionStorage.removeItem('user_role');
     `);
     await driver!.get(`${BASE_URL}/login`);
-    await driver!.wait(until.elementLocated(By.css('input[name="Correo"]')), TIMEOUT);
+    try {
+      await driver!.wait(until.elementLocated(By.css('input[name="Correo"]')), TIMEOUT);
+    } catch {
+      await driver!.navigate().refresh();
+      await driver!.wait(until.elementLocated(By.css('input[name="Correo"]')), TIMEOUT);
+    }
   }
 
   async function fillLogin(email: string, password: string): Promise<void> {
@@ -259,6 +264,11 @@ describe('LG — Login Page (E2E Selenium)', () => {
       TIMEOUT
     );
     expect(await dialog.isDisplayed()).toBe(true);
+    // Esperar a que Angular renderice el binding {{ data.message }} dentro del dialog
+    await driver!.wait(
+      async () => (await dialog.getText()).trim().length > 0,
+      TIMEOUT
+    );
     const text = await dialog.getText();
     expect(text.toLowerCase()).toContain('correo');
   });

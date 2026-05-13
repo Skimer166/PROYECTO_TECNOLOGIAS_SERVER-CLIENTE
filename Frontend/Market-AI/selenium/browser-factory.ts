@@ -59,17 +59,18 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
     } catch { /* intentar siguiente */ }
   }
 
-  // 2. Intentar Brave (usa ChromeDriver)
+  // 2. Intentar Brave (Chromium — usa ChromeDriver con binary personalizado)
   const bravePath = findBinary(BRAVE_PATHS);
   if (bravePath) {
     try {
-      const options = new EdgeOptions();
+      const options = new ChromeOptions();
+      options.setChromeBinaryPath(bravePath);
       options.addArguments(...headlessArgs);
       const driver = await new Builder()
-        .forBrowser('MicrosoftEdge')
-        .setEdgeOptions(options)
+        .forBrowser('chrome')
+        .setChromeOptions(options)
         .build();
-      return { driver, browserUsed: 'Microsoft Edge' };
+      return { driver, browserUsed: 'Brave' };
     } catch { /* intentar siguiente */ }
   }
 

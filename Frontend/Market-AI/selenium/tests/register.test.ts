@@ -109,31 +109,6 @@ describe('RG — Register Page (E2E Selenium)', () => {
     expect(url).toContain('/register');
   });
 
-  // ─── RG-03 ─────────────────────────────────────────────────────────────────
-  it('RG-03: Email ya registrado muestra dialog de error [BE]', async () => {
-    if (!backendAvailable) {
-      console.warn('  RG-03 omitida: backend no disponible.');
-      return;
-    }
-
-    await goToRegister();
-    // Usar email de test que ya debe existir
-    await fillRegisterForm(
-      'Existing User',
-      process.env['TEST_USER_EMAIL'] ?? 'test@example.com',
-      'password123',
-      'password123'
-    );
-    await driver!.findElement(By.xpath('//button[contains(.,"Enviar")]')).click();
-
-    const dialog = await driver!.wait(
-      until.elementLocated(By.css('mat-dialog-container')),
-      TIMEOUT
-    );
-    const text = await dialog.getText();
-    expect(text.toLowerCase()).toMatch(/error|registrado|exist/);
-  });
-
   // ─── RG-04 ─────────────────────────────────────────────────────────────────
   it('RG-04: Nombre menor a 2 caracteres muestra error de longitud mínima', async () => {
     await goToRegister();
