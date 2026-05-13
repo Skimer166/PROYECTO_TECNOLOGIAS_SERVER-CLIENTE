@@ -1,21 +1,109 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import passport from './google';
-import { loginUser } from '../users/controller';
 import { UserModel } from '../users/model';
+import { IUser } from '../interfaces/user';
 import bcrypt from 'bcryptjs';
-import { sendPasswordResetEmail } from '../mailer/controller';
+import { sendPasswordResetEmail, sendWelcomeEmail } from '../mailer/controller';
 
 const JWT_KEY = process.env.JWT_KEY!;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const JWT_SECRET = process.env.SECRET_KEY ?? process.env.JWT_KEY ?? 'dev-secret';
 
 export async function login(req: Request, res: Response) {
-  return loginUser(req, res);
+  try {
+    const { email, password } = req.body;
+
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
+    }
+
+    if (!user.passwordHash) {
+      return res.status(400).json({
+        message: 'Esta cuenta fue creada con Google. Inicia sesión usando "Iniciar sesión con Google".',
+      });
+    }
+
+    const ok = await bcrypt.compare(password, user.passwordHash);
+
+    if (!ok) {
+      return res.status(401).json({ message: 'Correo o contraseña incorrectos' });
+    }
+
+const token = jwt.sign(
+      {
+        sub: String(user._id),
+        email: user.email,
+        name: user.name,
+        role: user.role || 'user',
+        avatar: user.avatar,
+        credits: user.credits,
+        status: user.status || 'active',
+      },
+      JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    return res.json({
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.error('Error en loginUser:', err);
+    return res.status(500).json({ message: 'Error interno del servidor' });
+  }
 }
 
-export function signup(req: Request, res: Response) {
-  console.log('Signup body', req.body);
-  return res.status(501).json({ message: 'No implementado. Usa /users/register' });
+export async function signup(req: Request, res: Response) {
+  try {
+      const { name, email, password } = req.body;
+
+      if (!name || !email || !password)
+        return res.status(400).json({ message: "Rellena todos los campos" });
+
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Formato de correo inválido" });
+      }
+
+      const emailExists = await UserModel.findOne({ email }).lean();
+      if (emailExists) {
+        return res.status(409).json({ message: "Email ya registrado" });
+      }
+
+      const nameExists = await UserModel.findOne({ name }).lean();
+      if (nameExists) {
+        return res.status(409).json({ message: "Nombre de usuario ya registrado" });
+      }
+
+      const exists = await UserModel.findOne({ email }).lean();
+      if (exists) return res.status(409).json({ message: "Email ya registrado" });
+
+      const passwordHash = await bcrypt.hash(password, 10);
+      const user = await UserModel.create({ name, email, passwordHash });
+
+      //Enviar correo de bienvenida
+      try {
+        await sendWelcomeEmail(email, name);
+      } catch (emailError) {
+        console.error("Error enviando correo de bienvenida:", emailError);
+      }
+
+      return res.status(201).json({
+        message: "Usuario creado correctamente",
+        user: { id: String(user._id), name: user.name, email: user.email },
+      });
+    } catch (err: unknown) {
+      console.error("Error creando usuario:", err);
+      return res.status(500).json({ message: "Error del servidor" });
+    }
 }
 
 export async function forgotPassword(req: Request, res: Response) {
@@ -28,7 +116,6 @@ export async function forgotPassword(req: Request, res: Response) {
       console.log('3. [forgotPassword] Falta el email.'); // <--- NUEVO LOG
       return res.status(400).json({ message: 'Email requerido' });
     }
-    const token = req.body || {};
     const user = await UserModel.findOne({ email });
 
     if (!user) {
@@ -37,11 +124,18 @@ export async function forgotPassword(req: Request, res: Response) {
       return res.status(200).json({ message: '...' });
     }
 
-    console.log('5. [forgotPassword] Usuario encontrado. Generando token...'); // <--- NUEVO LOG
+    console.log('5. [forgotPassword] Usuario encontrado. Generando token...');
 
-    // ... código de generación de token ...
-    
-    const resetLink = `${FRONTEND_URL}/reset-password?token=${encodeURIComponent(token)}`;
+    const resetToken = jwt.sign(
+      { type: 'password-reset', sub: String(user._id) },
+      JWT_KEY,
+      { expiresIn: '1h' }
+    );
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000);
+    await user.save();
+
+    const resetLink = `${FRONTEND_URL}/reset-password?token=${encodeURIComponent(resetToken)}`;
     console.log('6. [forgotPassword] Intentando enviar correo a:', user.email); // <--- NUEVO LOG
 
     try {
@@ -128,7 +222,7 @@ export const googleCallbackController = (
   passport.authenticate(
     'google',
     { session: false },
-    async (err: Error | null, googleUser: Express.User | false | null, info?: { isNewUser?: boolean }) => {
+    async (err: Error | null, googleUser: IUser | false | null, info?: { isNewUser?: boolean }) => {
       if (err || !googleUser) {
         console.error('Error en Google Auth:', err);
         return res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Types } from 'mongoose';
 import { AgentModel } from './model';
 import { UserModel } from '../users/model';
-import { io } from '../../index';
+import { getIo } from '../../io-instance';
 
 //extraer el userId desde req.user
 interface MulterS3File extends Express.Multer.File {
@@ -269,7 +269,7 @@ export async function rentAgent(req: Request, res: Response) {
           if (!refreshed.rentedBy || !refreshed.rentedUntil) return;
           if (new Date(refreshed.rentedUntil).getTime() > Date.now()) return;
 
-          io.to(String(userId)).emit('agent-time-ended', {
+          getIo()?.to(String(userId)).emit('agent-time-ended', {
             agentId: String(refreshed._id),
             name: refreshed.name,
           });

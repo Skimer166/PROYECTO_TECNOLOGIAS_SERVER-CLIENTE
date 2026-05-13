@@ -4,8 +4,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 // CAMBIO: Importar desde .../animations/async
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
+import { of } from 'rxjs';
 
 describe('Register Component (Unitarias)', () => {
   let component: Register;
@@ -19,7 +20,7 @@ describe('Register Component (Unitarias)', () => {
         provideAnimationsAsync(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: ActivatedRoute, useValue: {} }
+        { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } }
       ]
     }).compileComponents();
 
