@@ -49,7 +49,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
 //Middlewares
 export interface AuthRequest extends Request {
-  user?: Express.User;
+  user?: JwtUserPayload;
 }
 
 export const verifyToken = async (req: AuthRequest, res: Response, next: NextFunction) => {

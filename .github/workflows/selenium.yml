@@ -30,31 +30,37 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Start Angular dev server en background
-        run: Start-Process -NoNewWindow npx -ArgumentList "ng serve --host 0.0.0.0"
-        shell: pwsh
+      - name: Build Angular (browser SPA)
+        run: npx ng build --configuration=development 2>&1
+        shell: bash
 
-      - name: Esperar a que Angular esté listo en el puerto 4200
+      - name: Start static file server
+        run: nohup npx http-server dist/Market-AI/browser -p 4200 --spa -c-1 --cors > /tmp/server.log 2>&1 &
+        shell: bash
+
+      - name: Esperar a que el servidor este listo
         run: |
-          $timeout = 90
-          $elapsed = 0
-          Write-Host "Esperando Angular en http://localhost:4200..."
-          while ($elapsed -lt $timeout) {
-            try {
-              Invoke-WebRequest -Uri "http://localhost:4200" -UseBasicParsing -ErrorAction Stop | Out-Null
-              Write-Host "Angular listo"
-              break
-            } catch {
-              Start-Sleep -Seconds 3
-              $elapsed += 3
-            }
-          }
-        shell: pwsh
+          elapsed=0
+          until curl -s http://localhost:4200 > /dev/null 2>&1; do
+            echo "Esperando servidor... ($elapsed s)"
+            sleep 3
+            elapsed=$((elapsed + 3))
+            if [ $elapsed -ge 60 ]; then
+              echo "Servidor no inicio. Log:"
+              cat /tmp/server.log || true
+              exit 1
+            fi
+          done
+          echo "Servidor listo despues de $elapsed segundos"
+        shell: bash
 
       - name: Ejecutar pruebas Selenium
         run: npm run selenium
         env:
+          CI: true
           BACKEND_URL: https://market-ai-api.onrender.com
+          USER_EMAIL: ${{ secrets.USER_EMAIL }}
+          USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
 
       - name: Subir reporte de resultados
         uses: actions/upload-artifact@v4

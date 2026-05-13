@@ -2,9 +2,15 @@ import { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { UserModel } from '../users/model';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2026-02-25.clover',
-});
+let _stripe: Stripe | null = null;
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error('STRIPE_SECRET_KEY no está configurado');
+    _stripe = new Stripe(key, { apiVersion: '2026-02-25.clover' });
+  }
+  return _stripe;
+}
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 
@@ -17,7 +23,7 @@ export async function createCheckoutSession(req: Request, res: Response) {
       return res.status(400).json({ message: 'El monto mínimo es $10' });
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
@@ -55,7 +61,7 @@ export async function verifyPaymentSuccess(req: Request, res: Response) {
 
     if (!session_id) return res.status(400).json({ message: 'Falta session_id' });
 
-    const session = await stripe.checkout.sessions.retrieve(session_id);
+    const session = await getStripe().checkout.sessions.retrieve(session_id);
 
     if (session.payment_status === 'paid') {
       const userId = session.metadata?.['userId'];

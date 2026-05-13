@@ -31,7 +31,21 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
     ? ['--headless', '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
     : ['--no-sandbox', '--disable-dev-shm-usage'];
 
-  // 1. Intentar Brave (usa ChromeDriver)
+  // 1. Intentar Edge (prioritario: preinstalado en Windows y más estable en CI)
+  const edgePath = findBinary(EDGE_PATHS);
+  if (edgePath) {
+    try {
+      const options = new EdgeOptions();
+      options.addArguments(...headlessArgs);
+      const driver = await new Builder()
+        .forBrowser('MicrosoftEdge')
+        .setEdgeOptions(options)
+        .build();
+      return { driver, browserUsed: 'Microsoft Edge' };
+    } catch { /* intentar siguiente */ }
+  }
+
+  // 2. Intentar Brave (usa ChromeDriver)
   const bravePath = findBinary(BRAVE_PATHS);
   if (bravePath) {
     try {
@@ -46,7 +60,7 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
     } catch { /* intentar siguiente */ }
   }
 
-  // 2. Intentar Chrome
+  // 3. Intentar Chrome
   const chromePath = findBinary(CHROME_PATHS);
   if (chromePath) {
     try {
@@ -57,20 +71,6 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
         .setChromeOptions(options)
         .build();
       return { driver, browserUsed: 'Chrome' };
-    } catch { /* intentar siguiente */ }
-  }
-
-  // 3. Intentar Edge (siempre disponible en Windows)
-  const edgePath = findBinary(EDGE_PATHS);
-  if (edgePath) {
-    try {
-      const options = new EdgeOptions();
-      options.addArguments(...headlessArgs);
-      const driver = await new Builder()
-        .forBrowser('MicrosoftEdge')
-        .setEdgeOptions(options)
-        .build();
-      return { driver, browserUsed: 'Microsoft Edge' };
     } catch { /* intentar siguiente */ }
   }
 

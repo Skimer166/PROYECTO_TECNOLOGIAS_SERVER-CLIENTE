@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { getUsers, getUserById, postUsers, updateUser, deleteUser, getFavoriteAgents, updateUserRole, addUserCredits, updateUserStatus } from "./controller";
+import { getUsers, getUserById, updateUser, deleteUser, getFavoriteAgents, updateUserRole, addUserCredits, updateUserStatus } from "./controller";
 import { verifyAdmin, verifyToken } from "../middlewares/auth";
 const router = Router();
 
 /**
- * @swagger 
+ * @swagger
  * /users:
  *  get:
  *      tags: [USERS]
@@ -95,9 +95,6 @@ router.get('/:id', verifyToken, getUserById)
  *         description: Error interno del servidor
  */
 // Crear usuario en /users (alias de /users/register)
-router.post('', postUsers)
-router.post('/register', postUsers)
-
 /**
  * @swagger
  * /users/{id}:
