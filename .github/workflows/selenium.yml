@@ -57,6 +57,7 @@ jobs:
       - name: Ejecutar pruebas Selenium
         run: npm run selenium
         env:
+          CI: true
           BACKEND_URL: https://market-ai-api.onrender.com
           USER_EMAIL: ${{ secrets.USER_EMAIL }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}

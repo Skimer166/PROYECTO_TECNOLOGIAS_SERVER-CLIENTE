@@ -2,8 +2,9 @@ import { WebDriver, By, until, WebElement } from 'selenium-webdriver';
 import * as crypto from 'crypto';
 
 export const APP_URL = 'http://localhost:4200';
-export const TIMEOUT = 10_000;
-export const NAV_TIMEOUT = 15_000;
+// En CI Angular arranca más lento con varios browsers en paralelo
+export const TIMEOUT     = process.env['CI'] ? 20_000 : 10_000;
+export const NAV_TIMEOUT = process.env['CI'] ? 30_000 : 15_000;
 
 // ─── JWT helpers ──────────────────────────────────────────────────────────────
 
@@ -74,38 +75,62 @@ async function ensureDomain(driver: WebDriver): Promise<void> {
   const url = await driver.getCurrentUrl().catch(() => '');
   if (!url.startsWith(APP_URL)) {
     await driver.get(APP_URL + '/landing-page');
+    await sleep(500); // esperar que la pagina cargue antes de acceder a localStorage
   }
 }
 
-/** Pone el token en localStorage Y sessionStorage. */
+const SET_SCRIPT = `localStorage.setItem('token', arguments[0]);
+                    sessionStorage.setItem('token', arguments[0]);`;
+const CLEAR_SCRIPT = `localStorage.removeItem('token');
+                      sessionStorage.removeItem('token');`;
+
+/** Pone el token en localStorage Y sessionStorage.
+ *  Si el acceso falla (p. ej. Edge en modo seguro con pagina de error),
+ *  navega a landing-page y reintenta una vez. */
 export async function setToken(driver: WebDriver, token: string): Promise<void> {
   await ensureDomain(driver);
-  await driver.executeScript(
-    `localStorage.setItem('token', arguments[0]);
-     sessionStorage.setItem('token', arguments[0]);`,
-    token
-  );
+  try {
+    await driver.executeScript(SET_SCRIPT, token);
+  } catch {
+    // Reintentar con pagina limpia si localStorage fue denegado
+    await driver.get(APP_URL + '/landing-page');
+    await sleep(500);
+    await driver.executeScript(SET_SCRIPT, token);
+  }
 }
 
 /** Pone el token solo en sessionStorage (no en localStorage). */
 export async function setSessionToken(driver: WebDriver, token: string): Promise<void> {
   await ensureDomain(driver);
-  await driver.executeScript(
-    `sessionStorage.setItem('token', arguments[0]);
-     localStorage.removeItem('token');`,
-    token
-  );
+  try {
+    await driver.executeScript(
+      `sessionStorage.setItem('token', arguments[0]);
+       localStorage.removeItem('token');`,
+      token
+    );
+  } catch {
+    await driver.get(APP_URL + '/landing-page');
+    await sleep(500);
+    await driver.executeScript(
+      `sessionStorage.setItem('token', arguments[0]);
+       localStorage.removeItem('token');`,
+      token
+    );
+  }
 }
 
 /** Elimina el token de ambos storages. */
 export async function clearToken(driver: WebDriver): Promise<void> {
   try {
     await ensureDomain(driver);
-    await driver.executeScript(
-      `localStorage.removeItem('token');
-       sessionStorage.removeItem('token');`
-    );
-  } catch { /* ignorar si el driver aún no está en dominio */ }
+    await driver.executeScript(CLEAR_SCRIPT);
+  } catch {
+    try {
+      await driver.get(APP_URL + '/landing-page');
+      await sleep(500);
+      await driver.executeScript(CLEAR_SCRIPT);
+    } catch { /* ignorar si el driver no puede recuperarse */ }
+  }
 }
 
 // ─── Wait helpers ─────────────────────────────────────────────────────────────
