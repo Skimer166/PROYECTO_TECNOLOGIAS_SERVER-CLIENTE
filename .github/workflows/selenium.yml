@@ -35,8 +35,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Google Chrome
-        uses: browser-actions/setup-chrome@v1
+      - name: Install Microsoft Edge
+        uses: browser-actions/setup-edge@v1
 
       - name: Start Angular dev server en background
         run: npx ng serve --host 0.0.0.0 &

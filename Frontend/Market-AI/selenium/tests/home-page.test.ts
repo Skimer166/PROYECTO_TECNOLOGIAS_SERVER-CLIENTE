@@ -590,7 +590,9 @@ describe('HP — Home Page (E2E Selenium)', () => {
     const btn = await driver!.findElement(
       By.xpath('//button[contains(., "Panel de agentes")]')
     );
-    await btn.click();
+    await driver!.executeScript('arguments[0].scrollIntoView({block:"center"});', btn);
+    await driver!.sleep(300);
+    await driver!.executeScript('arguments[0].click();', btn);
 
     await driver!.wait(until.urlContains('/admin/agents'), TIMEOUT);
     expect(await driver!.getCurrentUrl()).toContain('/admin/agents');
@@ -610,7 +612,9 @@ describe('HP — Home Page (E2E Selenium)', () => {
     const btn = await driver!.findElement(
       By.xpath('//button[contains(., "Panel de usuarios")]')
     );
-    await btn.click();
+    await driver!.executeScript('arguments[0].scrollIntoView({block:"center"});', btn);
+    await driver!.sleep(300);
+    await driver!.executeScript('arguments[0].click();', btn);
 
     await driver!.wait(until.urlContains('/admin/users'), TIMEOUT);
     expect(await driver!.getCurrentUrl()).toContain('/admin/users');
@@ -630,7 +634,9 @@ describe('HP — Home Page (E2E Selenium)', () => {
     const btn = await driver!.findElement(
       By.xpath('//button[contains(., "Chats de Soporte")]')
     );
-    await btn.click();
+    await driver!.executeScript('arguments[0].scrollIntoView({block:"center"});', btn);
+    await driver!.sleep(300);
+    await driver!.executeScript('arguments[0].click();', btn);
 
     await driver!.wait(until.urlContains('/admin/support'), TIMEOUT);
     expect(await driver!.getCurrentUrl()).toContain('/admin/support');

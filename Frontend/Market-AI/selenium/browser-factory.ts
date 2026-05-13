@@ -3,13 +3,14 @@ import { Options as ChromeOptions } from 'selenium-webdriver/chrome';
 import { Options as EdgeOptions } from 'selenium-webdriver/edge';
 import * as fs from 'fs';
 
-const BRAVE_PATHS = [
+const EDGE_PATHS = [
   // Windows
-  'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
-  'C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
-  // Linux
-  '/usr/bin/brave-browser',
-  '/usr/bin/brave',
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+  // Linux (pre-instalado en GitHub Actions ubuntu-latest)
+  '/usr/bin/microsoft-edge',
+  '/usr/bin/microsoft-edge-stable',
+  '/usr/bin/msedge',
 ];
 
 const CHROME_PATHS = [
@@ -23,13 +24,13 @@ const CHROME_PATHS = [
   '/usr/bin/chromium',
 ];
 
-const EDGE_PATHS = [
+const BRAVE_PATHS = [
   // Windows
-  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
-  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+  'C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
   // Linux
-  '/usr/bin/microsoft-edge',
-  '/usr/bin/microsoft-edge-stable',
+  '/usr/bin/brave-browser',
+  '/usr/bin/brave',
 ];
 
 function findBinary(paths: string[]): string | null {
@@ -44,18 +45,17 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
     ? ['--headless', '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
     : ['--no-sandbox', '--disable-dev-shm-usage'];
 
-  // 1. Intentar Brave (usa ChromeDriver)
-  const bravePath = findBinary(BRAVE_PATHS);
-  if (bravePath) {
+  // 1. Intentar Edge (prioritario: preinstalado en Windows y en GitHub Actions ubuntu)
+  const edgePath = findBinary(EDGE_PATHS);
+  if (edgePath) {
     try {
-      const options = new ChromeOptions();
+      const options = new EdgeOptions();
       options.addArguments(...headlessArgs);
-      options.setBinaryPath(bravePath);
       const driver = await new Builder()
-        .forBrowser('chrome')
-        .setChromeOptions(options)
+        .forBrowser('MicrosoftEdge')
+        .setEdgeOptions(options)
         .build();
-      return { driver, browserUsed: 'Brave' };
+      return { driver, browserUsed: 'Microsoft Edge' };
     } catch { /* intentar siguiente */ }
   }
 
@@ -73,17 +73,18 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
     } catch { /* intentar siguiente */ }
   }
 
-  // 3. Intentar Edge (siempre disponible en Windows)
-  const edgePath = findBinary(EDGE_PATHS);
-  if (edgePath) {
+  // 3. Intentar Brave
+  const bravePath = findBinary(BRAVE_PATHS);
+  if (bravePath) {
     try {
-      const options = new EdgeOptions();
+      const options = new ChromeOptions();
       options.addArguments(...headlessArgs);
+      options.setBinaryPath(bravePath);
       const driver = await new Builder()
-        .forBrowser('MicrosoftEdge')
-        .setEdgeOptions(options)
+        .forBrowser('chrome')
+        .setChromeOptions(options)
         .build();
-      return { driver, browserUsed: 'Microsoft Edge' };
+      return { driver, browserUsed: 'Brave' };
     } catch { /* intentar siguiente */ }
   }
 
