@@ -140,8 +140,7 @@ describe('Database Connection Tests', () => {
       await dbConnect();
       const endTime = Date.now();
 
-      // Usar umbral de 50 ms para evitar falsos negativos por precision del timer en CI
-      expect(endTime - startTime).toBeGreaterThanOrEqual(50);
+      expect(endTime - startTime).toBeGreaterThanOrEqual(100);
       expect(connect).toHaveBeenCalledWith(mockUrl);
     });
   });
