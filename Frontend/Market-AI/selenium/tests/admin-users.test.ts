@@ -1,7 +1,8 @@
-import { Builder, By, until, WebDriver } from 'selenium-webdriver';
-import * as chrome from 'selenium-webdriver/chrome';
+import { By, until, WebDriver } from 'selenium-webdriver';
+import { createDriver } from '../browser-factory';
+import { APP_URL } from '../helpers';
 
-const BASE_URL = 'https://proyectoservidorcliente.vercel.app';
+const BASE_URL = APP_URL;
 const PAUSE = 1000;
 const TARGET_USER = 'Enrique';
 const TARGET_EMAIL = 'kikeruv2004';
@@ -10,16 +11,12 @@ describe('Market-AI — Panel de Usuarios', () => {
   let driver: WebDriver;
 
   beforeAll(async () => {
-    const options = new chrome.Options();
-    options.addArguments('--no-sandbox', '--disable-dev-shm-usage', '--start-maximized');
-    driver = await new Builder()
-      .forBrowser('chrome')
-      .setChromeOptions(options)
-      .build();
+    const { driver: d, browserUsed } = await createDriver();
+    driver = d;
+    console.log(`Navegador detectado: ${browserUsed}`);
   }, 120000);
 
   afterAll(async () => {
-    await driver.sleep(PAUSE);
     if (driver) await driver.quit();
   });
 
