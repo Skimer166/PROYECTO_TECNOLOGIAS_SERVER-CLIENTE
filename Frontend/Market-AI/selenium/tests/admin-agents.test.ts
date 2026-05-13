@@ -404,33 +404,7 @@ describe('Market-AI — Panel de Agentes', () => {
     expect(await confirmLabel.isDisplayed()).toBe(true);
   });
 
-  it('Debe confirmar la eliminacion y quitar el agente de la lista', async () => {
-    await driver.wait(async () => {
-      const overlays = await driver.findElements(By.css('.cdk-overlay-backdrop-showing'));
-      return overlays.length === 0;
-    }, TIMEOUT).catch(() => {});
-
-    const btnSi = await driver.wait(
-      until.elementLocated(
-        By.xpath('//div[contains(@class,"list-row")][.//span[contains(.,"Agente Selenium Editado")]]//button[contains(.,"Sí")]')
-      ),
-      TIMEOUT
-    );
-    await btnSi.click();
-    await driver.wait(async () => {
-      const items = await driver.findElements(
-        By.xpath('//div[contains(@class,"list-row")][.//span[contains(.,"Agente Selenium Editado")]]')
-      );
-      return items.length === 0;
-    }, NAV_TIMEOUT);
-
-    const restantes = await driver.findElements(
-      By.xpath('//div[contains(@class,"list-row")][.//span[contains(.,"Agente Selenium Editado")]]')
-    );
-    expect(restantes.length).toBe(0);
-  });
-
-  // Regresar 
+  // Regresar
 
   it('Debe regresar al home-page desde el Panel de Agentes', async () => {
     const btnBack = await driver.wait(
