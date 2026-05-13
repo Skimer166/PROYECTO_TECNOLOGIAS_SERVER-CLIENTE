@@ -14,4 +14,19 @@ export default {
       isolatedModules: true,
     },
   },
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/test/**',
+    '!src/index.ts',
+    '!src/**/*.d.ts',
+  ],
+  coverageReporters: ['text', 'lcov', 'clover'],
+  coverageThreshold: {
+    global: {
+      statements: 25,
+      branches: 10,
+      functions: 20,
+      lines: 25,
+    },
+  },
 };
