@@ -3,20 +3,34 @@ import { Options as ChromeOptions } from 'selenium-webdriver/chrome';
 import { Options as EdgeOptions } from 'selenium-webdriver/edge';
 import * as fs from 'fs';
 
-// Rutas donde puede estar instalado cada navegador en Windows
-const BRAVE_PATHS = [
-  'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
-  'C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+const EDGE_PATHS = [
+  // Windows
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+  // Linux (pre-instalado en GitHub Actions ubuntu-latest)
+  '/usr/bin/microsoft-edge',
+  '/usr/bin/microsoft-edge-stable',
+  '/usr/bin/msedge',
 ];
 
 const CHROME_PATHS = [
+  // Windows
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
   'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  // Linux
+  '/usr/bin/google-chrome',
+  '/usr/bin/google-chrome-stable',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/chromium',
 ];
 
-const EDGE_PATHS = [
-  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
-  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+const BRAVE_PATHS = [
+  // Windows
+  'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+  'C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+  // Linux
+  '/usr/bin/brave-browser',
+  '/usr/bin/brave',
 ];
 
 function findBinary(paths: string[]): string | null {
@@ -49,14 +63,13 @@ export async function createDriver(): Promise<{ driver: WebDriver; browserUsed: 
   const bravePath = findBinary(BRAVE_PATHS);
   if (bravePath) {
     try {
-      const options = new ChromeOptions();
+      const options = new EdgeOptions();
       options.addArguments(...headlessArgs);
-      options.setBinaryPath(bravePath);
       const driver = await new Builder()
-        .forBrowser('chrome')
-        .setChromeOptions(options)
+        .forBrowser('MicrosoftEdge')
+        .setEdgeOptions(options)
         .build();
-      return { driver, browserUsed: 'Brave' };
+      return { driver, browserUsed: 'Microsoft Edge' };
     } catch { /* intentar siguiente */ }
   }
 

@@ -1,6 +1,9 @@
 name: Selenium E2E Tests
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - '**'
@@ -12,7 +15,7 @@ on:
 jobs:
   e2e-selenium:
     name: Selenium E2E Frontend
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     defaults:
       run:
@@ -26,6 +29,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './Frontend/Market-AI/package.json'
 
       - name: Install dependencies
         run: npm install

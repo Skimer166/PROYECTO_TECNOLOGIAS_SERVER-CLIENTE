@@ -1,0 +1,114 @@
+name: Full Test Suite
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  backend-tests:
+    name: Backend – Jest
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./Backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: './Backend/package.json'
+
+      - name: Cache mongodb-memory-server binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binary-${{ runner.os }}-${{ hashFiles('Backend/package.json') }}
+          restore-keys: mongodb-binary-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run unit tests
+        env:
+          S3_REGION: us-east-1
+          S3_ACCESS_KEY: test-access-key
+          S3_SECRET_KEY: test-secret-key
+          S3_BUCKET: test-bucket
+          STRIPE_SECRET_KEY: sk_test_dummy
+          OPENAI_API_KEY: sk-dummy
+          EMAIL_USER: test@test.com
+          EMAIL_PASSWORD: dummy-password
+          GOOGLE_CLIENT_ID: dummy-client-id
+          GOOGLE_CLIENT_SECRET: dummy-client-secret
+          JWT_KEY: dev-secret
+          SECRET_KEY: dev-secret
+          MONGO_URL: mongodb://localhost:27017/test
+        run: npm run test:unit -- --coverage --passWithNoTests --forceExit
+
+      - name: Run integration tests
+        env:
+          S3_REGION: us-east-1
+          S3_ACCESS_KEY: test-access-key
+          S3_SECRET_KEY: test-secret-key
+          S3_BUCKET: test-bucket
+          STRIPE_SECRET_KEY: sk_test_dummy
+          OPENAI_API_KEY: sk-dummy
+          EMAIL_USER: test@test.com
+          EMAIL_PASSWORD: dummy-password
+          GOOGLE_CLIENT_ID: dummy-client-id
+          GOOGLE_CLIENT_SECRET: dummy-client-secret
+          JWT_KEY: dev-secret
+          SECRET_KEY: dev-secret
+          MONGO_URL: mongodb://localhost:27017/test
+        run: npm run test:integration -- --passWithNoTests --forceExit
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: Backend/coverage/
+          retention-days: 7
+
+  frontend-tests:
+    name: Frontend – Karma (Angular)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./Frontend/Market-AI
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './Frontend/Market-AI/package.json'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Angular unit tests (headless)
+        run: npx ng test --no-watch --no-progress --browsers ChromeHeadless --code-coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: Frontend/Market-AI/coverage/
+          retention-days: 7
