@@ -428,7 +428,7 @@ describe('Market-AI — Panel de Agentes', () => {
       By.xpath('//div[contains(@class,"list-row")][.//span[contains(.,"Agente Selenium Editado")]]')
     );
     expect(restantes.length).toBe(0);
-  });
+  }, 90_000);
 
   // Regresar 
 

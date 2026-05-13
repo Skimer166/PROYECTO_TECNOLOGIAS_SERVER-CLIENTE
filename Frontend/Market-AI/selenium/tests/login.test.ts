@@ -259,6 +259,11 @@ describe('LG — Login Page (E2E Selenium)', () => {
       TIMEOUT
     );
     expect(await dialog.isDisplayed()).toBe(true);
+    // Esperar a que Angular renderice el binding {{ data.message }} dentro del dialog
+    await driver!.wait(
+      async () => (await dialog.getText()).trim().length > 0,
+      TIMEOUT
+    );
     const text = await dialog.getText();
     expect(text.toLowerCase()).toContain('correo');
   });
