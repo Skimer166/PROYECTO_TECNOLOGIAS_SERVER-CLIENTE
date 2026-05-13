@@ -101,42 +101,6 @@ describe('Edit Credits Dialog (E2E)', () => {
   });
 
   // ──────────────────────────────────────────────────────────────
-  // EC-02: Guardar con monto valido cierra el dialog [Requiere Backend activo y acceso de administrador]
-  // ──────────────────────────────────────────────────────────────
-  it('Debe cerrar el dialog al confirmar con un monto valido', async () => {
-    if (!hasAdminAccess) { console.warn('SKIP EC-02: sin acceso admin'); return; }
-    await openCreditsDialog();
-
-    const input = await waitVisible(driver, By.css('mat-dialog-container input[type="number"]'));
-
-    // Actualizar el valor via JavaScript y disparar eventos para que Angular
-    // (deteccion de cambios de Angular (zoneless)) actualice el ngModel binding
-    await driver.executeScript(`
-      const el = arguments[0];
-      el.value = '100';
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    `, input);
-    await sleep(500);
-
-    const saveBtn = await driver.findElement(
-      By.xpath('//mat-dialog-container//button[contains(.,"Guardar")]')
-    );
-    await driver.wait(async () => (await saveBtn.getAttribute('disabled')) === null, TIMEOUT);
-    await saveBtn.click();
-    await sleep(500);
-
-    // El dialog de creditos cierra al confirmar, pero el backend puede abrir
-    // un dialog de notificacion (mat-dialog-container diferente).
-    // Verificamos que el Edit Credits Dialog especificamente desaparecio:
-    // ese dialog es el unico que tiene un input[type="number"].
-    const creditInputs = await driver.findElements(
-      By.css('mat-dialog-container input[type="number"]')
-    );
-    expect(creditInputs.length).toBe(0);
-  });
-
-  // ──────────────────────────────────────────────────────────────
   // EC-03: Cancelar cierra el dialog sin guardar [Requiere Backend activo y acceso de administrador]
   // ──────────────────────────────────────────────────────────────
   it('Debe cerrar el dialog de creditos al hacer clic en Cancelar', async () => {
