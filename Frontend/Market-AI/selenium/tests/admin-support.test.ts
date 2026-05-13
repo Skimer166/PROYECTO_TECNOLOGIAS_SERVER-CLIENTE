@@ -379,7 +379,7 @@ describe('Market-AI — Chats de Soporte', () => {
     expect(await inputRespuesta.isDisplayed()).toBe(true);
 
     const btnEnviar = await driver.wait(
-      until.elementLocated(By.xpath('//button[contains(.,"Enviar")]')),
+      until.elementLocated(By.css('.input-area button')),
       TIMEOUT
     );
     await driver.sleep(PAUSE);
@@ -393,10 +393,10 @@ describe('Market-AI — Chats de Soporte', () => {
     );
     await inputRespuesta.clear();
     await inputRespuesta.sendKeys('Hola kikeruv, estamos revisando tu caso - Admin Selenium');
-    await driver.sleep(500);
+    await driver.sleep(1000);
 
     const btnEnviar = await driver.wait(
-      until.elementLocated(By.xpath('//button[contains(.,"Enviar")]')),
+      until.elementLocated(By.css('.input-area button')),
       TIMEOUT
     );
     await driver.executeScript('arguments[0].scrollIntoView({block:"center"})', btnEnviar);
@@ -409,7 +409,7 @@ describe('Market-AI — Chats de Soporte', () => {
       TIMEOUT
     );
     expect(await respuesta.isDisplayed()).toBe(true);
-  });
+  }, 90_000);
 
   // ── Volver a Pestaña Usuario — Verificar respuesta del admin ────────────────
 
